@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, Loading, Modal, ViewController } from 'ionic-angular';
+import { NavController, Loading, Modal, ViewController, NavParams } from 'ionic-angular';
 import { Db } from '../../providers/db/db';
 import { BggData } from '../../providers/bgg-data/bgg-data';
 import * as _ from 'lodash';
@@ -17,7 +17,7 @@ export class HomePage {
   /**
    * TODO move fetch and filter functionalities to modals
    */
-  
+
   constructor(
     private navController: NavController,
     private db: Db,
@@ -53,7 +53,13 @@ export class HomePage {
     );
   }
 
-
+  fetching(){
+    let modal = Modal.create(importGames, {bggOpts: this.bggOpts});
+    modal.onDismiss(data => {
+      this.bggOpts = data;
+    });
+    this.navController.present(modal);
+  }
 
   fetch(opts){
     let loading = Loading.create({
@@ -197,23 +203,31 @@ export class HomePage {
         <ion-input type="text" [(ngModel)]="bggOpts.username"></ion-input>
       </ion-item>
       <ion-item>
-        <button (click)=fetch(bggOpts)>Fetch</button>
+        <button (click)=close(bggOpts)>Fetch</button>
+        <button (click)=cancel()>Cancel</button>
       </ion-item>
-    </ion-list>`
+    </ion-list>
+  </ion-content>`
 })
 class importGames {
-  constructor(
-    private viewCtrl: ViewController) {}
 
-  bggOpts = {
+  bggOpts: Object = {
     username: '',
     excludeExp: true,
     minrating: 7,
     minrank: 1000
-  }
+  };
+
+  constructor(private viewCtrl: ViewController, private params: NavParams) {
+      this.bggOpts = params.get('bggOpts');
+    }
 
   close() {
     // parameter is returned to caller as onDismiss event
     this.viewCtrl.dismiss(this.bggOpts);
+  }
+
+  cancel(){
+    this.viewCtrl.dismiss(this.params.get('bggOpts'));
   }
 }
