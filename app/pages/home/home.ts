@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { NavController, Loading, Modal, ViewController } from 'ionic-angular';
 import { Db } from '../../providers/db/db';
 import { BggData } from '../../providers/bgg-data/bgg-data';
 import * as _ from 'lodash';
@@ -7,15 +7,22 @@ import { Game } from '../../game.class';
 import { Observable } from 'rxjs/Observable';
 
 @Component({
+  directives: [],
   templateUrl: 'build/pages/home/home.html',
   providers: [Db, BggData]
 })
 
 export class HomePage {
+
+  /**
+   * TODO move fetch and filter functionalities to modals
+   */
+  
   constructor(
     private navController: NavController,
     private db: Db,
-    private bgg: BggData)
+    private bgg: BggData
+  )
   {
     this.init();
   }
@@ -31,6 +38,7 @@ export class HomePage {
   rawbgg = [];
   dupes = [];
   added = 0;
+  loading = Loading.create();
 
   init(){
     this.db.load().subscribe(
@@ -39,14 +47,21 @@ export class HomePage {
       }, error => {
         console.log("ERROR LOADING DB -> " + error);
       }, () => {
+        this.games = this.db.games;
         console.log("DONE LOADING DB");
       }
     );
   }
 
+
+
   fetch(opts){
+    let loading = Loading.create({
+      content: "Please wait..."
+    });
+    this.navController.present(loading);
     this.bgg.fetch(opts).then(data => {
-      var arr = _.values(data);
+      let arr = _.values(data);
       if (opts.excludeExp) {
         arr = _.filter(arr, {'isExpansion': false});
       }
@@ -60,29 +75,43 @@ export class HomePage {
         () => {
           console.log("FINISHING IMPORT -> " + this.added + "games added, " +
            this.dupes.length + " dupes");
-          console.log(JSON.stringify(this.dupes));
           this.db.refresh().subscribe(
             resp => console.log(resp),
             error => console.log(error),
             () => {
-              this.refresh("IMPORT COMPLETE");
-              this.dupes = [];
-              this.added = 0;
+              this.refresh("IMPORT COMPLETE").subscribe(
+                resp => console.log(resp),
+                error => console.log(error),
+                () => {
+                  this.games = this.db.games;
+                  this.dupes = [];
+                  this.added = 0;
+                  loading.dismiss();
+                }
+              );
             }
           );
         }
       );
-    });
+    })
   }
 
   procImport(set: Array<Game>){
     return new Observable(obs => {
+      let toload = set.length;
+      let loaded = 0;
+      let prog = 0;
+
       for(let game of set){
+        loaded++;
+        prog = _.floor(loaded/toload);
         if(this.add(game, false)){
-          obs.next("IMPORTED GAME -> " + game.name);
+          obs.next("IMPORTED GAME -> " + game.name + '(' +
+           _.floor(loaded/toload*100) + '%)');
           this.added++;
         } else {
-          obs.next("DUPLICATE GAME -> " + game.name);
+          obs.next("DUPLICATE GAME -> " + game.name + '(' +
+           _.floor(loaded/toload*100) + '%)');
           this.dupes.push(game);
         }
       }
@@ -91,7 +120,7 @@ export class HomePage {
   }
 
   add(game: Game, refresh: boolean = true){
-    this.db.insert(game, refresh).subscribe(
+    this.db.insert(game).subscribe(
       result => {
         console.log(result);
       },
@@ -101,6 +130,14 @@ export class HomePage {
       },
       () => {
         console.log("INSERTION COMPLETE");
+        if (refresh) {
+          this.refresh("DONE ADDING").subscribe(
+            resp => console.log(resp),
+            error => console.log(error),
+            () => {
+              this.games = this.db.games;
+            });
+        }
         return true;
       }
     );
@@ -110,23 +147,73 @@ export class HomePage {
     this.db.drop(game).subscribe(
       msg => console.log(msg),
       error => console.log(error),
-      () => this.refresh("DONE KILLING")
+      () => this.refresh("DONE KILLING").subscribe(
+        resp => console.log(resp),
+        error => console.log(error),
+        () => {
+          this.games = this.db.games;
+        }
+      )
     );
   }
 
   refresh(msg: string = "refreshing"){
     console.log(msg);
-    this.db.refresh().subscribe(
-      resp => console.log(resp),
-      error => console.log(error),
-      () => { this.games = this.db.games; });
+    return this.db.refresh();
   }
 
   purge(){
+    let loading = Loading.create({
+      content: "Please wait..."
+    });
+    this.navController.present(loading);
     this.db.purge().subscribe(
       msg => console.log("PURGING -> " + msg),
       error => console.log("ERROR PURGING -> " + error.message),
-      () => { this.refresh("DONE PURGING") }
+      () => {
+        this.refresh("DONE PURGING").subscribe(
+          resp => console.log(resp),
+          error => console.log(error),
+          () => {
+            this.games = this.db.games;
+            loading.dismiss();
+          }
+        );;
+      }
     );
+  }
+
+}
+/*
+  Modal for importing games from BGG
+ */
+@Component({
+  template: `
+  <ion-content padding class="home">
+    <h2>Import your collection from BGG</h2>
+    <ion-list>
+      <ion-item>
+        <ion-label stacked>BGG Username</ion-label>
+        <ion-input type="text" [(ngModel)]="bggOpts.username"></ion-input>
+      </ion-item>
+      <ion-item>
+        <button (click)=fetch(bggOpts)>Fetch</button>
+      </ion-item>
+    </ion-list>`
+})
+class importGames {
+  constructor(
+    private viewCtrl: ViewController) {}
+
+  bggOpts = {
+    username: '',
+    excludeExp: true,
+    minrating: 7,
+    minrank: 1000
+  }
+
+  close() {
+    // parameter is returned to caller as onDismiss event
+    this.viewCtrl.dismiss(this.bggOpts);
   }
 }

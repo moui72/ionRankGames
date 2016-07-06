@@ -51,6 +51,7 @@ export class Db {
           this.games = _.values(data.res.rows);
           observer.next("LOADED GAMES -> " + this.games.length);
         } else {
+          this.games = [];
           observer.next("DB EMPTY");
         }
         observer.next("DONE REFRESHING");
@@ -77,19 +78,10 @@ export class Db {
           observer.next('GAME IS DUPE');
           return observer.complete();
         }
-        // console.log("INSERTING -> " + game.name + "["+game.gameId+"]");
         this.storage.query('INSERT INTO games(name, gameId, imgUrl)' +
         ' values("' + game.name + '","' + game.gameId + '","' + game.image + '") ').then(d => {
           // observer.next("INSERTED -> " + game.name + "["+game.gameId+"]");
-          if(refresh){
-            this.refresh().subscribe(
-              resp => observer.next(resp),
-              error => observer.error(error),
-              () => observer.complete()
-            );
-          }else{
-            observer.complete();
-          }
+          observer.complete();
         }, error => {
           observer.error(error);
         });
@@ -106,7 +98,6 @@ export class Db {
     return new Observable(observer => {
       observer.next("DROPPING GAME -> " + game.name);
       this.storage.query('DELETE FROM games WHERE gameId="'+game.gameId+'"').then((data) => {
-        console.log(JSON.stringify(data));
         observer.next("GAME DROPPED");
         this.refresh().subscribe(
           resp => observer.next(resp),
@@ -123,7 +114,6 @@ export class Db {
       observer.next('PURGING DB')
       this.storage.query('DELETE FROM games').then(
       result => {
-        console.log(result);
         observer.next("PURGED -> " + result.res.rowsAffected);
         observer.complete();
       },
