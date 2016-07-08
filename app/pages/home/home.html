@@ -8,11 +8,8 @@
   <h2>Welcome to Ionic!</h2>
   <ion-list>
     <ion-item>
-      <ion-label stacked>BGG Username</ion-label>
-      <ion-input type="text" [(ngModel)]="bggOpts.username"></ion-input>
-    </ion-item>
-    <ion-item>
       <button (click)=fetching()>Fetch</button>
+      <button (click)=filtering()>Filter</button>
       <button (click)=purge()>Reset</button>
     </ion-item>
   </ion-list>

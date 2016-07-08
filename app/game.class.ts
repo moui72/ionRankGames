@@ -1,8 +1,16 @@
 export class Game{
-  name: string;
-  id: number;
   gameId: number;
+  name: string;
   image: string;
-  rating: number;
+  thumbnail: string;
+  minPlayers: number;
+  maxPlayers: number;
+  playingTime: number;
   isExpansion: boolean;
+  yearPublished: number;
+  averageRating: number;
+  rank: number;
+  numPlays: number;
+  rating: number;
+  owned: boolean;
 }

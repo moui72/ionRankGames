@@ -14,7 +14,7 @@ import { Observable } from 'rxjs/Observable';
 @Injectable()
 export class Db {
   storage: any;
-  games: any;
+  games: Array<any>;
   duped: Array<Game>;
   added: number;
 
@@ -29,7 +29,23 @@ export class Db {
     return new Observable(observer => {
       this.storage = new Storage(SqlStorage);
       // this.storage.query('DROP TABLE games');
-      this.storage.query('CREATE TABLE IF NOT EXISTS games (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, gameId TEXT, imgUrl TEXT)').then((data) => {
+      this.storage.query('CREATE TABLE IF NOT EXISTS games (' +
+      'id INTEGER PRIMARY KEY AUTOINCREMENT,'+
+      ' name TEXT, ' +
+      ' gameId TEXT, ' +
+      ' image TEXT, ' +
+      ' thumbnail TEXT, ' +
+      ' minPlayers INTEGER,' +
+      ' maxPlayers INTEGER,' +
+      ' playTime INTEGER,' +
+      ' isExpansion NUMERIC,' +
+      ' owned NUMERIC,' +
+      ' yearPublished NUMERIC,' +
+      ' averageRating REAL,' +
+      ' rank INTEGER,' +
+      ' numPlays INTEGER,' +
+      ' rating INTEGER,' +
+      ')').then((data) => {
           observer.next("TABLE CREATED");
       }, (error) => {
           observer.error(error);
@@ -40,6 +56,17 @@ export class Db {
         () => observer.complete()
       );
     })
+  }
+
+  arrToString(arr: Array<any>){
+    let string = ''
+    for(let i of arr){
+      string += i + ', ';
+    }
+
+    string = string.substr(0, string.length - 2);
+    return string;
+
   }
 
   refresh() {
@@ -78,8 +105,10 @@ export class Db {
           observer.next('GAME IS DUPE');
           return observer.complete();
         }
-        this.storage.query('INSERT INTO games(name, gameId, imgUrl)' +
-        ' values("' + game.name + '","' + game.gameId + '","' + game.image + '") ').then(d => {
+        this.storage.query('INSERT INTO games('+
+         this.arrToString(_.keys(game)) + ')' +
+         ' values(' + this.arrToString(_.values(game)) +
+          ')').then(d => {
           // observer.next("INSERTED -> " + game.name + "["+game.gameId+"]");
           observer.complete();
         }, error => {
