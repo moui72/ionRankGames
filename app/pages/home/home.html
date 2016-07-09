@@ -40,17 +40,16 @@
   </ion-list>
 <!-/- Add game manually -->
 
-  <ion-card *ngFor="let game of games" class="game">
-    <ng2-slim-loading-bar></ng2-slim-loading-bar>
-    <ion-card-header>
+  <ion-card *ngFor="let game of games" class="game" >
+    <ion-card-header *ngIf="game.trash != true">
       <ion-item>
         <ion-avatar item-left>
-          <img [src]="game.image">
+          <img [src]="game.thumbnail">
         </ion-avatar>
         {{game.name}} [{{game.gameId}}]
       </ion-item>
     </ion-card-header>
-    <ion-card-content class="outer-content">
+    <ion-card-content class="outer-content" *ngIf="game.trash != true">
       <button (click)=kill(game)>kill</button>
     </ion-card-content>
   </ion-card>

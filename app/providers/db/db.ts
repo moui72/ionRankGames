@@ -28,7 +28,9 @@ export class Db {
   load() {
     return new Observable(observer => {
       this.storage = new Storage(SqlStorage);
-      // this.storage.query('DROP TABLE games');
+      // this.storage.query('DROP TABLE games').then(x => {
+
+
       this.storage.query('CREATE TABLE IF NOT EXISTS games (' +
       'id INTEGER PRIMARY KEY AUTOINCREMENT,'+
       ' name TEXT, ' +
@@ -37,7 +39,7 @@ export class Db {
       ' thumbnail TEXT, ' +
       ' minPlayers INTEGER,' +
       ' maxPlayers INTEGER,' +
-      ' playTime INTEGER,' +
+      ' playingTime INTEGER,' +
       ' isExpansion NUMERIC,' +
       ' owned NUMERIC,' +
       ' yearPublished NUMERIC,' +
@@ -45,6 +47,7 @@ export class Db {
       ' rank INTEGER,' +
       ' numPlays INTEGER,' +
       ' rating INTEGER,' +
+      ' trash NUMERIC' +
       ')').then((data) => {
           observer.next("TABLE CREATED");
       }, (error) => {
@@ -56,17 +59,7 @@ export class Db {
         () => observer.complete()
       );
     })
-  }
-
-  arrToString(arr: Array<any>){
-    let string = ''
-    for(let i of arr){
-      string += i + ', ';
-    }
-
-    string = string.substr(0, string.length - 2);
-    return string;
-
+//  });
   }
 
   refresh() {
@@ -100,19 +93,20 @@ export class Db {
   insert(game: Game, refresh: boolean = true){
     return new Observable(observer => {
       this.exists(game).then(data => {
+        let keys = _.keys(game).toString();
+        let vals = _.values(game).map(i => {return '"' + i + '"'}).join(', ');
+        console.log(keys + vals);
         if(data.res.rows.length > 0){
           this.duped.push(game);
           observer.next('GAME IS DUPE');
           return observer.complete();
         }
-        this.storage.query('INSERT INTO games('+
-         this.arrToString(_.keys(game)) + ')' +
-         ' values(' + this.arrToString(_.values(game)) +
-          ')').then(d => {
+        this.storage.query('INSERT INTO games('+ keys + ')' + ' values(' + vals
+         +')').then(d => {
           // observer.next("INSERTED -> " + game.name + "["+game.gameId+"]");
           observer.complete();
         }, error => {
-          observer.error(error);
+          observer.error(error.err.message);
         });
       });
     });
@@ -150,6 +144,16 @@ export class Db {
         observer.error(error.err);
       });
     });
+  }
+
+  updateFilter(game: Game){
+    return new Observable(obs => {
+      this.storage.query('UPDATE games SET trash="' + game.trash +
+       '" WHERE gameId=' + game.gameId ).then(result => {
+        obs.next('UPDATED ' + game.name + ' IN DB');
+        obs.complete();
+      }, error => obs.error(error));
+    })
   }
 
 }

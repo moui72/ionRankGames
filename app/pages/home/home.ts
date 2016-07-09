@@ -7,6 +7,11 @@ import { Game } from '../../game.class';
 import { BggOpts } from '../../bggopts.class';
 import { Observable } from 'rxjs/Observable';
 
+class update{
+  msg: string;
+  percentDone: number;
+}
+
 @Component({
   directives: [],
   templateUrl: 'build/pages/home/home.html',
@@ -48,7 +53,7 @@ export class HomePage {
       result => {
         console.log("LOADING DB -> " + result);
       }, error => {
-        console.log("ERROR LOADING DB -> " + error);
+        console.log("ERROR LOADING DB -> " + error.err.message);
       }, () => {
         this.games = this.db.games;
         console.log("DONE LOADING DB");
@@ -74,7 +79,7 @@ export class HomePage {
     modal.onDismiss(data => {
       if(data){
         this.bggOpts = data;
-        this.filter(this.bggOpts);
+        this.filter(this.games);
       } else {
         console.log('Filtering canceled.');
       }
@@ -83,43 +88,109 @@ export class HomePage {
   }
 
   filter(arr){
-    let loading = Loading.create({
-      content: "Please wait..."
-    });
-    this.navController.present(loading);
+    if (arr.length < 1) {
+      console.log("CANNOT FILTER -> SET EMPTY")
+      return false;
+    }
+
 
     let opts = this.bggOpts;
+    console.log(opts);
+
     if (opts.excludeExp) {
+      // filter out expansions, if requested
       arr = _.filter(arr, {'isExpansion': false});
     }
     if (opts.owned) {
-      arr = _.filter(arr, {'owned': true});
+      // filter out unowned games, if requested
+      arr = _.filter(arr, {'own': true});
     }
-    arr = _.filter(arr, function(g: Game){
-      return g.rating >= opts.minrating;
-    });
-    this.games = arr;
-    loading.dismiss();
+    if (opts.played || opts.minplays > 0) {
+      // filter out unplayed or underplayed games, if requested
+      arr = _.filter(arr, game => {
+        if (opts.minplays > 0) {
+          // filter out underplayed (number of plays < minimum number of plays)
+          return game['numPlays'] > opts.minplays;
+        }
+        // filter out games with no plays logged
+        return game['numPlays'] > 0;
+      });
+    }
+    if (opts.rated || opts.minrating > 0) {
+      // filter out unrated or low rated games, if requested
+      arr = _.filter(arr, game => {
+        if (opts.minrating > 0) {
+          // filter out games with rating lower than minimum rating
+          return game['rating'] > opts.minrating;
+        }
+        // filter out games not rated
+        return game['rating'] > 0;
+      })
+    }
+    if (opts.minrank > 0) {
+      // filter out unrated or low rated games, if requested
+      arr = _.filter(arr, game => {
+        // filter out games not rated
+        return game['rank'] > opts.minrank;
+      })
+    }
+    if (opts.minAverageRating > 0) {
+      // filter out unrated or low rated games, if requested
+      arr = _.filter(arr, game => {
+        // filter out games not rated
+        return game['averageRating'] > opts.minAverageRating;
+      })
+    }
+    let trashed = _.differenceBy(this.games, arr, 'gameId');
+    for (let game of this.games) {
+      if(!_.some(arr, ['gameId', game.gameId])){
+        game.trash = true;
+      } else {
+        game.trash = false;
+      }
+      this.updateFilter(game);
+    }
   }
 
-  fetch(opts){
+  updateFilter(game){
+    this.db.updateFilter(game).subscribe(
+      msg => {
+        console.log("FILTER MESSAGE: ");
+        console.log(msg);
+      },
+      error => {
+        console.log("FILTER ERROR: ");
+        console.log(error);
+      },
+      () => {
+        console.log("UPDATED");
+      }
+    );
+  }
+
+  fetch(username){
+    let prog = 0;
     let loading = Loading.create({
-      content: "Please wait..."
+      content: "Please wait... " + prog + "%"
     });
     this.navController.present(loading);
-    this.bgg.fetch(opts).then(data => {
+    this.bgg.fetch(username).then(data => {
+      console.log(data);
       let arr = _.values(data);
 
       this.rawbgg = arr;
       this.procImport(this.rawbgg).subscribe(
-        msg => console.log(msg),
+        update => {
+          console.log(update['msg']);
+          prog = update['percentDone'];
+        },
         error => console.log(error),
         () => {
-          console.log("FINISHING IMPORT -> " + this.added + "games added, " +
+          console.log("FINISHING IMPORT -> " + this.added + " games added, " +
            this.dupes.length + " dupes");
           this.db.refresh().subscribe(
             resp => console.log(resp),
-            error => console.log(error),
+            error => console.log(error.err.message),
             () => {
               this.refresh("IMPORT COMPLETE").subscribe(
                 resp => console.log(resp),
@@ -144,16 +215,27 @@ export class HomePage {
       let loaded = 0;
       let prog = 0;
 
-      for(let game of set){
+      // iterate through the set of retrieved games
+      for(let rawGame of set){
+        let game = new Game();
+        _.forIn(game, (val, key) => {
+          if (typeof rawGame[key] != undefined) {
+            game[key] = rawGame[key];
+          }
+        });
         loaded++;
         prog = _.floor(loaded/toload);
         if(this.add(game, false)){
-          obs.next("IMPORTED GAME -> " + game.name + '(' +
-           _.floor(loaded/toload*100) + '%)');
+          obs.next({
+            msg: "IMPORTED GAME -> " + game.name + '(' +
+             prog + '%)',
+            percentDone: prog});
           this.added++;
         } else {
-          obs.next("DUPLICATE GAME -> " + game.name + '(' +
-           _.floor(loaded/toload*100) + '%)');
+          obs.next({
+            msg: "DUPLICATE GAME -> " + game.name + '(' +
+             prog + '%)',
+            percentDone: prog});
           this.dupes.push(game);
         }
       }
@@ -167,7 +249,8 @@ export class HomePage {
         console.log(result);
       },
       error => {
-        console.log("DB INSERTION ERROR -> " + error.message);
+        console.log("DB INSERTION ERROR")
+        console.log(error);
         return false;
       },
       () => {
