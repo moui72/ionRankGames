@@ -28,9 +28,7 @@ export class Db {
   load() {
     return new Observable(observer => {
       this.storage = new Storage(SqlStorage);
-      // this.storage.query('DROP TABLE games').then(x => {
-
-
+      // this.storage.query('DROP TABLE games');
       this.storage.query('CREATE TABLE IF NOT EXISTS games (' +
       'id INTEGER PRIMARY KEY AUTOINCREMENT,'+
       ' name TEXT, ' +
@@ -47,6 +45,7 @@ export class Db {
       ' rank INTEGER,' +
       ' numPlays INTEGER,' +
       ' rating INTEGER,' +
+      ' filtered INTEGER,' +
       ' trash NUMERIC' +
       ')').then((data) => {
           observer.next("TABLE CREATED");
@@ -59,7 +58,6 @@ export class Db {
         () => observer.complete()
       );
     })
-//  });
   }
 
   refresh() {

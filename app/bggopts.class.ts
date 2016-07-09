@@ -3,7 +3,7 @@ export class BggOpts{
   minrating: number;
 
   // rank >= minkrank
-  minrank: number;
+  maxrank: number;
 
   // numPlays >= minplays
   minplays: number;

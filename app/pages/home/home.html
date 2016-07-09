@@ -14,34 +14,8 @@
     </ion-item>
   </ion-list>
 
-<!-- Add game manually -/->
-
-  <ion-list>
-    <ion-item>
-      <ion-label stacked>Name</ion-label>
-      <ion-input type="text" [(ngModel)]="game.name"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-label stacked>ID</ion-label>
-      <ion-input type="number" [(ngModel)]="game.gameId"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <ion-label stacked>Image URL</ion-label>
-      <ion-input type="text" [(ngModel)]="game.image"></ion-input>
-    </ion-item>
-
-    <ion-item>
-      <button (click)=add(game)>Add</button>
-      <button (click)=purge()>Reset</button>
-      <button (click)=fetch()>Fetch</button>
-    </ion-item>
-  </ion-list>
-<!-/- Add game manually -->
-
   <ion-card *ngFor="let game of games" class="game" >
-    <ion-card-header *ngIf="game.trash != true">
+    <ion-card-header *ngIf="game.trash != true && game.filtered != true">
       <ion-item>
         <ion-avatar item-left>
           <img [src]="game.thumbnail">
@@ -49,8 +23,9 @@
         {{game.name}} [{{game.gameId}}]
       </ion-item>
     </ion-card-header>
-    <ion-card-content class="outer-content" *ngIf="game.trash != true">
-      <button (click)=kill(game)>kill</button>
+    <ion-card-content class="outer-content" *ngIf="game.trash != true && game.filtered != true">
+      <button (click)=kill(game)>trash</button>
+      <button (click)=detail(game)>detail</button>
     </ion-card-content>
   </ion-card>
 </ion-content>

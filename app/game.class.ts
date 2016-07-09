@@ -14,4 +14,5 @@ export class Game{
   rating: number = 0;
   owned: boolean = false;
   trash: boolean = false;
+  filtered: boolean = false;
 }

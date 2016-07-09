@@ -33,12 +33,12 @@ export class HomePage {
 
   bggOpts: BggOpts = {
     minrating: 7,
-    minrank: 0,
+    maxrank: 0,
     minplays: 0,
     minAverageRating: 7,
     excludeExp: true,
-    owned: true,
-    rated: true,
+    owned: false,
+    rated: false,
     played: false
   }
 
@@ -93,63 +93,93 @@ export class HomePage {
       return false;
     }
 
-
     let opts = this.bggOpts;
-    console.log(opts);
 
     if (opts.excludeExp) {
-      // filter out expansions, if requested
-      arr = _.filter(arr, {'isExpansion': false});
+      // select only non-expansions, if requested
+      console.log("----- FILTERING BY EXPANSION STATUS -----");
+      arr = _.filter(arr, game => {
+        if (game['isExpansion'] == 'true') {
+          return false;
+        }
+        if (game['isExpansion'] === true) {
+          return false;
+        }
+        return true;
+      });
+      console.log("NON-EXPANSIONS: " + _.map(arr, 'name').join(', '));
+    } else {
+      console.log("----- SKIPPING EXPANSION CHECK -----");
     }
     if (opts.owned) {
-      // filter out unowned games, if requested
-      arr = _.filter(arr, {'own': true});
-    }
-    if (opts.played || opts.minplays > 0) {
-      // filter out unplayed or underplayed games, if requested
+      // select only owned games, if requested
+      console.log("----- FILTERING BY OWNERSHIP -----");
       arr = _.filter(arr, game => {
-        if (opts.minplays > 0) {
-          // filter out underplayed (number of plays < minimum number of plays)
-          return game['numPlays'] > opts.minplays;
+        if (game['own'] == 'true') {
+          return true;
         }
-        // filter out games with no plays logged
-        return game['numPlays'] > 0;
+        if (game['own'] === true) {
+          return true;
+        }
+        return false;
       });
+      console.log("OWNED GAMES: " + _.map(arr, 'name').join(', '));
+    } else {
+      console.log("----- SKIPPING OWNERSHIP CHECK -----");
     }
-    if (opts.rated || opts.minrating > 0) {
+
+    var playComp = this.bggOpts.played == false ? 0 : this.bggOpts.minplays > 0 ? this.bggOpts.minplays : 1;
+    if (playComp > 0) {
+      // select only games played more than [0 or minplays] times, if requested
+      console.log("----- FILTERING BY PLAYS -----");
+      arr = _.filter(arr, game => {
+        // only 1 play needed
+        return game['numPlays'] > playComp;
+      });
+      console.log("GAMES PLAYED MORE THAN " + playComp + " TIMES: " + _.map(arr, 'name').join(', '));
+    } else {
+      console.log("SKIPPING PLAYS CHECK");
+    }
+    var rateComp = this.bggOpts.rated == false ? -1 : opts.minrating >= 0 ? opts.minrating : 1;
+    if (rateComp >= 0) {
+      console.log("----- FILTERING BY RATING -----");
       // filter out unrated or low rated games, if requested
       arr = _.filter(arr, game => {
-        if (opts.minrating > 0) {
-          // filter out games with rating lower than minimum rating
-          return game['rating'] > opts.minrating;
-        }
-        // filter out games not rated
-        return game['rating'] > 0;
-      })
+        // filter out games not rated above [minrating]
+        return game['rating'] > rateComp;
+      });
+      console.log("GAMES RATED HIGHER THAN " + rateComp + ": " + _.map(arr, 'name').join(', '));
+    } else {
+      console.log("SKIPPING RATING CHECK");
     }
-    if (opts.minrank > 0) {
+    if (opts.maxrank > 0) {
+      console.log("----- FILTERING BY RANK -----");
       // filter out unrated or low rated games, if requested
       arr = _.filter(arr, game => {
         // filter out games not rated
-        return game['rank'] > opts.minrank;
-      })
+        return game['rank'] < opts.maxrank;
+      });
+      console.log("GAMES RANKED BETTER THAN " + opts.maxrank + ": " + _.map(arr, 'name').join(', '));
+    } else {
+      console.log("SKIPPING RANK CHECK");
     }
     if (opts.minAverageRating > 0) {
       // filter out unrated or low rated games, if requested
+      console.log("----- FILTERING BY AVERAGE RATOMG -----");
       arr = _.filter(arr, game => {
         // filter out games not rated
         return game['averageRating'] > opts.minAverageRating;
-      })
+      });
+      console.log("GAMES RATED BETTER THAN " + opts.minAverageRating + " ON AVERAGE: " + _.map(arr, 'name').join(', '));
+    }else {
+      console.log("SKIPPING AVERAGE RATING CHECK");
     }
-    let trashed = _.differenceBy(this.games, arr, 'gameId');
-    for (let game of this.games) {
-      if(!_.some(arr, ['gameId', game.gameId])){
-        game.trash = true;
-      } else {
-        game.trash = false;
-      }
+    let filtered = _.differenceBy(this.games, arr, 'gameId');
+    console.log("TRASHED: " + _.map(filtered, 'name').join(', '))
+    _.forEach(filtered, game => {
+      game.filtered = true;
       this.updateFilter(game);
-    }
+    });
   }
 
   updateFilter(game){
@@ -163,7 +193,7 @@ export class HomePage {
         console.log(error);
       },
       () => {
-        console.log("UPDATED");
+        console.log("FILTER UPDATED");
       }
     );
   }
@@ -268,6 +298,11 @@ export class HomePage {
     );
   }
 
+  trash(game: Game){
+    game.filtered = true;
+    this.updateFilter(game);
+  }
+
   kill(game: Game){
     this.db.drop(game).subscribe(
       msg => console.log(msg),
@@ -306,6 +341,11 @@ export class HomePage {
         );;
       }
     );
+  }
+
+  detail(game){
+    console.log(game);
+
   }
 
 }
@@ -366,11 +406,11 @@ class importGames {
         <ion-toggle [(ngModel)]="bggOpts[field.name]"></ion-toggle>
       </ion-item>
       <ion-item *ngFor="let field of schema.number">
-        <ion-label inline title="{{field.description}}">{{field.name}}</ion-label>
-        <ion-input type="number" [(ngModel)]="bggOpts[field.name]"></ion-input>
+        <ion-label stacked title="{{field.description}}">{{field.prettyname}}</ion-label>
+        <ion-input [disabled]="field.show !== true && bggOpts[field.show] == false" type="number" [(ngModel)]="bggOpts[field.name]"></ion-input>
       </ion-item>
       <ion-item>
-        <button (click)=close()>Fetch</button>
+        <button (click)=close()>Filter</button>
         <button (click)=cancel()>Cancel</button>
       </ion-item>
     </ion-list>
@@ -380,7 +420,7 @@ class filterGames {
 
   bggOpts: BggOpts = {
     minrating: 7,
-    minrank: 0,
+    maxrank: 0,
     minplays: 0,
     minAverageRating: 7,
     excludeExp: true,
@@ -405,16 +445,18 @@ class filterGames {
          "Collection owner's lowest allowed rating for imported games.",
         default:7,
         min: 0,
-        max: 10
+        max: 10,
+        show: 'rated'
       },
       {
         name: 'minrank',
-        prettyname: 'Minimum rank',
+        prettyname: 'Maximum BGG rank',
         description:
-         "Lowest allowed BGG rank for imported games (0 for any rank).",
+         "Highest allowed BGG rank for imported games (0 for any rank).",
         default:0,
         min: 0,
-        max: 100000
+        max: 100000,
+        show: true
       },
       {
         name: 'minplays',
@@ -424,6 +466,7 @@ class filterGames {
         default:0,
         min: 0,
         max: 1000,
+        show: 'played'
       },
       {
         name: 'minAverageRating',
@@ -433,6 +476,7 @@ class filterGames {
         default:7,
         min: 0,
         max: 10,
+        show: true
       }
     ],
     bool: [
