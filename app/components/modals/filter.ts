@@ -5,21 +5,23 @@ import { ViewController, NavParams } from 'ionic-angular';
 @Component({
   template: `
   <ion-content padding>
-    <h2>Filter your game set using BGG data</h2>
-    <ion-list>
-      <ion-item *ngFor="let field of schema.bool">
-        <ion-label inline title="{{field.description}}">{{field.prettyname}}</ion-label>
-        <ion-toggle [(ngModel)]="bggOpts[field.name]"></ion-toggle>
-      </ion-item>
-      <ion-item *ngFor="let field of schema.number">
-        <ion-label stacked title="{{field.description}}">{{field.prettyname}}</ion-label>
-        <ion-input [disabled]="field.show !== true && bggOpts[field.show] == false" type="number" [(ngModel)]="bggOpts[field.name]"></ion-input>
-      </ion-item>
-      <ion-item>
-        <button (click)=close()>Filter</button>
-        <button (click)=cancel()>Cancel</button>
-      </ion-item>
-    </ion-list>
+    <form>
+      <h2>Filter your game set using BGG data</h2>
+      <ion-list>
+        <ion-item *ngFor="let field of schema.bool">
+          <ion-label inline title="{{field.description}}">{{field.prettyname}}</ion-label>
+          <ion-toggle [(ngModel)]="bggOpts[field.name]"></ion-toggle>
+        </ion-item>
+        <ion-item *ngFor="let field of schema.number">
+          <ion-label stacked title="{{field.description}}">{{field.prettyname}}</ion-label>
+          <ion-input [disabled]="field.show !== true && bggOpts[field.show] == false" type="number" [(ngModel)]="bggOpts[field.name]"></ion-input>
+        </ion-item>
+        <ion-item>
+          <button (click)=close()>Filter</button>
+          <button (click)=cancel()>Cancel</button>
+        </ion-item>
+      </ion-list>
+    </form>
   </ion-content>`
 })
 export class FilterGames {

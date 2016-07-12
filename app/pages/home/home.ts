@@ -21,7 +21,9 @@ class update{
 })
 
 export class HomePage {
-  /* TODO: correct refresh() to appriopriately call viewIn() / viewOut() */
+
+  /* TODO: change button menu to action sheet & add confirm modal to purge */
+
   constructor(
     private navController: NavController,
     private db: Db,
@@ -251,17 +253,7 @@ export class HomePage {
       game.trash + ', filtered: ' +
       game.filtered + ')'
     );
-    this.db.updateGame(game, column, value).subscribe(
-      msg => {
-        // console.log("FILTER MESSAGE -> " + msg);
-      },
-      error => {
-        console.log(error);
-      },
-      () => {
-        // console.log("FILTER UPDATED");
-      }
-    );
+    return this.db.updateGame(game, column, value);
   }
 
   fetch(username){
@@ -283,28 +275,15 @@ export class HomePage {
         error => console.log(error),
         () => {
           console.log("FINISHING IMPORT -> " + this.added + " games added, " +
-           this.dupes.length + " dupes");
-          this.db.refresh().subscribe(
-            resp => console.log(resp),
-            error => console.log(error.err.message),
-            () => {
-              this.refresh("IMPORT COMPLETE").subscribe(
-                resp => console.log(resp),
-                error => console.log(error),
-                () => {
-                  this.games = this.db.games;
-                  this.dupes = [];
-                  this.added = 0;
-                  // update the view based on whether we're looking at trash
-                  this.viewingIn ? this.viewIn() : this.viewOut();
-                  loading.dismiss();
-                }
-              );
-            }
-          );
+          this.dupes.length + " dupes");
+          this.refresh();
+          this.games = this.db.games;
+          this.dupes = [];
+          this.added = 0;
+          loading.dismiss();
         }
       );
-    })
+    });
   }
 
   procImport(set: Array<Game>){
@@ -354,12 +333,7 @@ export class HomePage {
       () => {
         console.log("INSERTION COMPLETE");
         if (refresh) {
-          this.refresh("DONE ADDING").subscribe(
-            resp => console.log(resp),
-            error => console.log(error),
-            () => {
-              this.games = this.db.games;
-            });
+          this.refresh("DONE ADDING");
         }
         return true;
       }
@@ -367,17 +341,56 @@ export class HomePage {
   }
 
   trash(game: Game){
-    this.updateGame(game, 'trash', true);
+    this.updateGame(game, 'trash', true).subscribe(
+      msg => {
+        // console.log("FILTER MESSAGE -> " + msg);
+      },
+      error => {
+        console.log(error);
+      },
+      () => {
+        // console.log("FILTER UPDATED");
+        this.refresh('REFRESHING -> trashed ' + game.name);
+      }
+    );
   }
 
   restore(game: Game) {
-    this.updateGame(game, 'trash', false);
-    this.updateGame(game, 'filtered', false);
+    this.updateGame(game, 'trash', false).subscribe(
+      msg => {
+        // console.log("FILTER MESSAGE -> " + msg);
+      },
+      error => {
+        console.log(error);
+      },
+      () => {
+        // console.log("FILTER UPDATED");
+        this.updateGame(game, 'filtered', false).subscribe(
+          msg => {
+            // console.log("FILTER MESSAGE -> " + msg);
+          },
+          error => {
+            console.log(error);
+          },
+          () => {
+            // console.log("FILTER UPDATED");
+            this.refresh('REFRESHING -> restored ' + game.name);
+          }
+        );
+      }
+    );
   }
 
   refresh(msg: string = "refreshing"){
     console.log(msg);
-    return this.db.refresh();
+    return this.db.refresh().subscribe(
+      resp => console.log(resp),
+      error => console.log(error.err.message),
+      () => {
+        this.games = this.db.games;
+        // update the view based on whether we're looking at trash
+        this.viewingIn ? this.viewIn() : this.viewOut();
+      })
   }
 
   purge(){

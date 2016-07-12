@@ -5,15 +5,15 @@
 </ion-header>
 
 <ion-content padding class="home">
-  <h2>Welcome to Ionic!</h2>
+  <h2>Manage your games</h2>
   <ion-list>
     <ion-item>
       <button (click)=fetching()>Fetch</button>
       <button (click)=filtering()>Filter</button>
-      <button padding *ngIf="viewingIn" (click)="viewOut()" >
+      <button padding *ngIf="viewingIn" (click)="viewOut()" title="view trashed games">
         <ion-icon name="trash"></ion-icon> {{out()}}
       </button>
-      <button padding *ngIf="!viewingIn" (click)="viewIn()" >
+      <button padding *ngIf="!viewingIn" (click)="viewIn()" title="view non-trashed games">
         <ion-icon name="archive"></ion-icon> {{games.length - out()}}
       </button>
       <button (click)=purge() danger>Reset</button>
