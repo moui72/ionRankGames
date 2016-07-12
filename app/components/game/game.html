@@ -1,0 +1,25 @@
+<!--
+  Generated template for the Game component.
+
+  See https://angular.io/docs/ts/latest/api/core/ComponentMetadata-class.html
+  for more info on Angular 2 Components.
+-->
+<ion-card class="game">
+  <ion-card-header>
+    <ion-item>
+      <ion-avatar item-left>
+        <img [src]="game.thumbnail">
+      </ion-avatar>
+      <h3 item-left>
+        {{game.name}} (trash: {{game.trash}}, filtered: {{game.filtered}})
+      </h3>
+      <ion-badge item-right>ID# {{game.gameId}}</ion-badge>
+    </ion-item>
+  </ion-card-header>
+  <ion-card-content class="outer-content">
+    <button (click)=trash(game) *ngIf="!isOut()">trash</button>
+    <button (click)=detail(game)>detail</button>
+    <button (click)=restore(game) *ngIf="isOut()">restore</button>
+    <button (click)=amIout()>Out?</button>
+  </ion-card-content>
+</ion-card>

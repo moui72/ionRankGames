@@ -10,22 +10,17 @@
     <ion-item>
       <button (click)=fetching()>Fetch</button>
       <button (click)=filtering()>Filter</button>
-      <button (click)=purge()>Reset</button>
+      <button padding *ngIf="viewingIn" (click)="viewOut()" >
+        <ion-icon name="trash"></ion-icon> {{out()}}
+      </button>
+      <button padding *ngIf="!viewingIn" (click)="viewIn()" >
+        <ion-icon name="archive"></ion-icon> {{games.length - out()}}
+      </button>
+      <button (click)=purge() danger>Reset</button>
     </ion-item>
   </ion-list>
 
-  <ion-card *ngFor="let game of games" class="game" >
-    <ion-card-header *ngIf="game.trash != true && game.filtered != true">
-      <ion-item>
-        <ion-avatar item-left>
-          <img [src]="game.thumbnail">
-        </ion-avatar>
-        {{game.name}} [{{game.gameId}}]
-      </ion-item>
-    </ion-card-header>
-    <ion-card-content class="outer-content" *ngIf="game.trash != true && game.filtered != true">
-      <button (click)=kill(game)>trash</button>
-      <button (click)=detail(game)>detail</button>
-    </ion-card-content>
-  </ion-card>
+  <game-card *ngFor="let game of viewGames" [game]="game" (onRestore)="restore($event)" (onTrash)="trash($event)" (onDetail)="detail($event)"
+    (onCheck)="isGameOut($event)">
+  </game-card>
 </ion-content>

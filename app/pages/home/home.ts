@@ -6,6 +6,7 @@ import * as _ from 'lodash';
 import { Game } from '../../game.class';
 import { BggOpts } from '../../bggopts.class';
 import { Observable } from 'rxjs/Observable';
+import { GameCard } from '../../components/game/game';
 
 class update{
   msg: string;
@@ -13,13 +14,13 @@ class update{
 }
 
 @Component({
-  directives: [],
+  directives: [GameCard],
   templateUrl: 'build/pages/home/home.html',
   providers: [Db, BggData]
 })
 
 export class HomePage {
-
+  /* TODO: correct refresh() to appriopriately call viewIn() / viewOut() */
   constructor(
     private navController: NavController,
     private db: Db,
@@ -42,11 +43,14 @@ export class HomePage {
     played: false
   }
 
+  viewGames = [];
   games = [];
   rawbgg = [];
   dupes = [];
   added = 0;
   loading = Loading.create();
+  showingTrash: boolean = false;
+  viewingIn: boolean = true;
 
   init(){
     this.db.load().subscribe(
@@ -57,8 +61,46 @@ export class HomePage {
       }, () => {
         this.games = this.db.games;
         console.log("DONE LOADING DB");
+        this.viewIn();
       }
     );
+  }
+
+  isGameOut(game: Game){
+    console.log('Is ' + game.name + ' out?')
+
+    if(this.isTrue(game.filtered) || this.isTrue(game.trash)){
+      console.log('--> yep')
+      return true;
+    }
+    console.log(this.isTrue(game.filtered));
+    console.log('--> nope')
+    return false;
+  }
+
+  viewIn(){
+    this.viewGames = _.filter(this.games, game => {
+      return !this.isTrue(game.filtered) && !this.isTrue(game.trash);
+    });
+    this.viewingIn = true;
+  }
+  viewOut(){
+    this.viewGames = _.filter(this.games, game => {
+      return this.isTrue(game.filtered) || this.isTrue(game.trash);
+    })
+    this.viewingIn = false;
+  }
+
+  isTrue(exp){
+    // check for string/bool true/'true'
+    return exp == true || exp == 'true';
+  }
+
+  out(){
+    // returns number of games in trash or filtered out
+    return _.filter(this.games, game => {
+      return this.isTrue(game.trash) || this.isTrue(game.filtered);
+    }).length;
   }
 
   fetching(){
@@ -176,24 +218,29 @@ export class HomePage {
     }
     let filtered = _.differenceBy(this.games, arr, 'gameId');
     console.log("TRASHED: " + _.map(filtered, 'name').join(', '))
+    _.forEach(arr, game => {
+      this.updateGame(game, 'filtered', false);
+    })
     _.forEach(filtered, game => {
-      game.filtered = true;
-      this.updateFilter(game);
+      this.updateGame(game, 'filtered', true);
     });
   }
 
-  updateFilter(game){
-    this.db.updateFilter(game).subscribe(
+  updateGame(game, column, value){
+    console.log(
+      'UPDATING: ' + game.name + ' (trash: ' +
+      game.trash + ', filtered: ' +
+      game.filtered + ')'
+    );
+    this.db.updateGame(game, column, value).subscribe(
       msg => {
-        console.log("FILTER MESSAGE: ");
-        console.log(msg);
+        // console.log("FILTER MESSAGE -> " + msg);
       },
       error => {
-        console.log("FILTER ERROR: ");
         console.log(error);
       },
       () => {
-        console.log("FILTER UPDATED");
+        // console.log("FILTER UPDATED");
       }
     );
   }
@@ -201,7 +248,7 @@ export class HomePage {
   fetch(username){
     let prog = 0;
     let loading = Loading.create({
-      content: "Please wait... " + prog + "%"
+      content: "Please wait"
     });
     this.navController.present(loading);
     this.bgg.fetch(username).then(data => {
@@ -229,6 +276,8 @@ export class HomePage {
                   this.games = this.db.games;
                   this.dupes = [];
                   this.added = 0;
+                  // update the view based on whether we're looking at trash
+                  this.viewingIn ? this.viewIn() : this.viewOut();
                   loading.dismiss();
                 }
               );
@@ -299,22 +348,12 @@ export class HomePage {
   }
 
   trash(game: Game){
-    game.filtered = true;
-    this.updateFilter(game);
+    this.updateGame(game, 'trash', true);
   }
 
-  kill(game: Game){
-    this.db.drop(game).subscribe(
-      msg => console.log(msg),
-      error => console.log(error),
-      () => this.refresh("DONE KILLING").subscribe(
-        resp => console.log(resp),
-        error => console.log(error),
-        () => {
-          this.games = this.db.games;
-        }
-      )
-    );
+  restore(game: Game) {
+    this.updateGame(game, 'trash', false);
+    this.updateGame(game, 'filtered', false);
   }
 
   refresh(msg: string = "refreshing"){
@@ -323,29 +362,11 @@ export class HomePage {
   }
 
   purge(){
-    let loading = Loading.create({
-      content: "Please wait..."
-    });
-    this.navController.present(loading);
-    this.db.purge().subscribe(
-      msg => console.log("PURGING -> " + msg),
-      error => console.log("ERROR PURGING -> " + error.message),
-      () => {
-        this.refresh("DONE PURGING").subscribe(
-          resp => console.log(resp),
-          error => console.log(error),
-          () => {
-            this.games = this.db.games;
-            loading.dismiss();
-          }
-        );;
-      }
-    );
+    this.db.recreateTable();
   }
 
   detail(game){
     console.log(game);
-
   }
 
 }
@@ -358,7 +379,7 @@ export class HomePage {
     <h2>Import your collection from BGG</h2>
     <ion-list>
       <ion-item>
-        <ion-label inline title="{{schema.description}}">{{schema.prettyname}}</ion-label>
+        <ion-label stacked title="{{schema.description}}">{{schema.prettyname}}</ion-label>
         <ion-input [(ngModel)]="username"></ion-input>
       </ion-item>
 

@@ -45,7 +45,7 @@ export class Db {
       ' rank INTEGER,' +
       ' numPlays INTEGER,' +
       ' rating INTEGER,' +
-      ' filtered INTEGER,' +
+      ' filtered NUMERIC,' +
       ' trash NUMERIC' +
       ')').then((data) => {
           observer.next("TABLE CREATED");
@@ -144,14 +144,22 @@ export class Db {
     });
   }
 
-  updateFilter(game: Game){
+  updateGame(game: Game, column: string, value: any){
     return new Observable(obs => {
-      this.storage.query('UPDATE games SET trash="' + game.trash +
+      this.storage.query('UPDATE games SET ' + column + '="' + value +
        '" WHERE gameId=' + game.gameId ).then(result => {
-        obs.next('UPDATED ' + game.name + ' IN DB');
+        obs.next('UPDATED ' + game.name + ' IN DB -> ' +
+         column + ' = ' + value);
         obs.complete();
       }, error => obs.error(error));
     })
+  }
+
+  recreateTable(){
+    this.storage.query('DROP TABLE games').then(r => {
+      this.load();
+    })
+
   }
 
 }

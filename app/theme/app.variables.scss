@@ -28,8 +28,12 @@
 $colors: (
   primary:    #478047,
   secondary:  #A07959,
-  danger:     #7B3737,
+  danger:     #C33,
   light:      #eeffee,
   dark:       #414D6B,
   favorite:   #6F8D8D
 );
+
+button:hover{
+  opacity: .8;
+}
