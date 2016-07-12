@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, Loading, Modal, ViewController, NavParams } from 'ionic-angular';
+import { Alert, NavController, Loading, Modal, ViewController, NavParams } from 'ionic-angular';
 import { Db } from '../../providers/db/db';
 import { BggData } from '../../providers/bgg-data/bgg-data';
 import * as _ from 'lodash';
@@ -7,6 +7,7 @@ import { Game } from '../../game.class';
 import { BggOpts } from '../../bggopts.class';
 import { Observable } from 'rxjs/Observable';
 import { GameCard } from '../../components/game/game';
+import { FilterGames } from '../../components/modals/filter';
 
 class update{
   msg: string;
@@ -104,20 +105,38 @@ export class HomePage {
   }
 
   fetching(){
-    let modal = Modal.create(importGames, {username: this.bggUsr});
-    modal.onDismiss(data => {
-      if(data){
-        this.bggUsr = data;
-        this.fetch(this.bggUsr);
-      } else {
-        console.log('Fetching canceled.');
-      }
-    });
-    this.navController.present(modal);
+    let fetch = Alert.create({
+      title: 'Import games from BGG',
+      message: 'Import your (or someone else\'s) game collection from boardgamegeek.com.',
+      inputs: [{
+        name: 'username',
+        placeholder: 'BGG Username'
+      }],
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: data => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Save',
+          handler: data => {
+            if(data){
+              this.bggUsr = data;
+              this.fetch(this.bggUsr);
+            } else {
+              console.log('Fetching canceled.');
+            }
+          }
+        }
+      ]
+    })
+    this.navController.present(fetch);
   }
 
   filtering(){
-    let modal = Modal.create(filterGames, {bggOpts: this.bggOpts});
+    let modal = Modal.create(FilterGames, {bggOpts: this.bggOpts});
     modal.onDismiss(data => {
       if(data){
         this.bggOpts = data;
@@ -369,176 +388,4 @@ export class HomePage {
     console.log(game);
   }
 
-}
-/*
-  Modal for importing games from BGG
- */
-@Component({
-  template: `
-  <ion-content padding>
-    <h2>Import your collection from BGG</h2>
-    <ion-list>
-      <ion-item>
-        <ion-label stacked title="{{schema.description}}">{{schema.prettyname}}</ion-label>
-        <ion-input [(ngModel)]="username"></ion-input>
-      </ion-item>
-
-      <ion-item>
-        <button (click)=close()>Fetch</button>
-        <button (click)=cancel()>Cancel</button>
-      </ion-item>
-    </ion-list>
-  </ion-content>`
-})
-class importGames {
-
-  username: 'Your BGG username';
-
-  schema = {
-    name: 'username',
-    prettyname: 'BGG Username',
-    description: 'BGG username for collection to import.',
-  }
-
-
-  constructor(private viewCtrl: ViewController, private params: NavParams) {
-      this.username = params.get('username');
-    }
-
-  close() {
-    // parameter is returned to caller as onDismiss event
-    this.viewCtrl.dismiss(this.username);
-  }
-
-  cancel(){
-    this.viewCtrl.dismiss();
-  }
-}
-/*
-  Modal for filtering games from BGG
- */
-@Component({
-  template: `
-  <ion-content padding>
-    <h2>Filter your game set using BGG data</h2>
-    <ion-list>
-      <ion-item *ngFor="let field of schema.bool">
-        <ion-label inline title="{{field.description}}">{{field.prettyname}}</ion-label>
-        <ion-toggle [(ngModel)]="bggOpts[field.name]"></ion-toggle>
-      </ion-item>
-      <ion-item *ngFor="let field of schema.number">
-        <ion-label stacked title="{{field.description}}">{{field.prettyname}}</ion-label>
-        <ion-input [disabled]="field.show !== true && bggOpts[field.show] == false" type="number" [(ngModel)]="bggOpts[field.name]"></ion-input>
-      </ion-item>
-      <ion-item>
-        <button (click)=close()>Filter</button>
-        <button (click)=cancel()>Cancel</button>
-      </ion-item>
-    </ion-list>
-  </ion-content>`
-})
-class filterGames {
-
-  bggOpts: BggOpts = {
-    minrating: 7,
-    maxrank: 0,
-    minplays: 0,
-    minAverageRating: 7,
-    excludeExp: true,
-    owned: true,
-    rated: true,
-    played: false
-  };
-
-  schema = {
-    text: [
-      {
-        name: 'username',
-        prettyname: 'BGG Username',
-        description: 'BGG username for collection to import.',
-      }
-    ],
-    number: [
-      {
-        name: 'minrating',
-        prettyname: 'Minimum rating',
-        description:
-         "Collection owner's lowest allowed rating for imported games.",
-        default:7,
-        min: 0,
-        max: 10,
-        show: 'rated'
-      },
-      {
-        name: 'minrank',
-        prettyname: 'Maximum BGG rank',
-        description:
-         "Highest allowed BGG rank for imported games (0 for any rank).",
-        default:0,
-        min: 0,
-        max: 100000,
-        show: true
-      },
-      {
-        name: 'minplays',
-        prettyname: 'Minimum plays',
-        description:
-         "Collection owner's lowest number of plays for imported games",
-        default:0,
-        min: 0,
-        max: 1000,
-        show: 'played'
-      },
-      {
-        name: 'minAverageRating',
-        prettyname: 'Minimum average rating',
-        description:
-         "Lowest allowed average rating on BGG for imported games (0 for any rating)",
-        default:7,
-        min: 0,
-        max: 10,
-        show: true
-      }
-    ],
-    bool: [
-      {
-        name : 'excludeExp',
-        prettyname : 'Exclude expansions',
-        description: "Filter out expansions?",
-        default: true
-      },
-      {
-        name: 'owned',
-          prettyname: "Owned only",
-          description: "Limit to collection owner's owned games?",
-          default: true
-      },
-      {
-        name: 'rated',
-        prettyname: 'Rated only',
-        description: "Limit to games rated by collection owner?",
-        default: true
-      },
-      {
-        name: 'played',
-        prettyname: 'Must have play(s) logged',
-        description: "Limit to games with plays logged by collection owner?",
-        default: false
-      },
-    ]
-  }
-
-
-  constructor(private viewCtrl: ViewController, private params: NavParams) {
-      this.bggOpts = params.get('bggOpts');
-    }
-
-  close() {
-    // parameter is returned to caller as onDismiss event
-    this.viewCtrl.dismiss(this.bggOpts);
-  }
-
-  cancel(){
-    this.viewCtrl.dismiss();
-  }
 }
