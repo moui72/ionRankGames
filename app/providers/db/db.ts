@@ -5,10 +5,7 @@ import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
 
 /*
-  Generated class for the Db provider.
-
-  See https://angular.io/docs/ts/latest/guide/dependency-injection.html
-  for more info on providers and Angular 2 DI.
+  Database interface
 */
 
 @Injectable()
@@ -39,7 +36,7 @@ export class Db {
       ' maxPlayers INTEGER,' +
       ' playingTime INTEGER,' +
       ' isExpansion NUMERIC,' +
-      ' owned NUMERIC,' +
+      ' own NUMERIC,' +
       ' yearPublished NUMERIC,' +
       ' averageRating REAL,' +
       ' rank INTEGER,' +
@@ -74,6 +71,9 @@ export class Db {
         }
         observer.next("DONE REFRESHING");
         observer.complete();
+      }).catch(err => {
+        this.games = [];
+        observer.error(err);
       });
     })
   }
@@ -144,7 +144,7 @@ export class Db {
     });
   }
 
-  updateGame(game: Game, column: string, value: any){
+  updateGame(game: Game, column: string, value: boolean){
     return new Observable(obs => {
       this.storage.query('UPDATE games SET ' + column + '="' + value +
        '" WHERE gameId=' + game.gameId ).then(result => {
@@ -152,14 +152,12 @@ export class Db {
          column + ' = ' + value);
         obs.complete();
       }, error => obs.error(error));
-    })
+    });
   }
 
   recreateTable(){
-    this.storage.query('DROP TABLE games').then(r => {
+    this.storage.query('DROP TABLE games').then(re => {
       this.load();
     })
-
   }
-
 }

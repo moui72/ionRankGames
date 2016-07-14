@@ -4,22 +4,21 @@
   See https://angular.io/docs/ts/latest/api/core/ComponentMetadata-class.html
   for more info on Angular 2 Components.
 -->
-<ion-card class="game">
-  <ion-card-header>
     <ion-item>
-      <ion-avatar item-left>
+      <ion-thumbnail item-left>
         <img [src]="game.thumbnail">
-      </ion-avatar>
-      <h3 item-left>
-        {{game.name}} (trash: {{game.trash}}, filtered: {{game.filtered}})
+      </ion-thumbnail>
+      <h3>
+        {{game.name}}
+        <small grey padding-horizontal>id {{game.gameId}}</small>
       </h3>
-      <ion-badge item-right>ID# {{game.gameId}}</ion-badge>
-    </ion-item>
-  </ion-card-header>
-  <ion-card-content class="outer-content">
+    <p grey>
+      {{game.rating > -1 ? 'Personal rating: ' + game.rating : 'No personal rating'}}.
+
+      {{game.averageRating > -1 ? 'Average rating: ' + game.averageRating.toFixed(1) : 'No average rating'}}.
+    </p>
     <button (click)=trash(game) *ngIf="!isOut()">trash</button>
     <button (click)=detail(game)>detail</button>
     <button (click)=restore(game) *ngIf="isOut()">restore</button>
     <button (click)=amIout()>Out?</button>
-  </ion-card-content>
-</ion-card>
+  </ion-item>

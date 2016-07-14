@@ -1,26 +1,88 @@
 <ion-header>
-  <ion-navbar>
-    <ion-title>Home</ion-title>
+  <ion-navbar primary>
+    <ion-title>Manage games</ion-title>
+    <ion-buttons start>
+      <button menuToggle><ion-icon name="menu"></ion-icon></button>
+    </ion-buttons>
+    <ion-buttons end>
+      <button><ion-icon name="help" title="help"></ion-icon></button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
-
-<ion-content padding class="home">
-  <h2>Manage your games</h2>
+<ion-menu [content]="content" id="manageMenu" type="reveal">
+  <ion-toolbar primary>
+    <ion-title>Menu</ion-title>
+  </ion-toolbar>
   <ion-list>
-    <ion-item>
-      <button (click)=fetching()>Fetch</button>
-      <button (click)=filtering()>Filter</button>
-      <button padding *ngIf="viewingIn" (click)="viewOut()" title="view trashed games">
-        <ion-icon name="trash"></ion-icon> {{out()}}
-      </button>
-      <button padding *ngIf="!viewingIn" (click)="viewIn()" title="view non-trashed games">
-        <ion-icon name="archive"></ion-icon> {{games.length - out()}}
-      </button>
-      <button (click)=purge() danger>Reset</button>
-    </ion-item>
+    <button ion-item  (click)="purging()" class="item-borderless">
+      <ion-icon danger name="warning" item-left></ion-icon>
+      Purge
+    </button>
+    <button ion-item (click)="fetching()" class="item-borderless">
+      <ion-icon name="sync" primary item-left ></ion-icon>
+      Fetch
+    </button>
+    <button ion-item  (click)="filtering()" class="item-borderless">
+      <ion-icon name="funnel" primary item-left ></ion-icon>
+      Filter
+    </button>
+    <button ion-item  class="item-borderless">
+      <ion-icon name="list" primary item-left></ion-icon>
+      Rank
+    </button>
+    <button menuClose ion-item detail-none>
+      <ion-icon name="close" primary item-left></ion-icon>
+      Close
+    </button>
   </ion-list>
-
-  <game-card *ngFor="let game of viewGames" [game]="game" (onRestore)="restore($event)" (onTrash)="trash($event)" (onDetail)="detail($event)"
-    (onCheck)="isGameOut($event)">
-  </game-card>
+</ion-menu>
+<ion-content padding class="home" #content>
+  <ion-card>
+    <ion-card-header>
+      <h2>
+        <span *ngIf="viewing == 'in'">
+          Viewing your current game set
+        </span>
+        <span *ngIf="viewing == 'out'">
+          Viewing your trashed and filtered games
+        </span>
+      </h2>
+    </ion-card-header>
+    <ion-card-content class="lightfont">
+      <p *ngIf="viewing == 'in'" >
+        Trash games to remove from the set of games that you will rank.
+      </p>
+      <p *ngIf="viewing == 'out'">
+        Restore games to put them back into the set of games that you will rank.
+      </p>
+    </ion-card-content>
+  </ion-card>
+  <ion-list>
+    <game-card *ngFor="let game of viewGames" [game]="game" (onRestore)="restore($event)" (onTrash)="trash($event)" (onDetail)="detail($event)"
+      (onCheck)="isGameOut($event)">
+    </game-card>
+  </ion-list>
 </ion-content>
+
+<ion-footer>
+  <ion-toolbar position="bottom" primary>
+    <ion-segment [(ngModel)]="viewing" (ionChange)="view($event)" white>
+      <ion-segment-button value="in" title="view non-trashed games">
+        <strong padding-horizontal>
+          Games
+        </strong>
+        <ion-badge favorite>
+            {{games.length - out()}}
+        </ion-badge>
+      </ion-segment-button>
+      <ion-segment-button value="out" title="view trashed games">
+        <strong padding-horizontal>
+          Trashed games
+        </strong>
+        <ion-badge danger>
+          {{out()}}
+        </ion-badge>
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-footer>
