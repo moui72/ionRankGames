@@ -1,4 +1,5 @@
 export class Game{
+  _id: number;
   gameId: number = 0;
   name: string = '';
   image: string = '';

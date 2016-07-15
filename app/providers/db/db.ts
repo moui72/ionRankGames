@@ -11,79 +11,38 @@ import * as PouchDB from 'pouchdb';
 
 @Injectable()
 export class Db {
-  storage: any;
   games: Array<any>;
   duped: Array<Game>;
   added: number;
+  games_db: any;
 
   constructor() {
-    this.storage = null;
     this.added = 0;
     this.games = [];
     this.duped = [];
+
   }
 
   load() {
-    var games_db = new PouchDB('rankGames_games');
-
-    return new Observable(observer => {
-      this.storage = new Storage(SqlStorage);
-      // this.storage.query('DROP TABLE games');
-      this.storage.query('CREATE TABLE IF NOT EXISTS games (' +
-      'id INTEGER PRIMARY KEY AUTOINCREMENT,'+
-      ' name TEXT, ' +
-      ' gameId TEXT, ' +
-      ' image TEXT, ' +
-      ' thumbnail TEXT, ' +
-      ' minPlayers INTEGER,' +
-      ' maxPlayers INTEGER,' +
-      ' playingTime INTEGER,' +
-      ' isExpansion NUMERIC,' +
-      ' own NUMERIC,' +
-      ' yearPublished NUMERIC,' +
-      ' averageRating REAL,' +
-      ' rank INTEGER,' +
-      ' numPlays INTEGER,' +
-      ' rating INTEGER,' +
-      ' filtered NUMERIC,' +
-      ' trash NUMERIC' +
-      ')').then((data) => {
-          observer.next("TABLE CREATED");
-      }, (error) => {
-          observer.error(error);
-      });
-      this.refresh().subscribe(
-        resp => observer.next(resp),
-        error => observer.error(error),
-        () => observer.complete()
-      );
-    })
+    this.games_db = new PouchDB('rankGames_games');
   }
 
   refresh() {
-    return new Observable(observer => {
-      observer.next("REFRESHING GAMES");
-      this.storage.query('SELECT * FROM games').then((data) => {
-        if(data.res.rows.length > 0) {
-          // map to array
-          this.games = _.values(data.res.rows);
-          observer.next("LOADED GAMES -> " + this.games.length);
-        } else {
-          this.games = [];
-          observer.next("DB EMPTY");
+    return new Observable(obs => {
+      obs.next("REFRESHING GAMES");
+      this.games_db.allDocs((error, response) => {
+        if(error){
+          obs.error(error);
         }
-        observer.next("DONE REFRESHING");
-        observer.complete();
-      }).catch(err => {
-        this.games = [];
-        observer.error(err);
-      });
+        console.log(response);
+        this.games = response.rows;
+        obs.complete();
+      })
     })
   }
 
   exists(game: Game){
-    return this.storage.query('SELECT * FROM games WHERE' +
-    ' gameId="'+game.gameId+'"');
+    return this.games_db.get(game.gameId);
   }
 
   /**
@@ -92,25 +51,19 @@ export class Db {
    * @return {[Observable]}   [game added, error if dupe]
    */
   insert(game: Game, refresh: boolean = true){
-    return new Observable(observer => {
-      this.exists(game).then(data => {
-        let keys = _.keys(game).toString();
-        let vals = _.values(game).map(i => {return '"' + i + '"'}).join(', ');
-        console.log(keys + vals);
-        if(data.res.rows.length > 0){
-          this.duped.push(game);
-          observer.next('GAME IS DUPE');
-          return observer.complete();
-        }
-        this.storage.query('INSERT INTO games('+ keys + ')' + ' values(' + vals
-         +')').then(d => {
-          // observer.next("INSERTED -> " + game.name + "["+game.gameId+"]");
-          observer.complete();
+    let gameDoc = {_id: game.gameId, game: game};
+    return new Observable(obs => {
+      this.exists(game).then((error, response) => {
+        this.games_db.put(gameDoc).then(result => {
+          console.log(result);
+          obs.complete();
+        }).error(error => {
+          obs.error(error)
+        });
         }, error => {
-          observer.error(error.err.message);
+          obs.error(error);
         });
       });
-    });
   }
 
   /**
@@ -120,47 +73,29 @@ export class Db {
    */
   drop(game: Game){
     return new Observable(observer => {
-      observer.next("DROPPING GAME -> " + game.name);
-      this.storage.query('DELETE FROM games WHERE gameId="'+game.gameId+'"').then((data) => {
-        observer.next("GAME DROPPED");
-        this.refresh().subscribe(
-          resp => observer.next(resp),
-          error => observer.error(error),
-          () => observer.complete()
-        );
-        observer.complete();
-      });
+      // get game then remove game
     })
   }
 
   purge(){
     return new Observable(observer => {
-      observer.next('PURGING DB')
-      this.storage.query('DELETE FROM games').then(
+      observer.next('PURGING DB');
+      this.games_db.destroy().then(
       result => {
-        observer.next("PURGED -> " + result.res.rowsAffected);
+        observer.next("PURGED");
         observer.complete();
-      },
-      error => {
-        observer.error(error.err);
-      });
+      })
     });
   }
 
   updateGame(game: Game, column: string, value: boolean){
     return new Observable(obs => {
-      this.storage.query('UPDATE games SET ' + column + '="' + value +
-       '" WHERE gameId=' + game.gameId ).then(result => {
+      this.exists(game).then((error, result) => {
+        // put game (include _rev)
         obs.next('UPDATED ' + game.name + ' IN DB -> ' +
          column + ' = ' + value);
         obs.complete();
       }, error => obs.error(error));
     });
-  }
-
-  recreateTable(){
-    this.storage.query('DROP TABLE games').then(re => {
-      this.load();
-    })
   }
 }
