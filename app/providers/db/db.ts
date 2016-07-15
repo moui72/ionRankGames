@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Storage, SqlStorage } from 'ionic-angular';
-import { Game } from '../../game.class';
+import { Game, WrappedGame } from '../../game.class';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
 import * as PouchDB from 'pouchdb';
@@ -20,11 +20,12 @@ export class Db {
     this.added = 0;
     this.games = [];
     this.duped = [];
-
+    this.load();
   }
 
   load() {
     this.games_db = new PouchDB('rankGames_games');
+    this.refresh();
   }
 
   refresh() {
@@ -33,16 +34,31 @@ export class Db {
       this.games_db.allDocs((error, response) => {
         if(error){
           obs.error(error);
+          return false;
         }
-        console.log(response);
-        this.games = response.rows;
-        obs.complete();
+        // should map each row's game into array for game
+        let arr = [];
+        var done = _.after(response.rows.length, (game) => {
+          obs.next("FETCHING COMPLETE -> " + response.rows.length + ' games.');
+          this.games = arr;
+          obs.complete();
+        })
+        _.forEach(response.rows, doc => {
+          this.games_db.get(doc['id']).then((response) => {
+            arr.push(response.game);
+            done(response.game);
+          }).catch(error => {
+            obs.error(error);
+          });
+        });
+
+        return true;
       })
     })
   }
 
   exists(game: Game){
-    return this.games_db.get(game.gameId);
+    return this.games_db.get('g_' + game.gameId);
   }
 
   /**
@@ -50,20 +66,19 @@ export class Db {
    * @param  {[Game]} game    [game to add to db (uses gameId to identify)]
    * @return {[Observable]}   [game added, error if dupe]
    */
-  insert(game: Game, refresh: boolean = true){
-    let gameDoc = {_id: game.gameId, game: game};
+  insert(game: Game){
+    let gameDoc: WrappedGame = {_id: 'g_' + game.gameId, game: game};
     return new Observable(obs => {
-      this.exists(game).then((error, response) => {
-        this.games_db.put(gameDoc).then(result => {
-          console.log(result);
-          obs.complete();
-        }).error(error => {
-          obs.error(error)
-        });
-        }, error => {
-          obs.error(error);
-        });
-      });
+      this.games_db.put(gameDoc).then(result => {
+        this.refresh().subscribe(
+          msg => obs.next(msg),
+          error => obs.error(error),
+          () => obs.complete()
+        )
+      }).error(error => {
+        obs.error(error);
+      })
+    })
   }
 
   /**
@@ -74,6 +89,12 @@ export class Db {
   drop(game: Game){
     return new Observable(observer => {
       // get game then remove game
+      this.games_db.get('g_' + game.gameId, (error, doc) => {
+        if(error){
+          return console.log(error);
+        }
+        this.games_db.remove(doc);
+      })
     })
   }
 
@@ -83,6 +104,7 @@ export class Db {
       this.games_db.destroy().then(
       result => {
         observer.next("PURGED");
+        this.load();
         observer.complete();
       })
     });
@@ -90,11 +112,13 @@ export class Db {
 
   updateGame(game: Game, column: string, value: boolean){
     return new Observable(obs => {
-      this.exists(game).then((error, result) => {
-        // put game (include _rev)
-        obs.next('UPDATED ' + game.name + ' IN DB -> ' +
-         column + ' = ' + value);
-        obs.complete();
+      this.exists(game).then((doc) => {
+        doc.game[column] = value;
+        this.games_db.put(doc).then(response => {
+          obs.next('UPDATED ' + doc.game.name + ' IN DB -> ' +
+           column + ' = ' + doc.game[column] + '(intended ' + value + ')');
+          obs.complete();
+        })
       }, error => obs.error(error));
     });
   }

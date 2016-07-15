@@ -1,5 +1,4 @@
 export class Game{
-  _id: number;
   gameId: number = 0;
   name: string = '';
   image: string = '';
@@ -16,4 +15,9 @@ export class Game{
   own: boolean = false;
   trash: boolean = false;
   filtered: boolean = false;
+}
+
+export class WrappedGame{
+  _id: string;
+  game: Game;
 }

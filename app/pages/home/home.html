@@ -57,11 +57,18 @@
       </p>
     </ion-card-content>
   </ion-card>
-  <ion-list>
+  <ion-list *ngIf="thereAreGames()">
     <game-card *ngFor="let game of viewGames" [game]="game" (onRestore)="restore($event)" (onTrash)="trash($event)" (onDetail)="detail($event)"
       (onCheck)="isGameOut($event)">
     </game-card>
   </ion-list>
+  <ion-card *ngIf="!thereAreGames()">
+    <ion-card-header>No games yet</ion-card-header>
+    <ion-card-content>
+      You haven't imported any games.
+      <button small (click)="fetching()">Fetch</button> some?
+    </ion-card-content>
+  </ion-card>
 </ion-content>
 
 <ion-footer>
@@ -72,7 +79,7 @@
           Games
         </strong>
         <ion-badge favorite>
-            {{games.length - out()}}
+            {{games ? games.length - out() : 0}}
         </ion-badge>
       </ion-segment-button>
       <ion-segment-button value="out" title="view trashed games">
@@ -80,7 +87,7 @@
           Trashed games
         </strong>
         <ion-badge danger>
-          {{out()}}
+          {{games ? out() : 0}}
         </ion-badge>
       </ion-segment-button>
     </ion-segment>

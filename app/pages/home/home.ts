@@ -58,17 +58,7 @@ export class HomePage {
   viewing: string = 'in';
 
   init(){
-    this.db.load().subscribe(
-      result => {
-        console.log("LOADING DB -> " + result);
-      }, error => {
-        console.log("ERROR LOADING DB -> " + error.err.message);
-      }, () => {
-        this.games = this.db.games;
-        console.log("DONE LOADING DB");
-        this.viewIn();
-      }
-    );
+    this.refresh('Initializing');
   }
 
   isGameOut(game: Game){
@@ -90,9 +80,11 @@ export class HomePage {
    */
   view(viewChangeEvent){
     if(viewChangeEvent.value == "in"){
+      console.log('VIEWING IN');
       return this.viewIn();
     }
-  return  this.viewOut();
+    console.log('VIEWING OUT');
+    return  this.viewOut();
   }
   /**
    * Filters games to just those which are not trashed/filtered
@@ -128,6 +120,9 @@ export class HomePage {
    */
   out(){
     // returns number of games in trash or filtered out
+    if(!this.games){
+      return 0;
+    }
     return _.filter(this.games, game => {
       return this.isTrue(game.trash) || this.isTrue(game.filtered);
     }).length;
@@ -315,14 +310,8 @@ export class HomePage {
     */
     let filtered = _.differenceBy(this.games, arr, 'gameId');
     let updated = _.after(arr.length + filtered.length, () => {
-      this.refresh().subscribe(
-        msg => console.log(msg),
-        error => console.log(error),
-        () => {
-          this.viewIn();
-          loading.dismiss();
-        }
-      )
+      this.refresh();
+      loading.dismiss();
     })
     _.forEach(filtered, game => {
       this.updateGame(game, 'filtered', true).subscribe(() => {
@@ -345,7 +334,7 @@ export class HomePage {
    * @return {Observable}       passes observable returned by Db service
    */
   updateGame(game: Game, column: string, value : boolean){
-    if(column != 'filter' && column != 'trash'){
+    if(column != 'filtered' && column != 'trash'){
       return new Observable(obs => {
         obs.error(new Error('invalid column name'));
       });
@@ -372,16 +361,11 @@ export class HomePage {
         },
         error => console.log(error),
         () => {
-          this.refresh().subscribe(
-            msg => {},
-            error => {},
-            () => {
-              this.games = this.db.games;
-              this.added = 0;
-              this.viewIn();
-              loading.dismiss();
-            }
-          );
+          this.refresh();
+          this.games = this.db.games;
+          this.added = 0;
+          this.viewIn();
+          loading.dismiss();
         }
       );
     });
@@ -400,6 +384,8 @@ export class HomePage {
       // iterate through the set of retrieved games
       for(let rawGame of set){
         let game = new Game();
+        game.trash = false;
+        game.filtered = false;
         _.forIn(game, (val, key) => {
           if (typeof rawGame[key] != undefined) {
             game[key] = rawGame[key];
@@ -407,7 +393,7 @@ export class HomePage {
         });
         loaded++;
         prog = _.floor(loaded/toload);
-        if(this.add(game, false)){
+        if(this.add(game)){
           obs.next({
             msg: "IMPORTED GAME -> " + game.name + '(' +
              prog + '%)',
@@ -424,9 +410,10 @@ export class HomePage {
     })
   }
 
-  add(game: Game, refresh: boolean = true){
+  add(game: Game){
     this.db.insert(game).subscribe(
       result => {
+        console.log('adding...');
         console.log(result);
       },
       error => {
@@ -436,9 +423,6 @@ export class HomePage {
       },
       () => {
         console.log("INSERTION COMPLETE");
-        if (refresh) {
-          this.refresh("DONE ADDING");
-        }
         return true;
       }
     );
@@ -447,7 +431,7 @@ export class HomePage {
   trash(game: Game){
     this.updateGame(game, 'trash', true).subscribe(
       msg => {
-        // console.log("FILTER MESSAGE -> " + msg);
+        console.log("UPDATE MESSAGE -> " + msg);
       },
       error => {
         console.log(error);
@@ -462,22 +446,20 @@ export class HomePage {
   restore(game: Game) {
     this.updateGame(game, 'trash', false).subscribe(
       msg => {
-        // console.log("FILTER MESSAGE -> " + msg);
+        console.log("UPDATE MESSAGE -> " + msg);
       },
       error => {
         console.log(error);
       },
       () => {
-        // console.log("FILTER UPDATED");
         this.updateGame(game, 'filtered', false).subscribe(
           msg => {
-            // console.log("FILTER MESSAGE -> " + msg);
+            console.log("UPDATE MESSAGE -> " + msg);
           },
           error => {
             console.log(error);
           },
           () => {
-            // console.log("FILTER UPDATED");
             this.refresh('REFRESHING -> restored ' + game.name);
           }
         );
@@ -485,36 +467,31 @@ export class HomePage {
     );
   }
 
-  refresh(msg: string = "refreshing"){
+  refresh(msg: string = "REFRESHING"){
     console.log(msg);
-    return new Observable(obs => {
-      this.db.refresh().subscribe(
-        resp => obs.next(resp),
-        error => {
-          console.log(error);
-          this.games = this.db.games;
-          obs.complete();
-        },
-        () => {
-          this.games = this.db.games;
-          obs.complete()
-        });
-    });
+    this.db.refresh().subscribe(
+      resp => console.log(resp),
+      error => console.log(error),
+      () => {
+        this.games = this.db.games;
+        this.view({value: this.viewing})
+      });
   }
 
   purge(){
-    this.db.recreateTable();
-    this.refreshAndView();
-  }
-
-  refreshAndView(){
-    this.refresh().subscribe(() => {
-      this.viewIn();
-    });
+    this.db.purge();
+    this.refresh();
   }
 
   detail(game){
     console.log(game);
+  }
+
+  thereAreGames(){
+    if(this.games && this.games.length > 0){
+      return true;
+    }
+    return false;
   }
 
 }
