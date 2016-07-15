@@ -3,6 +3,7 @@ import { Storage, SqlStorage } from 'ionic-angular';
 import { Game } from '../../game.class';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
+import * as PouchDB from 'pouchdb';
 
 /*
   Database interface
@@ -23,6 +24,8 @@ export class Db {
   }
 
   load() {
+    var games_db = new PouchDB('rankGames_games');
+
     return new Observable(observer => {
       this.storage = new Storage(SqlStorage);
       // this.storage.query('DROP TABLE games');
