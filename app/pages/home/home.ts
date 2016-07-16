@@ -61,22 +61,19 @@ export class HomePage {
     this.refresh('Initializing');
   }
 
+  /**
+   * Determines if a game is in trash or not
+   * @param  {Game}   game  Game to check status of
+   * @return {boolean}      True if game.trash or game.filtered is true
+   */
   isGameOut(game: Game){
-    console.log('Is ' + game.name + ' out?')
-
-    if(this.isTrue(game.filtered) || this.isTrue(game.trash)){
-      console.log('--> yep')
-      return true;
-    }
-    console.log(this.isTrue(game.filtered));
-    console.log('--> nope')
-    return false;
+    return this.isTrue(game.filtered) || this.isTrue(game.trash);
   }
 
   /**
    * Manipulates the viewlist based on segment modeled on viewing button click
    * @param  {viewChangeEvent}  Event emitted by segment modeled on viewing
-   * @return {[type]}                        call to viewIn() or viewOut()
+   * @return {function()}                        call to viewIn() or viewOut()
    */
   view(viewChangeEvent){
     if(viewChangeEvent.value == "in"){
@@ -84,7 +81,7 @@ export class HomePage {
       return this.viewIn();
     }
     console.log('VIEWING OUT');
-    return  this.viewOut();
+    return this.viewOut();
   }
   /**
    * Filters games to just those which are not trashed/filtered
@@ -104,6 +101,7 @@ export class HomePage {
       return this.isTrue(game.filtered) || this.isTrue(game.trash);
     })
   }
+
   /**
    * Evaluates expression (exp) accounting for either boolean or string
    * @param  {any} exp    should be a string or boolean
@@ -410,6 +408,11 @@ export class HomePage {
     })
   }
 
+  /**
+   * Add a game to database
+   * @param  {Game}   game game to add
+   * @return {boolean}      true on success, false on error
+   */
   add(game: Game){
     this.db.insert(game).subscribe(
       result => {
@@ -438,7 +441,9 @@ export class HomePage {
       },
       () => {
         // console.log("FILTER UPDATED");
-        this.refresh('REFRESHING -> trashed ' + game.name);
+        // this.refresh('REFRESHING -> trashed ' + game.name);
+        game.trash = true;
+        return this.view({value: this.viewing});
       }
     );
   }
@@ -460,33 +465,58 @@ export class HomePage {
             console.log(error);
           },
           () => {
-            this.refresh('REFRESHING -> restored ' + game.name);
+            game.trash = false;
+            game.filtered = false;
+            return this.view({value: this.viewing});
           }
         );
       }
     );
   }
 
+  /**
+   * Gets all games from DB. Slow, so use conservatively.
+   * @param  {string = "REFRESHING"} msg Describes the reason for refresing
+   * @return {void}      no return value
+   */
   refresh(msg: string = "REFRESHING"){
     console.log(msg);
+    let loading = Loading.create({content: 'Updating view'});
+    this.navController.present(loading);
     this.db.refresh().subscribe(
       resp => console.log(resp),
       error => console.log(error),
       () => {
         this.games = this.db.games;
-        this.view({value: this.viewing})
+        this.view({value: this.viewing});
+        loading.dismiss()
+        // _.defer(() => loading.dismiss());
       });
   }
 
+  /**
+   * Destroys and recreates the database.
+   * @return {} no return value
+   */
   purge(){
     this.db.purge();
     this.refresh();
   }
 
-  detail(game){
+  /**
+   * Displays detailed info for game
+   * @param  {Game}   game the game to display details of
+   * @return {}            no return value
+   */
+  detail(game: Game){
     console.log(game);
   }
 
+  /**
+   * Determines whether there are loaded games or not.
+   * @return {boolean} True if this.games[] exists and has at least 1 member,
+   *                         false otherwise
+   */
   thereAreGames(){
     if(this.games && this.games.length > 0){
       return true;

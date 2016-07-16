@@ -34,8 +34,8 @@ export class GameCard {
   isOut(){
     return this.isTrue(this.game.filtered) || this.isTrue(this.game.trash);
   }
-  isTrue(exp){
+  isTrue(expression){
     // check for string/bool true/'true'
-    return exp == true || exp == 'true';
+    return expression == true || expression == 'true';
   }
 }

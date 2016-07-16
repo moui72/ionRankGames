@@ -30,29 +30,20 @@ export class Db {
 
   refresh() {
     return new Observable(obs => {
-      obs.next("REFRESHING GAMES");
-      this.games_db.allDocs((error, response) => {
-        if(error){
-          obs.error(error);
-          return false;
-        }
+      this.games_db.allDocs({
+          include_docs: true
+      }).then(response => {
         // should map each row's game into array for game
-        let arr = [];
-        var done = _.after(response.rows.length, (game) => {
-          obs.next("FETCHING COMPLETE -> " + response.rows.length + ' games.');
-          this.games = arr;
-          obs.complete();
-        })
-        _.forEach(response.rows, doc => {
-          this.games_db.get(doc['id']).then((response) => {
-            arr.push(response.game);
-            done(response.game);
-          }).catch(error => {
-            obs.error(error);
-          });
+        let arr = _.map(response.rows, row => {
+          return row['doc'].game;
         });
-
-        return true;
+        obs.next('LOADING ' + response.total_rows + ' GAMES')
+        _.defer(gamesArr => {
+          this.games = gamesArr;
+          obs.complete();
+        }, arr);
+      }).catch(error => {
+        obs.error(error);
       })
     })
   }
@@ -75,7 +66,7 @@ export class Db {
           error => obs.error(error),
           () => obs.complete()
         )
-      }).error(error => {
+      }).catch(error => {
         obs.error(error);
       })
     })
@@ -99,13 +90,13 @@ export class Db {
   }
 
   purge(){
-    return new Observable(observer => {
-      observer.next('PURGING DB');
+    return new Observable(obs => {
+      obs.next('PURGING DB');
       this.games_db.destroy().then(
       result => {
-        observer.next("PURGED");
+        obs.next("PURGED");
         this.load();
-        observer.complete();
+        obs.complete();
       })
     });
   }
@@ -118,8 +109,8 @@ export class Db {
           obs.next('UPDATED ' + doc.game.name + ' IN DB -> ' +
            column + ' = ' + doc.game[column] + '(intended ' + value + ')');
           obs.complete();
-        })
-      }, error => obs.error(error));
+        }).catch(error => obs.error(error));
+      }).catch(error => obs.error(error));
     });
   }
 }
