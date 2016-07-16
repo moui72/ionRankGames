@@ -17,6 +17,7 @@ import { BggOpts } from '../../bggopts.class';
 import { Observable } from 'rxjs/Observable';
 import { GameCard } from '../../components/game/game';
 import { FilterGames } from '../../components/modals/filter';
+import { ListsPage } from '../../pages/lists/lists'
 
 @Component({
   directives: [GameCard],
@@ -27,7 +28,6 @@ import { FilterGames } from '../../components/modals/filter';
 export class HomePage {
 
   /* TODO: comment each method */
-  /* TODO: fix refresh after fetch */
 
   constructor(
     private navController: NavController,
@@ -472,6 +472,11 @@ export class HomePage {
         );
       }
     );
+  }
+
+  ranking(){
+    console.log('pushing lists page')
+    this.navController.push(ListsPage);
   }
 
   /**
