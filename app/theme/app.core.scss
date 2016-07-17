@@ -9,6 +9,18 @@
 
 @import "../pages/home/home";
 
+// app-wide styles
 button.item-borderless{
   border: none;
+}
+
+game-compare img{
+  max-height: 20em;
+  height: auto;
+  width: auto;
+  display: block;
+  margin: auto;
+}
+game-compare{
+  text-align: center;
 }

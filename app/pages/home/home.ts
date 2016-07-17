@@ -56,9 +56,12 @@ export class HomePage {
   added = 0;
   showingTrash: boolean = false;
   viewing: string = 'in';
+  initialized: boolean = false;
 
   init(){
-    this.refresh('Initializing');
+    this.refresh('Initializing').then(() => {
+      this.initialized = true;
+    });
   }
 
   /**
@@ -326,7 +329,7 @@ export class HomePage {
   }
 
   /**
-   * Wrapper for method of Db service
+   * Wrapper for updateGame method of Db service
    * @param  {Game}    game   the game to update (uses gameId property for
    *  lookup)
    * @param  {string}  column   the column to change (filter or trash)
@@ -371,9 +374,9 @@ export class HomePage {
     });
   }
   /**
-   * [procImport description]
-   * @param  {Array<any>} set [description]
-   * @return {[type]}         [description]
+   * Goes through a set of raw imported games and inserts them into local DB
+   * @param  {Array<any>} set     Set of raw impored games
+   * @return {Observable}         complete when all games are in db
    */
   procImport(set: Array<any>){
     return new Observable(obs => {
@@ -433,6 +436,11 @@ export class HomePage {
     );
   }
 
+  /**
+   * [trash description]
+   * @param  {Game}   game [description]
+   * @return {[type]}      [description]
+   */
   trash(game: Game){
     game.trash = true;
     this.updateGame(game, 'trash', true).subscribe(
@@ -449,6 +457,11 @@ export class HomePage {
     return this.view({value: this.viewing});
   }
 
+  /**
+   * [restore description]
+   * @param  {Game}   game [description]
+   * @return {[type]}      [description]
+   */
   restore(game: Game) {
     game.trash = false;
     game.filtered = false;
@@ -476,6 +489,10 @@ export class HomePage {
     return this.view({value: this.viewing});
   }
 
+  /**
+   * pushes list management page onto nav
+   * @return {void} no return value
+   */
   ranking(){
     console.log('pushing lists page')
     this.navController.push(ListsPage, {pool: this.viewIn()});
@@ -490,15 +507,19 @@ export class HomePage {
     console.log(msg);
     let loading = Loading.create({content: 'Updating view'});
     this.navController.present(loading);
-    this.db.refresh().subscribe(
-      resp => console.log(resp),
-      error => console.log(error),
-      () => {
-        this.games = this.db.games;
-        this.view({value: this.viewing});
-        loading.dismiss()
-        // _.defer(() => loading.dismiss());
-      });
+    return new Promise((resolve, reject) => {
+      this.db.refresh().subscribe(
+        resp => console.log(resp),
+        error => reject(error),
+        () => {
+          this.games = this.db.games;
+          this.view({value: this.viewing});
+          loading.dismiss()
+          resolve(true);
+          // _.defer(() => loading.dismiss());
+        });
+    })
+
   }
 
   /**

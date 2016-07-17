@@ -1,5 +1,5 @@
-<ion-header>
-  <ion-navbar>
+<ion-header >
+  <ion-navbar primary>
     <ion-title>lists</ion-title>
   </ion-navbar>
 </ion-header>
@@ -8,38 +8,36 @@
   <p>
     Current pool: {{pool.length || 0}}
   </p>
-  <ion-list>
-    <ion-item-group>
-      <ion-list-divider>
-        Lists
-      </ion-list-divider>
-      <ion-item *ngFor="let list of lists">
-        <h3>
-          {{list.name}}
-          <small grey padding-horizontal>id {{list.key}}</small>
-        </h3>
-        <p>
-          Ranked games: {{list.rankedCount()}}
-          Unranked games: {{list.unrankedCount()}}
-        </p>
-        <button item-left (click)="edit(list)">edit</button>
-        <button item-left (click)="delete(list)" danger>delete</button>
-      </ion-item>
-      <ion-item *ngIf="!thereAreLists()">
-        <p>
-          No lists yet.
-        </p>
-      </ion-item>
-    </ion-item-group>
-    <ion-item-group>
-      <ion-list-divider>
-        Make new list
-      </ion-list-divider>
-      <ion-item padding>
-        <ion-label stacked>List name</ion-label>
-        <ion-input type="text" [(ngModel)]="newName"></ion-input>
-        <button item-right (click)="create()">Create</button>
-      </ion-item>
-    </ion-item-group>
-  </ion-list>
+  <ion-item-group>
+    <ion-list-divider>
+      Lists
+    </ion-list-divider>
+    <ion-item *ngFor="let list of lists">
+      <h3>
+        {{list.name}}
+        <small grey padding-horizontal>id {{list.key}}</small>
+      </h3>
+      <p>
+        Ranked games: {{rankedCount(list)}}.
+        Unranked games: {{unrankedCount(list)}}.
+      </p>
+      <button item-right (click)="edit(list)">edit</button>
+      <button item-right (click)="destroy(list)" danger>delete</button>
+    </ion-item>
+    <ion-item *ngIf="!thereAreLists()">
+      <p>
+        No lists yet.
+      </p>
+    </ion-item>
+  </ion-item-group>
+  <ion-item-group>
+    <ion-list-divider>
+      Make new list
+    </ion-list-divider>
+    <ion-item padding>
+      <ion-label stacked>List name</ion-label>
+      <ion-input type="text" [(ngModel)]="newName"></ion-input>
+      <button item-right (click)="create()">Create</button>
+    </ion-item>
+  </ion-item-group>
 </ion-content>

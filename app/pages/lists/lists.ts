@@ -1,9 +1,9 @@
 import { Component, Input } from '@angular/core';
-import { NavController, NavParams } from 'ionic-angular';
+import { NavController, NavParams, Loading } from 'ionic-angular';
 import { Game } from '../../game.class';
 import { List, WrappedList } from '../../list.class';
 import { ListPage } from '../list/list'
-import * as PouchDB from 'pouchdb';
+import { Listdb } from '../../providers/listdb/listdb';
 import * as _ from 'lodash';
 /*
   Generated class for the ListsPage page.
@@ -13,53 +13,52 @@ import * as _ from 'lodash';
 */
 @Component({
   templateUrl: 'build/pages/lists/lists.html',
+  providers: [Listdb]
 })
 /* TODO: figure out how to pass pool, newName to list */
 export class ListsPage {
   lists: Array<List> = [];
   pool: Array<Game> = [];
   newName: string = 'New list';
-  list_db: PouchDB;
 
-  constructor(private nav: NavController, private params: NavParams) {
+  constructor(
+      private nav: NavController,
+      private params: NavParams,
+      private listdb: Listdb
+    )
+  {
     this.lists = [];
     this.pool = params.get('pool');
-    this.list_db = new PouchDB('rankGames_lists');
+    this.getLists();
+  }
+
+  getLists(){
+    this.listdb.getLists().then(lists => {
+      this.lists = this.listdb.lists;
+    });
   }
 
   create(){
     let list = new List(this.nextKey());
-    console.log(list);
     list.name = this.newName;
     if(this.pool){
       list.set = this.pool;
     }
     this.lists.push(list);
-    let listDoc = new WrappedList(list);
-    this.list_db.put(listDoc, (error, response) => {
-      if(error){return console.log(error)}
-      console.log(response);
-      console.log('Insertion complete.');
-    });
+    this.listdb.create(list);
   }
 
   edit(list){
-    this.nav.push(ListPage, list);
+    this.nav.push(ListPage, {list: list});
   }
 
-  delete(list){
+  destroy(list){
     console.log("deleting list with id " + list.key);
     _.remove(this.lists, li => {
       return li.key == list.key;
     })
     let key: string = 'li_' + list.key;
-    this.list_db.get(key, (error, doc) => {
-      if(error){return console.log(error)}
-      return this.list_db.remove(doc, (error, resp) => {
-        if(error){return console.log(error)}
-        console.log('Deletion complete.')
-      })
-    });
+    this.listdb.destroy(list);
   }
 
   thereAreLists(){
@@ -77,4 +76,16 @@ export class ListsPage {
     return '1';
   }
 
+  rankedCount(list){
+    if(list.rankedSet.length < 1){
+      return 0;
+    }
+    return list.rankedSet.length;
+  }
+  unrankedCount(list){
+    if(list.set.length < 1){
+      return 0;
+    }
+    return list.set.length;
+  }
 }

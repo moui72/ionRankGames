@@ -1,24 +1,23 @@
-import { Component, Input } from '@angular/core';
-import { NavController } from 'ionic-angular';
+import { Component } from '@angular/core';
+import { NavController, NavParams } from 'ionic-angular';
 import { Game } from '../../game.class';
 import { List } from '../../list.class';
+import { GameCompare } from '../../components/game-compare/game-compare';
 
 /*
-  Generated class for the ListsPage page.
+  TODO: implement sorting (drag and drop needs event listener)
+        cf. http://ionicframework.com/docs/v2/api/components/item/ItemReorder/
+ */
 
-  See http://ionicframework.com/docs/v2/components/#navigation for more info on
-  Ionic pages and navigation.
-*/
 @Component({
   templateUrl: 'build/pages/list/list.html',
+  directives: [GameCompare]
 })
-/* TODO: figure out how to accept input */
 export class ListPage {
-  @Input() list: List;
-  rankedSet: Array<Game>;
+  list: List;
 
-  constructor(private nav: NavController) {
-
+  constructor(private nav: NavController, private params: NavParams) {
+    this.list = params.get('list')
   }
 
 }

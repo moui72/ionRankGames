@@ -10,19 +10,6 @@ export class List{
     this.key = key;
   }
 
-  rankedCount(){
-    if(this.rankedSet.length < 1){
-      return 0;
-    }
-    return this.rankedSet.length;
-  }
-  unrankedCount(){
-    if(this.set.length < 1){
-      return 0;
-    }
-    return this.set.length;
-  }
-
 }
 
 export class WrappedList{

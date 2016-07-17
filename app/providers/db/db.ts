@@ -34,14 +34,12 @@ export class Db {
           include_docs: true
       }).then(response => {
         // should map each row's game into array for game
+        obs.next('LOADING ' + response.total_rows + ' GAMES');
         let arr = _.map(response.rows, row => {
           return row['doc'].game;
         });
-        obs.next('LOADING ' + response.total_rows + ' GAMES')
-        _.defer(gamesArr => {
-          this.games = gamesArr;
-          obs.complete();
-        }, arr);
+        this.games = arr;
+        obs.complete();
       }).catch(error => {
         obs.error(error);
       })

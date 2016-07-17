@@ -7,12 +7,32 @@
 <ion-header>
 
   <ion-navbar>
-    <ion-title>list</ion-title>
+    <ion-title>{{list.name}}</ion-title>
   </ion-navbar>
 
 </ion-header>
 
 
 <ion-content padding>
+  <h2>Editing {{list.name}}</h2>
+  <p>
+    Ranked games: {{list.rankedSet.length || 0}}
+    Unranked games: {{list.set.length || 0}}
+  </p>
+  <ion-grid>
+    <ion-row>
+      <ion-col width-50>
+        <game-compare [game]="list.set[0]"></game-compare>
+      </ion-col>
+      <ion-col width-50>
+        <game-compare [game]="list.set[1]"></game-compare>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-list reorder>
+    <ion-item *ngFor="let game of list.set" ngClass="">
+      <h2>{{game.name}}</h2>
+    </ion-item>
+  </ion-list>
 
 </ion-content>

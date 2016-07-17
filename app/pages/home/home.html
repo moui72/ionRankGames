@@ -58,17 +58,20 @@
     </ion-card-content>
   </ion-card>
   <ion-list *ngIf="thereAreGames()">
-    <game-card *ngFor="let game of viewGames" [game]="game" (onRestore)="restore($event)" (onTrash)="trash($event)" (onDetail)="detail($event)"
+    <game-card *ngFor="let game of viewGames" [game]="game"
+      (onRestore)="restore($event)"
+      (onTrash)="trash($event)"
+      (onDetail)="detail($event)"
       (onCheck)="isGameOut($event)">
     </game-card>
+    <ion-card *ngIf="!thereAreGames() && initialized">
+      <ion-card-header>No games yet</ion-card-header>
+      <ion-card-content>
+        You haven't imported any games.
+        <button small (click)="fetching()">Fetch</button> some?
+      </ion-card-content>
+    </ion-card>
   </ion-list>
-  <ion-card *ngIf="!thereAreGames()">
-    <ion-card-header>No games yet</ion-card-header>
-    <ion-card-content>
-      You haven't imported any games.
-      <button small (click)="fetching()">Fetch</button> some?
-    </ion-card-content>
-  </ion-card>
 </ion-content>
 
 <ion-footer>
