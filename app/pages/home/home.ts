@@ -85,21 +85,23 @@ export class HomePage {
   }
   /**
    * Filters games to just those which are not trashed/filtered
-   * @return {void}   no return value
+   * @return {array}   array of games in view
    */
   viewIn(){
     this.viewGames = _.filter(this.games, game => {
       return !this.isTrue(game.filtered) && !this.isTrue(game.trash);
     });
+    return this.viewGames;
   }
   /**
    * Filters games to just those which are trashed/filtered
-   * @return {void}   no return value
+   * @return {array}   array of games in view
    */
   viewOut(){
     this.viewGames = _.filter(this.games, game => {
       return this.isTrue(game.filtered) || this.isTrue(game.trash);
     })
+    return this.viewGames;
   }
 
   /**
@@ -432,26 +434,27 @@ export class HomePage {
   }
 
   trash(game: Game){
+    game.trash = true;
     this.updateGame(game, 'trash', true).subscribe(
       msg => {
-        console.log("UPDATE MESSAGE -> " + msg);
+        console.log("DB UPDATE MESSAGE -> " + msg);
       },
       error => {
         console.log(error);
       },
       () => {
-        // console.log("FILTER UPDATED");
-        // this.refresh('REFRESHING -> trashed ' + game.name);
-        game.trash = true;
-        return this.view({value: this.viewing});
+        console.log('TRASH -> database update complete');
       }
     );
+    return this.view({value: this.viewing});
   }
 
   restore(game: Game) {
+    game.trash = false;
+    game.filtered = false;
     this.updateGame(game, 'trash', false).subscribe(
       msg => {
-        console.log("UPDATE MESSAGE -> " + msg);
+        console.log("DB UPDATE MESSAGE -> " + msg);
       },
       error => {
         console.log(error);
@@ -459,24 +462,23 @@ export class HomePage {
       () => {
         this.updateGame(game, 'filtered', false).subscribe(
           msg => {
-            console.log("UPDATE MESSAGE -> " + msg);
+            console.log("DB UPDATE MESSAGE -> " + msg);
           },
           error => {
             console.log(error);
           },
           () => {
-            game.trash = false;
-            game.filtered = false;
-            return this.view({value: this.viewing});
+            console.log('RESTORE -> database update complete');
           }
         );
       }
     );
+    return this.view({value: this.viewing});
   }
 
   ranking(){
     console.log('pushing lists page')
-    this.navController.push(ListsPage);
+    this.navController.push(ListsPage, {pool: this.viewIn()});
   }
 
   /**
