@@ -1,17 +1,16 @@
 <ion-header >
   <ion-navbar primary>
-    <ion-title>lists</ion-title>
+    <ion-title>RankGames &raquo; Manage lists</ion-title>
   </ion-navbar>
 </ion-header>
 <ion-content padding>
-  <h2>Manage lists</h2>
-  <p>
-    Current pool: {{pool.length || 0}}
-  </p>
-  <ion-item-group>
-    <ion-list-divider>
-      Lists
-    </ion-list-divider>
+  <ion-card>
+    <ion-card-header>Manage your lists</ion-card-header>
+    <ion-card-content>
+      Current pool: {{pool.length || 0}}
+    </ion-card-content>
+  </ion-card>
+  <ion-list>
     <ion-item *ngFor="let list of lists">
       <h3>
         {{list.name}}
@@ -21,23 +20,46 @@
         Ranked games: {{rankedCount(list)}}.
         Unranked games: {{unrankedCount(list)}}.
       </p>
-      <button item-right (click)="edit(list)">edit</button>
-      <button item-right (click)="destroy(list)" danger>delete</button>
+      <button small outline item-right *ngIf="!showCtrl(list.key)" (click)="openCtrl(list.key)">
+        <label stacked>More</label>
+        <ion-icon name="more"></ion-icon>
+      </button>
+      <ion-item-group class="listCtrl" *ngIf="showCtrl(list.key)" padding margin-top>
+        <button ion-item (click)="destroying(list)" danger start>
+          <ion-icon item-left danger name="warning"></ion-icon>
+          <label stacked>Delete</label>
+        </button>
+        <button ion-item (click)="edit(list)">
+          <ion-icon item-left primary name="open"></ion-icon>
+          <label stacked>Open</label>
+        </button>
+        <button ion-item (click)="renaming(list)">
+          <ion-icon item-left primary name="create"></ion-icon>
+          <label stacked>Rename</label>
+        </button>
+        <button ion-item (click)="closeCtrl(list.key)">
+          <ion-icon item-left light name="close"></ion-icon>
+          <label stacked>Cancel</label>
+        </button>
+      </ion-item-group >
     </ion-item>
     <ion-item *ngIf="!thereAreLists()">
       <p>
         No lists yet.
       </p>
     </ion-item>
-  </ion-item-group>
-  <ion-item-group>
-    <ion-list-divider>
+  </ion-list>
+  <div class="newlist">
+    <h2>
       Make new list
-    </ion-list-divider>
-    <ion-item padding>
-      <ion-label stacked>List name</ion-label>
+    </h2>
+    <div>
+      <ion-label stacked primary>List name</ion-label>
       <ion-input type="text" [(ngModel)]="newName"></ion-input>
+    </div>
+    <div text-right>
       <button item-right (click)="create()">Create</button>
-    </ion-item>
-  </ion-item-group>
+    </div>
+  </div>
+
 </ion-content>

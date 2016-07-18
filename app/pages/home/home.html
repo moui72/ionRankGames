@@ -1,6 +1,6 @@
 <ion-header>
   <ion-navbar primary>
-    <ion-title>Manage games</ion-title>
+    <ion-title>RankGames &raquo; Manage games</ion-title>
     <ion-buttons start>
       <button menuToggle><ion-icon name="menu"></ion-icon></button>
     </ion-buttons>
@@ -9,6 +9,7 @@
     </ion-buttons>
   </ion-navbar>
 </ion-header>
+
 <ion-menu [content]="content" id="manageMenu" type="reveal">
   <ion-toolbar primary>
     <ion-title>Menu</ion-title>
@@ -19,23 +20,24 @@
       Purge
     </button>
     <button ion-item (click)="fetching()" class="item-borderless">
-      <ion-icon name="sync" primary item-left ></ion-icon>
+      <ion-icon name="sync" secondary item-left ></ion-icon>
       Fetch
     </button>
     <button ion-item  (click)="filtering()" class="item-borderless">
-      <ion-icon name="funnel" primary item-left ></ion-icon>
+      <ion-icon name="funnel" secondary item-left ></ion-icon>
       Filter
     </button>
     <button (click)="ranking()" ion-item class="item-borderless">
-      <ion-icon name="list" primary item-left></ion-icon>
+      <ion-icon name="list" secondary item-left></ion-icon>
       Manage/create lists
     </button>
     <button menuClose ion-item detail-none>
-      <ion-icon name="close" primary item-left></ion-icon>
+      <ion-icon name="close" secondary item-left></ion-icon>
       Close
     </button>
   </ion-list>
 </ion-menu>
+
 <ion-content padding class="home" #content>
   <ion-card>
     <ion-card-header>
@@ -81,7 +83,7 @@
         <strong padding-horizontal>
           Games
         </strong>
-        <ion-badge favorite>
+        <ion-badge light>
             {{games ? games.length - out() : 0}}
         </ion-badge>
       </ion-segment-button>

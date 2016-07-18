@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { NavController, NavParams, Loading } from 'ionic-angular';
+import { NavController, NavParams, Loading, Alert } from 'ionic-angular';
 import { Game } from '../../game.class';
 import { List, WrappedList } from '../../list.class';
 import { ListPage } from '../list/list'
@@ -12,14 +12,14 @@ import * as _ from 'lodash';
   Ionic pages and navigation.
 */
 @Component({
-  templateUrl: 'build/pages/lists/lists.html',
-  providers: [Listdb]
+  templateUrl: 'build/pages/lists/lists.html'
 })
 /* TODO: figure out how to pass pool, newName to list */
 export class ListsPage {
   lists: Array<List> = [];
   pool: Array<Game> = [];
   newName: string = 'New list';
+  showingCtrl: Array<number> = [];
 
   constructor(
       private nav: NavController,
@@ -50,6 +50,57 @@ export class ListsPage {
 
   edit(list){
     this.nav.push(ListPage, {list: list});
+  }
+
+  destroying(list){
+    let confirm = Alert.create({
+      title: 'Delete ' + list.name,
+      message: 'Delete all list data? This cannot be undone.',
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: data => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Destroy',
+          handler: data => {
+            this.destroy(list);
+          }
+        }
+      ]
+    })
+    this.nav.present(confirm);
+  }
+
+  renaming(list){
+    let prompt = Alert.create({
+      title: 'Rename ' + list.name,
+      message: 'Change the name of this list',
+      inputs: [{
+        name: 'toName',
+        placeholder: 'New list name'
+      }],
+      buttons: [
+        {
+          text: 'Cancel',
+          icon: 'close',
+          handler: data => {
+            console.log('Cancel clicked');
+          }
+        },
+        {
+          text: 'Rename',
+          icon: 'check',
+          handler: data => {
+            list.name = data.toName;
+            this.listdb.update(list);
+          }
+        }
+      ]
+    })
+    this.nav.present(prompt);
   }
 
   destroy(list){
@@ -88,4 +139,18 @@ export class ListsPage {
     }
     return list.set.length;
   }
+
+  showCtrl(id){
+    return !(_.indexOf(this.showingCtrl, id) < 0);
+  }
+  openCtrl(id){
+    this.showingCtrl.push(id);
+  }
+  closeCtrl(xId){
+    _.remove(this.showingCtrl, id => {
+      return xId == id;
+    });
+  }
+
+
 }

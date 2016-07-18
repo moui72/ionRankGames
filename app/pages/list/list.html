@@ -5,19 +5,16 @@
   Ionic pages and navigation.
 -->
 <ion-header>
-
   <ion-navbar>
-    <ion-title>{{list.name}}</ion-title>
+    <ion-title>RankGames &raqup; {{list.name}}</ion-title>
   </ion-navbar>
-
 </ion-header>
-
 
 <ion-content padding>
   <h2>Editing {{list.name}}</h2>
   <p>
     Ranked games: {{list.rankedSet.length || 0}}
-    Unranked games: {{list.set.length || 0}}
+    Unranked games: {{unrankedGames().length || 0}}
   </p>
   <ion-grid>
     <ion-row>
@@ -29,10 +26,18 @@
       </ion-col>
     </ion-row>
   </ion-grid>
-  <ion-list reorder>
-    <ion-item *ngFor="let game of list.set" ngClass="">
+  <ion-list-header *ngIf="list.rankedSet.length > 0">
+    Ranked games
+  </ion-list-header>
+  <ion-item-group reorder (ionItemReorder)="dragged($event)">
+    <ion-item *ngFor="let game of list.rankedSet">
       <h2>{{game.name}}</h2>
     </ion-item>
-  </ion-list>
-
+  </ion-item-group>
+  <ion-list-header *ngIf="unrankedGames().length > 0">Unranked games</ion-list-header>
+  <ion-item-group>
+    <ion-item *ngFor="let game of unrankedGames()">
+      <unranked-game [game]="game" (onAppend)="append($event)"></unranked-game>
+    </ion-item>
+  </ion-item-group>
 </ion-content>
