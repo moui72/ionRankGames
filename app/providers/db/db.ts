@@ -92,8 +92,7 @@ export class Db {
       obs.next('PURGING DB');
       this.games_db.destroy().then(
       result => {
-        obs.next("PURGED");
-        this.load();
+        obs.next(result);
         obs.complete();
       })
     });

@@ -12,17 +12,20 @@
   </ion-card>
   <ion-list>
     <ion-item *ngFor="let list of lists">
-      <h3>
+      <div (click)="openCtrl(list.key)">
         {{list.name}}
         <small grey padding-horizontal>id {{list.key}}</small>
-      </h3>
-      <p>
-        Ranked games: {{rankedCount(list)}}.
-        Unranked games: {{unrankedCount(list)}}.
-      </p>
-      <button small outline item-right *ngIf="!showCtrl(list.key)" (click)="openCtrl(list.key)">
-        <label stacked>More</label>
-        <ion-icon name="more"></ion-icon>
+        <p>
+          Ranked games: {{rankedCount(list)}}.
+          Unranked games: {{unrankedCount(list)}}.
+        </p>
+      </div>
+      <button small clear item-right (click)="edit(list)" *ngIf="!showCtrl(list.key)">
+        <ion-icon item-left light name="open"></ion-icon>
+      </button>
+      <button small clear item-right
+        (click)="openCtrl(list.key)" *ngIf="!showCtrl(list.key)">
+        <ion-icon item-left light name="more"></ion-icon>
       </button>
       <ion-item-group class="listCtrl" *ngIf="showCtrl(list.key)" padding margin-top>
         <button ion-item (click)="destroying(list)" danger start>
@@ -35,7 +38,7 @@
         </button>
         <button ion-item (click)="renaming(list)">
           <ion-icon item-left primary name="create"></ion-icon>
-          <label stacked>Rename</label>
+          <label stacked>Rename</labonel>
         </button>
         <button ion-item (click)="closeCtrl(list.key)">
           <ion-icon item-left light name="close"></ion-icon>

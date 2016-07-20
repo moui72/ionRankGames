@@ -247,7 +247,7 @@ export class HomePage {
       console.log("----- FILTERING BY OWNERSHIP -----");
       arr = _.filter(arr, game => {
         // returns all games where own == true or 'true'
-        return this.isTrue(game.own);
+        return this.isTrue(game.owned);
       });
       console.log("OWNED GAMES: " + arr.length);
     } else {
@@ -351,7 +351,6 @@ export class HomePage {
    * @return {void}            None
    */
   fetch(username: string){
-    let prog = 0;
     let loading = Loading.create({
       content: "Please wait"
     });
@@ -359,14 +358,15 @@ export class HomePage {
     this.bgg.fetch(username).then(data => {
       this.procImport(_.values(data)).subscribe(
         update => {
-          console.log(update['msg']);
-          prog = update['percentDone'];
+          console.log(update);
         },
-        error => console.log(error),
+        error => {
+          console.log('import processing error:')
+          console.log(error)
+        },
         () => {
+          console.log('import complete');
           this.refresh();
-          this.games = this.db.games;
-          this.added = 0;
           this.viewIn();
           loading.dismiss();
         }
@@ -384,32 +384,51 @@ export class HomePage {
       let loaded = 0;
       let prog = 0;
 
-      // iterate through the set of retrieved games
-      for(let rawGame of set){
-        let game = new Game();
-        game.trash = false;
-        game.filtered = false;
-        _.forIn(game, (val, key) => {
-          if (typeof rawGame[key] != undefined) {
-            game[key] = rawGame[key];
-          }
-        });
-        loaded++;
-        prog = _.floor(loaded/toload);
-        if(this.add(game)){
-          obs.next({
-            msg: "IMPORTED GAME -> " + game.name + '(' +
-             prog + '%)',
-            percentDone: prog});
-          this.added++;
-        } else {
-          obs.next({
-            msg: "DUPLICATE GAME -> " + game.name + '(' +
-             prog + '%)',
-            percentDone: prog});
+      let work = new Promise((resolve, reject) => {
+        // iterate through the set of retrieved games
+        for(let rawGame of set){
+          let game = new Game();
+          game.trash = false;
+          game.filtered = false;
+          _.forIn(game, (val, key) => {
+            if (typeof rawGame[key] != undefined) {
+              game[key] = rawGame[key];
+            }
+          });
+          this.add(game).subscribe(
+            msg => {},
+            error => {
+              if(error.status == 409){
+                loaded++;
+                prog = _.floor(loaded/toload * 100);
+                obs.next({
+                msg: "DUPLICATE GAME -> " + game.name + '(' +
+                    prog + '%)',
+                  percentDone: prog});
+                if(loaded == toload){
+                  resolve('done');
+                }
+              } else {
+                obs.error(error);
+              }
+            },
+            () => {
+              loaded++;
+              prog = _.floor(loaded/toload * 100);
+              obs.next({
+                msg: "IMPORTED GAME -> " + game.name + '(' +
+                 prog + '%)',
+                percentDone: prog});
+              this.added++;
+              if(loaded == toload){
+                resolve('done');
+              }
+            }
+          )
         }
-      }
-      obs.complete();
+      }).then(result => {
+        obs.complete();
+      })
     })
   }
 
@@ -419,21 +438,21 @@ export class HomePage {
    * @return {boolean}      true on success, false on error
    */
   add(game: Game){
-    this.db.insert(game).subscribe(
-      result => {
-        console.log('adding...');
-        console.log(result);
-      },
-      error => {
-        console.log("DB INSERTION ERROR")
-        console.log(error);
-        return false;
-      },
-      () => {
-        console.log("INSERTION COMPLETE");
-        return true;
-      }
-    );
+    return new Observable(obs => {
+      this.db.insert(game).subscribe(
+        result => {
+          obs.next(result);
+        },
+        error => {
+          obs.error(error)
+          console.log(error);
+        },
+        () => {
+          obs.next("INSERTION COMPLETE");
+          obs.complete();
+        }
+      );
+    })
   }
 
   /**
@@ -527,8 +546,16 @@ export class HomePage {
    * @return {} no return value
    */
   purge(){
-    this.db.purge();
-    this.refresh();
+    this.db.purge().subscribe(
+      msg => console.log(msg),
+      err => console.log(err),
+      () => {
+        console.log('purged');
+        this.games = [];
+        this.viewGames = [];
+        this.db.load();
+      }
+    );
   }
 
   /**

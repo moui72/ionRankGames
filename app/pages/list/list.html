@@ -6,7 +6,7 @@
 -->
 <ion-header>
   <ion-navbar>
-    <ion-title>RankGames &raqup; {{list.name}}</ion-title>
+    <ion-title>RankGames &raquo; {{list.name}}</ion-title>
   </ion-navbar>
 </ion-header>
 
@@ -14,15 +14,15 @@
   <h2>Editing {{list.name}}</h2>
   <p>
     Ranked games: {{list.rankedSet.length || 0}}
-    Unranked games: {{unrankedGames().length || 0}}
+    Unranked games: {{list.set.length - list.rankedSet.length || 0}}
   </p>
   <ion-grid>
     <ion-row>
       <ion-col width-50>
-        <game-compare [game]="list.set[0]"></game-compare>
+        <game-compare [game]="incumbent" [rank]="incumbentRank()" (onChoose)="choose($event)"></game-compare>
       </ion-col>
       <ion-col width-50>
-        <game-compare [game]="list.set[1]"></game-compare>
+        <game-compare [game]="challenger" [rank]="-1" (onChoose)="choose($event)"></game-compare>
       </ion-col>
     </ion-row>
   </ion-grid>
@@ -30,14 +30,17 @@
     Ranked games
   </ion-list-header>
   <ion-item-group reorder (ionItemReorder)="dragged($event)">
-    <ion-item *ngFor="let game of list.rankedSet">
-      <h2>{{game.name}}</h2>
+    <ion-item *ngFor="let game of list.rankedSet; let i = index">
+      <h2>{{i + 1}}. {{game.name}}</h2>
     </ion-item>
   </ion-item-group>
   <ion-list-header *ngIf="unrankedGames().length > 0">Unranked games</ion-list-header>
-  <ion-item-group>
-    <ion-item *ngFor="let game of unrankedGames()">
-      <unranked-game [game]="game" (onAppend)="append($event)"></unranked-game>
-    </ion-item>
-  </ion-item-group>
+  <ion-list>
+    <unranked-game *ngFor="let game of unrankedGames()"
+    [game]="game"
+    [last]="list.rankedSet.length + 1"
+    (onDrop)="drop($event)"
+    (onPrepend)="prepend($event)"
+    (onAppend)="append($event)"></unranked-game>
+  </ion-list>
 </ion-content>

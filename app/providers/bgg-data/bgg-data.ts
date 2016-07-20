@@ -28,7 +28,6 @@ export class BggData {
       this.http.get(this.rootAddr+this.command+username)
         .map(res => res.json())
         .subscribe(data => {
-          console.log(data);
           // we've got back the raw data, now generate the core schedule data
           // and save the data for later reference
           this.data = data;

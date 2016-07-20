@@ -12,7 +12,7 @@ export class Game{
   rank: number = 0;
   numPlays: number = 0;
   rating: number = 0;
-  own: boolean = false;
+  owned: boolean = false;
   trash: boolean = false;
   filtered: boolean = false;
 }
