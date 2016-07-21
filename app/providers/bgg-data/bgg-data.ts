@@ -19,7 +19,7 @@ export class BggData {
   }
 
   fetch(username) {
-    console.log('fetching games for ' + username);
+    // TOAST? ('fetching games for ' + username);
     // don't have the data yet
     return new Promise(resolve => {
       // We're using Angular Http provider to request the data,

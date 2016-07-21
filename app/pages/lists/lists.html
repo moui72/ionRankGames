@@ -21,7 +21,7 @@
         </p>
       </div>
       <button small clear item-right (click)="edit(list)" *ngIf="!showCtrl(list.key)">
-        <ion-icon item-left light name="open"></ion-icon>
+        <ion-icon light name="open"></ion-icon>
       </button>
       <button small clear item-right
         (click)="openCtrl(list.key)" *ngIf="!showCtrl(list.key)">
@@ -38,7 +38,7 @@
         </button>
         <button ion-item (click)="renaming(list)">
           <ion-icon item-left primary name="create"></ion-icon>
-          <label stacked>Rename</labonel>
+          <label stacked>Rename</label>
         </button>
         <button ion-item (click)="closeCtrl(list.key)">
           <ion-icon item-left light name="close"></ion-icon>

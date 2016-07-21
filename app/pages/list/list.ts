@@ -26,7 +26,6 @@ export class ListPage {
     private params: NavParams, private listdb: Listdb)
   {
     this.list = params.get('list');
-    console.log(this.list);
     this.remainder = this.list.rankedSet;
     this.nextComparison();
   }
@@ -34,12 +33,20 @@ export class ListPage {
   save(){
     this.listdb.update(this.list);
   }
+  sort(){
+    this.list.set = _.sortBy(this.list.set, game => {
+      return game.name;
+    });
+  }
+  resetRankings(){
+    this.list.rankedSet = [];
+    this.nextComparison();
+  }
 
   dragged(indices){
     this.list.rankedSet = reorderArray(this.list.rankedSet, indices);
     this.save();
   }
-
   append(game){
     this.list.rankedSet.push(game);
     this.save();
@@ -56,19 +63,32 @@ export class ListPage {
           {
             text: 'Cancel',
             handler: data => {
-              console.log('Cancel game drop');
+            // TOAST? ('Cancel game drop');
             }
           },
           {
             text: 'Drop',
             handler: data => {
               _.remove(this.list.set, game);
+              if(game == this.challenger){
+                this.challenger = this.getOne();
+              }
               this.save();
             }
           }
         ]
       })
       this.nav.present(confirm);
+  }
+  unrank(game){
+    // TOAST? ('unranking');
+    _.remove(this.list.rankedSet, game);
+    if(game == this.incumbent){
+      // handle case where incumbent becomes unranked (get new incumbent)
+      this.incumbent = this.getIncumbent();
+    }
+    this.sort();
+    this.save();
   }
 
   unrankedGames(){
@@ -79,56 +99,71 @@ export class ListPage {
     return _.shuffle(this.unrankedGames()).pop();
   }
 
-  getIncumbent(remainder: Array<Game>){
-    return remainder[_.floor(remainder.length / 2)];
+  getIncumbent(){
+    return this.remainder[_.floor(this.remainder.length / 2)];
   }
 
-  getRemainder(remainder: Array<Game>, index: number, goUp: boolean){
-    console.log('getting new comparison set, going ' + (goUp ? 'up' : 'down') + '.');
+  getRemainder(index: number, goUp: boolean){
+    /*
+      TOAST?
+      ('Only ' + this.remainder.length + ' games remain to compare.');
+      ('getting new comparison set, going ' + (goUp ? 'up' : 'down') + '.');
+     */
+
     if(goUp){
-      let size = remainder.length % 2 == 0 ? index : index + 1;
-      return _.dropRight(remainder, size);
+      let size = this.remainder.length % 2 == 0 ? index : index + 1;
+      // TOAST? ('dropping ' + size + ' from the right');
+      return _.dropRight(this.remainder, size);
     }
-    let size = remainder.length % 2 == 0 ? index + 1 : index;
-    return _.drop(remainder, size);
+    let size = index + 1;
+    // TOAST? ('dropping ' + size + ' from the left');
+    return _.drop(this.remainder, size);
   }
 
   nextComparison(){
-    console.log('setting up new comparison...')
+    // TOAST? ('setting up new comparison...');
     if(this.list.rankedSet.length < 1){
       this.append(this.getOne());
+      this.remainder = this.list.rankedSet;
     }
-    this.incumbent = this.getIncumbent(this.remainder);
-    if (this.challenger == undefined || _.indexOf(this.list.rankedSet, this.challenger) > -1){
+    this.incumbent = this.getIncumbent();
+    if (this.challenger == undefined ||
+      _.indexOf(this.list.rankedSet, this.challenger) > -1)
+    {
       this.challenger = this.getOne();
     }
     this.save();
-    console.log('Challenger: ' + this.challenger.name);
-    console.log('Incumbent: ' + this.incumbent.name);
   }
 
   choose(winner){
-    console.log('and the winner is... ' + (this.challenger == winner ? 'the challenger!' : 'the incumbent.'));
-    let incumbentIndex = _.indexOf(this.list.rankedSet, this.incumbent);
+    /*
+      TOAST?
+      ('and the winner is... ' +
+      (this.challenger == winner ? this.challenger.name +
+      ', the challenger!' : this.incumbent.name + ', the incumbent.'));
+    */
+    let pivot = _.indexOf(this.remainder, this.incumbent);
     this.remainder = this.getRemainder(
-      this.remainder,
-      incumbentIndex,
+      pivot,
       this.challenger == winner // challenger is winner? go up; else: go down
     );
 
     if (this.remainder.length < 1) {
       // no comparisons left to make, so insert the game
-      this.rank(this.challenger, incumbentIndex);
+      let incumbentIndex = _.indexOf(this.list.rankedSet, this.incumbent);
+      this.rank(
+        this.challenger,
+        this.challenger == winner ? incumbentIndex : incumbentIndex + 1
+      );
     }
     // advance to next comparison
     this.nextComparison();
   }
 
   rank(game, index){
-    console.log('inserting ' + game.name + ' at ' + index);
+    // TOAST? ('inserting ' + game.name + ' at ' + index);
     this.list.rankedSet.splice(index, 0, game);
     this.remainder = this.list.rankedSet;
-    console.log(this.remainder);
     return game;
   }
 

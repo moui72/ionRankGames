@@ -57,6 +57,9 @@
       <p *ngIf="viewing == 'out'">
         Restore games to put them back into the set of games that you will rank.
       </p>
+      <p *ngIf="updatingDB" margin-top danger>
+        Database update(s) in progress: {{dbUpdateProg}}% done. Please don't close your browser.
+      </p>
     </ion-card-content>
   </ion-card>
   <ion-list *ngIf="thereAreGames()">

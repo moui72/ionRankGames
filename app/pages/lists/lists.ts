@@ -60,7 +60,7 @@ export class ListsPage {
         {
           text: 'Cancel',
           handler: data => {
-            console.log('Cancel clicked');
+            // TOAST?: list destruction canceled
           }
         },
         {
@@ -87,7 +87,7 @@ export class ListsPage {
           text: 'Cancel',
           icon: 'close',
           handler: data => {
-            console.log('Cancel clicked');
+            // TOAST?: list renaming canceled
           }
         },
         {
@@ -104,7 +104,6 @@ export class ListsPage {
   }
 
   destroy(list){
-    console.log("deleting list with id " + list.key);
     _.remove(this.lists, li => {
       return li.key == list.key;
     })

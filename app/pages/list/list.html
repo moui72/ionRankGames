@@ -12,6 +12,7 @@
 
 <ion-content padding>
   <h2>Editing {{list.name}}</h2>
+  <button (click)="resetRankings()" danger><ion-icon name="undo"></ion-icon>reset rankings</button>
   <p>
     Ranked games: {{list.rankedSet.length || 0}}
     Unranked games: {{list.set.length - list.rankedSet.length || 0}}
@@ -19,10 +20,10 @@
   <ion-grid>
     <ion-row>
       <ion-col width-50>
-        <game-compare [game]="incumbent" [rank]="incumbentRank()" (onChoose)="choose($event)"></game-compare>
+        <game-compare [game]="incumbent" [rank]="incumbentRank()" (onChoose)="choose($event)" (onUnrank)="unrank($event)"></game-compare>
       </ion-col>
       <ion-col width-50>
-        <game-compare [game]="challenger" [rank]="-1" (onChoose)="choose($event)"></game-compare>
+        <game-compare [game]="challenger" [rank]="-1" (onChoose)="choose($event)" (onDrop)="drop($event)"></game-compare>
       </ion-col>
     </ion-row>
   </ion-grid>
@@ -32,6 +33,7 @@
   <ion-item-group reorder (ionItemReorder)="dragged($event)">
     <ion-item *ngFor="let game of list.rankedSet; let i = index">
       <h2>{{i + 1}}. {{game.name}}</h2>
+      <button small round danger item-left (click)="unrank(game)"><ion-icon name="close"></ion-icon></button>
     </ion-item>
   </ion-item-group>
   <ion-list-header *ngIf="unrankedGames().length > 0">Unranked games</ion-list-header>

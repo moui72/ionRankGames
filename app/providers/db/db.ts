@@ -80,9 +80,11 @@ export class Db {
       // get game then remove game
       this.games_db.get('g_' + game.gameId, (error, doc) => {
         if(error){
-          return console.log(error);
+          observer.error(error);
         }
-        this.games_db.remove(doc);
+        this.games_db.remove(doc)
+          .then(response => observer.complete()
+          .catch(error => observer.error(error)));
       })
     })
   }

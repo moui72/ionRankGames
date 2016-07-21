@@ -22,7 +22,7 @@ import { ListsPage } from '../../pages/lists/lists'
 @Component({
   directives: [GameCard],
   templateUrl: 'build/pages/home/home.html',
-  providers: [Db, BggData]
+  providers: [BggData]
 })
 
 export class HomePage {
@@ -32,7 +32,8 @@ export class HomePage {
   constructor(
     private navController: NavController,
     private db: Db,
-    private bgg: BggData
+    private bgg: BggData,
+    private menu: MenuController
   )
   {
     this.init();
@@ -51,17 +52,25 @@ export class HomePage {
     played: false
   }
 
+  logging = false;
   viewGames = [];
   games = [];
-  added = 0;
   showingTrash: boolean = false;
   viewing: string = 'in';
   initialized: boolean = false;
+  updatingDB: boolean = false;
+  dbUpdateProg: number = 0;
 
   init(){
     this.refresh('Initializing').then(() => {
       this.initialized = true;
     });
+  }
+
+  log(text){
+    if (this.logging) {
+      console.log(text);
+    }
   }
 
   /**
@@ -80,10 +89,10 @@ export class HomePage {
    */
   view(viewChangeEvent){
     if(viewChangeEvent.value == "in"){
-      console.log('VIEWING IN');
+      this.log('VIEWING IN');
       return this.viewIn();
     }
-    console.log('VIEWING OUT');
+    this.log('VIEWING OUT');
     return this.viewOut();
   }
   /**
@@ -147,7 +156,7 @@ export class HomePage {
         {
           text: 'Cancel',
           handler: data => {
-            console.log('Cancel clicked');
+            this.log('Cancel clicked');
           }
         },
         {
@@ -155,10 +164,11 @@ export class HomePage {
           handler: data => {
             if(data){
               // update username
+              this.menu.close();
               this.bggUsr = data.username;
               this.fetch(this.bggUsr);
             } else {
-              console.log('Fetching canceled.');
+              this.log('Fetching canceled.');
             }
           }
         }
@@ -175,10 +185,11 @@ export class HomePage {
     let modal = Modal.create(FilterGames, {bggOpts: this.bggOpts});
     modal.onDismiss(data => {
       if(data){
+        this.menu.close();
         this.bggOpts = data;
         this.filter(this.games, this.bggOpts);
       } else {
-        console.log('Filtering canceled.');
+        this.log('Filtering canceled.');
       }
     });
     this.navController.present(modal);
@@ -196,7 +207,7 @@ export class HomePage {
         {
           text: 'Cancel',
           handler: data => {
-            console.log('Cancel clicked');
+            this.log('Cancel clicked');
           }
         },
         {
@@ -218,113 +229,92 @@ export class HomePage {
    * @return {Boolean}          true if success, false if not
    */
   filter(arr: Array<Game>, opts: BggOpts){
-    let loading = Loading.create({
-      content: "Please wait"
-    });
-    this.navController.present(loading);
+
     // make sure there are actually games in arr
     if (arr.length < 1) {
-      console.log("CANNOT FILTER -> SET EMPTY")
+      this.log("CANNOT FILTER -> SET EMPTY")
       // no games, return false
       return false;
     }
-    // should we exclude expansions?
-    if (this.isTrue(opts.excludeExp)) {
-      // select only non-expansions, if requested
-      console.log("----- FILTERING BY EXPANSION STATUS -----");
-      arr = _.filter(arr, game => {
-        // returns all games where isExpansion != true or 'true'
-        return !this.isTrue(game.isExpansion);
-      });
-      console.log("NON-EXPANSIONS: " + arr.length);
-    } else {
-      // not filtering expansions
-      console.log("----- SKIPPING EXPANSION CHECK -----");
-    }
-    // should we include only games owned by user?
-    if (this.isTrue(opts.owned)) {
-      // select only owned games, if requested
-      console.log("----- FILTERING BY OWNERSHIP -----");
-      arr = _.filter(arr, game => {
-        // returns all games where own == true or 'true'
-        return this.isTrue(game.owned);
-      });
-      console.log("OWNED GAMES: " + arr.length);
-    } else {
-      console.log("----- SKIPPING OWNERSHIP CHECK -----");
-    }
-    // should we exclude games based on low or no logged plays?
-    if (this.isTrue(opts.played)) {
-      // select only games played more than [0 or minplays] times, if requested
-      let threshold = opts.minplays > 0 ? opts.minplays : 1;
-      console.log("----- FILTERING BY PLAYS -----");
-      arr = _.filter(arr, game => {
-        // only 1 play needed
-        return game.numPlays > threshold;
-      });
-      console.log("GAMES PLAYED MORE THAN " + threshold + " TIMES: " +
-       arr.length);
-    } else {
-      console.log("----- SKIPPING PLAYS CHECK -----");
-    }
-    // should we exclude low rated or unrated games?
-    var rateComp = this.bggOpts.rated == false ? -1 : opts.minrating >= 0 ? opts.minrating : 1;
-    if (this.isTrue(opts.rated)) {
-      console.log("----- FILTERING BY RATING -----");
-      // filter out unrated or low rated games, if requested
-      let threshold = opts.minrating > 0 ? opts.minrating : 0;
-      arr = _.filter(arr, game => {
-        // filter out games not rated above [minrating]
-        return game.rating > threshold;
-      });
-      console.log("GAMES RATED HIGHER THAN " + threshold + ": " + arr.length);
-    } else {
-      console.log("----- SKIPPING RATING CHECK -----");
-    }
-    // should we exclude poorly ranked games?
-    if (opts.maxrank > 0) {
-      console.log("----- FILTERING BY RANK -----");
-      // filter out unrated or low rated games, if requested
-      let threshold = opts.maxrank * 1;
-      arr = _.filter(arr, game => {
-        // filter out games not ranked better than threshold
-        return game.rank < threshold;
-      });
-      console.log("GAMES RANKED BETTER THAN " + threshold + ": " + arr.length);
-    } else {
-      console.log("----- SKIPPING RANK CHECK -----");
-    }
-    // should we exclude games with low average rating?
-    if (opts.minAverageRating > 0) {
-      console.log("----- FILTERING BY AVERAGE RATING -----");
-      // filter out games with low average rating, if requested
-      let threshold = opts.minAverageRating * 1;
-      arr = _.filter(arr, game => {
-        return game.averageRating > threshold;
-      });
-      console.log("GAMES RATED BETTER THAN " + threshold + " ON AVERAGE: " +
-       arr.length);
-    }else {
-      console.log("----- SKIPPING AVERAGE RATING CHECK -----");
-    }
+
+    this.log('filtering...')
+
+    arr = _.reject(arr, game => {
+      let reject: boolean = false;
+      // reject if excluding expansion AND this game is an expansion
+      reject = this.isTrue(opts.excludeExp) && this.isTrue(game.isExpansion);
+
+      // reject if previously rejected
+      // OR (excluding unowned AND this game is not owned)
+      reject = reject || (this.isTrue(opts.owned) && this.isTrue(game.owned));
+
+      // reject if previously rejected
+      // OR (excluding low or unplayed AND this game has too few plays)
+      reject = reject || this.isTrue(opts.played)
+        && game.numPlays < (opts.minplays > 0 ? opts.minplays : 1);
+
+      // reject if previously rejected
+      // OR (excluding low or unrated AND this game has low or no rating)
+      reject = reject || this.isTrue(opts.rated)
+        && game.rating < (opts.minrating > 0 ? opts.minrating : 0);
+
+      // reject if previously rejected
+      // OR (excluding poorly ranked games AND this game has low or no rating)
+      reject = reject || (opts.maxrank > 0 && game.rank > opts.maxrank);
+
+      // reject if previously rejected
+      // OR (excluding poor averageRating games AND this game has low or
+      // no averageRating)
+      reject = reject || (opts.minAverageRating > 0 &&
+        game.averageRating < opts.minAverageRating);
+
+      return reject;
+    });
+
     /*
       arr contains all games that passed through filter
       filtered gets set to array of all games not in arr
     */
+
     let filtered = _.differenceBy(this.games, arr, 'gameId');
-    let updated = _.after(arr.length + filtered.length, () => {
-      this.refresh();
-      loading.dismiss();
-    })
+    this.updatingDB = true;
+
+    let toUpdate = arr.length + filtered.length;
+    let updatedGames = 0;
+
+    let dbupdated = _.after(arr.length + filtered.length, () => {
+      this.log('filter complete in db');
+      this.updatingDB = false;
+      return true;
+    });
+    let memupdated = _.after(arr.length + filtered.length, () => {
+      this.log('filter complete in memory');
+      return true;
+    });
+
+    let progress = () => {
+      updatedGames++;
+      this.dbUpdateProg = _.floor(updatedGames / toUpdate * 100);
+      dbupdated();
+    }
+
     _.forEach(filtered, game => {
-      this.updateGame(game, 'filtered', true).subscribe(() => {
-        updated();
-      })
+      game.filtered = true;
+      memupdated();
+      this.updateGame(game, 'filtered', true).subscribe(
+        msg => this.log(msg),
+        err => this.log(err),
+        () => progress()
+      );
     });
     _.forEach(arr, game => {
-      this.updateGame(game, 'filtered', false).subscribe(() => {
-        updated();
-      })
+      game.filtered = false;
+      memupdated();
+      this.updateGame(game, 'filtered', false).subscribe(
+        msg => this.log(msg),
+        err => this.log(err),
+        () => progress()
+      );
     });
   }
 
@@ -358,14 +348,14 @@ export class HomePage {
     this.bgg.fetch(username).then(data => {
       this.procImport(_.values(data)).subscribe(
         update => {
-          console.log(update);
+          this.log(update);
         },
         error => {
-          console.log('import processing error:')
-          console.log(error)
+          this.log('import processing error:')
+          this.log(error)
         },
         () => {
-          console.log('import complete');
+          this.log('import complete');
           this.refresh();
           this.viewIn();
           loading.dismiss();
@@ -380,55 +370,58 @@ export class HomePage {
    */
   procImport(set: Array<any>){
     return new Observable(obs => {
-      let toload = set.length;
+      let toLoad = set.length;
       let loaded = 0;
-      let prog = 0;
+      this.updatingDB = true;
+      this.dbUpdateProg = 0;
 
-      let work = new Promise((resolve, reject) => {
-        // iterate through the set of retrieved games
-        for(let rawGame of set){
-          let game = new Game();
-          game.trash = false;
-          game.filtered = false;
-          _.forIn(game, (val, key) => {
-            if (typeof rawGame[key] != undefined) {
-              game[key] = rawGame[key];
-            }
-          });
-          this.add(game).subscribe(
-            msg => {},
-            error => {
-              if(error.status == 409){
-                loaded++;
-                prog = _.floor(loaded/toload * 100);
-                obs.next({
-                msg: "DUPLICATE GAME -> " + game.name + '(' +
-                    prog + '%)',
-                  percentDone: prog});
-                if(loaded == toload){
-                  resolve('done');
-                }
-              } else {
-                obs.error(error);
-              }
-            },
-            () => {
-              loaded++;
-              prog = _.floor(loaded/toload * 100);
-              obs.next({
-                msg: "IMPORTED GAME -> " + game.name + '(' +
-                 prog + '%)',
-                percentDone: prog});
-              this.added++;
-              if(loaded == toload){
-                resolve('done');
-              }
-            }
-          )
-        }
-      }).then(result => {
-        obs.complete();
+
+      let dbupdated = _.after(set.length, () => {
+        this.updatingDB = false;
+        this.dbUpdateProg = 0;
       })
+
+      // iterate through the set of retrieved games
+      for(let rawGame of set){
+        let game = new Game();
+        game.trash = false;
+        game.filtered = false;
+        _.forIn(game, (val, key) => {
+          if (typeof rawGame[key] != undefined) {
+            game[key] = rawGame[key];
+          }
+        });
+
+        // add game to memory
+        this.games.push(game);
+        if (this.games.length == set.length) {
+          // games are all in memory
+        }
+
+        // add game to db
+        this.dbUpdateProg = _.floor(loaded / toLoad * 100)
+        this.add(game).subscribe(
+          msg => {},
+          error => {
+            if(error.status == 409){
+              toLoad--;
+              obs.next('Dupe, ' + loaded + ' added');
+              if(loaded == toLoad){
+                obs.complete();
+              }
+            } else {
+              obs.error(error);
+            }
+          },
+          () => {
+            loaded++;
+            obs.next('Added to db, ' + loaded + ' added');
+            if(loaded == toLoad){
+              obs.complete();
+            }
+          }
+        )
+      }
     })
   }
 
@@ -445,7 +438,7 @@ export class HomePage {
         },
         error => {
           obs.error(error)
-          console.log(error);
+          this.log(error);
         },
         () => {
           obs.next("INSERTION COMPLETE");
@@ -464,13 +457,13 @@ export class HomePage {
     game.trash = true;
     this.updateGame(game, 'trash', true).subscribe(
       msg => {
-        console.log("DB UPDATE MESSAGE -> " + msg);
+        this.log("DB UPDATE MESSAGE -> " + msg);
       },
       error => {
-        console.log(error);
+        this.log(error);
       },
       () => {
-        console.log('TRASH -> database update complete');
+        this.log('TRASH -> database update complete');
       }
     );
     return this.view({value: this.viewing});
@@ -486,21 +479,21 @@ export class HomePage {
     game.filtered = false;
     this.updateGame(game, 'trash', false).subscribe(
       msg => {
-        console.log("DB UPDATE MESSAGE -> " + msg);
+        this.log("DB UPDATE MESSAGE -> " + msg);
       },
       error => {
-        console.log(error);
+        this.log(error);
       },
       () => {
         this.updateGame(game, 'filtered', false).subscribe(
           msg => {
-            console.log("DB UPDATE MESSAGE -> " + msg);
+            this.log("DB UPDATE MESSAGE -> " + msg);
           },
           error => {
-            console.log(error);
+            this.log(error);
           },
           () => {
-            console.log('RESTORE -> database update complete');
+            this.log('RESTORE -> database update complete');
           }
         );
       }
@@ -513,7 +506,7 @@ export class HomePage {
    * @return {void} no return value
    */
   ranking(){
-    console.log('pushing lists page')
+    this.log('pushing lists page')
     this.navController.push(ListsPage, {pool: this.viewIn()});
   }
 
@@ -523,12 +516,12 @@ export class HomePage {
    * @return {void}      no return value
    */
   refresh(msg: string = "REFRESHING"){
-    console.log(msg);
+    this.log(msg);
     let loading = Loading.create({content: 'Updating view'});
     this.navController.present(loading);
     return new Promise((resolve, reject) => {
       this.db.refresh().subscribe(
-        resp => console.log(resp),
+        resp => this.log(resp),
         error => reject(error),
         () => {
           this.games = this.db.games;
@@ -547,10 +540,10 @@ export class HomePage {
    */
   purge(){
     this.db.purge().subscribe(
-      msg => console.log(msg),
-      err => console.log(err),
+      msg => this.log(msg),
+      err => this.log(err),
       () => {
-        console.log('purged');
+        this.log('purged');
         this.games = [];
         this.viewGames = [];
         this.db.load();
@@ -564,7 +557,7 @@ export class HomePage {
    * @return {}            no return value
    */
   detail(game: Game){
-    console.log(game);
+    this.log(game);
   }
 
   /**
