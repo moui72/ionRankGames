@@ -1,0 +1,14 @@
+<ion-card>
+  <div (click)="choose(game)" class="choose">
+    <div class="imgWrapper">
+      <img [src]="game.image" (click)="choose(game)" />
+    </div>
+    <ion-card-content>
+        <ion-card-title>{{game.name}}</ion-card-title>
+        <h2 favorite>{{rank > 0 ? 'Ranked #' + rank: 'Unranked'}}</h2>
+    </ion-card-content>
+  </div>
+</ion-card>
+<button clear (click)="drop(game)" danger class="compareTrash">
+  <ion-icon  name="trash"></ion-icon> trash
+</button>

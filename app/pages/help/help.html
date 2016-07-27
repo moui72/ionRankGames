@@ -1,0 +1,72 @@
+<!--
+  Generated template for the HelpPage page.
+
+  See http://ionicframework.com/docs/v2/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar primary>
+    <ion-title>Help</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding>
+  <div class="wrap">
+    <h1><ion-icon name="home"></ion-icon> Games</h1>
+    <p>
+      The games page is where you set up the pool of games that you will build
+      your ranked lists from. It offers two views, accessible via the "games" and
+      "trashed games" tabs at the bottom of the screen. The "games" are those
+      that will be available when you make a list. The "trashed games" are those
+      that you have trashed individually, or removed via a filter.
+    </p>
+    <p>
+      You can indivually remove games from or restore games to the pool of games that will be available for ranking from these views.
+    </p>
+    <div padding>
+      <h2><ion-icon name="menu"></ion-icon> Menu commands</h2>
+      <p>
+        The games page also has a menu of commands available. The menu can be opened using the <ion-icon name="menu"></ion-icon> menu icon at the top left.
+      </p>
+      <div padding>
+        <h3>
+          <ion-icon danger name="warning"></ion-icon>
+          Purge
+        </h3>
+        <p>
+          The purge command will delete all games that you have imported, whether
+          they have been filtered, trashed or remain in the general pool. This
+          command is irreversible. You will be prompted to confirm before it actually
+          executes.
+        </p>
+        <h3>
+          <ion-icon name="sync"></ion-icon>
+          Fetch
+        </h3>
+        <p>
+          The fetch command will import all games in a given boardgamegeek user's
+          collection. Once they've been imported you will be able to manipulate which
+          ones are actually available during the ranking process.
+        </p>
+        <h3>
+          <ion-icon name="funnel"></ion-icon>
+          Filter
+        </h3>
+        <p>
+          The filter command will categorically remove games from the available pool.
+          You can then individually correct any exceptions using the "trash"
+          or "restore" button for a given game.
+        </p>
+      </div>
+    </div>
+
+    <hr />
+
+    <h1><ion-icon name="list"></ion-icon> Lists</h1>
+    The lists page is where you can create and manage your ranked lists of games.
+
+  </div>
+</ion-content>

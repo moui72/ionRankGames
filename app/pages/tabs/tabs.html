@@ -1,0 +1,18 @@
+<!--
+  Generated template for the TabsPage page.
+
+  See http://ionicframework.com/docs/v2/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<div class="loader" *ngIf="!data.ready">
+  <img src="/build/img/loading.gif" text-center />
+  <h1 text-center>
+    Loading...
+  </h1>
+</div>
+
+<ion-tabs #content>
+  <ion-tab [root]="tab1Root" tabTitle="Games" tabIcon="home"></ion-tab>
+  <ion-tab [root]="tab2Root" tabTitle="Lists" tabIcon="list"></ion-tab>
+  <ion-tab [root]="tab3Root" tabTitle="Help" tabIcon="information-circle"></ion-tab>
+</ion-tabs>

@@ -1,0 +1,40 @@
+<ion-item (click)="toggleControls()">
+  <button item-right clear>
+    <ion-icon name="more"></ion-icon>
+    <span *ngIf="!showControls">
+      more
+    </span>
+    <span *ngIf="showControls">
+      less
+    </span>
+  </button>
+  <ion-thumbnail item-left>
+    <img [src]="game.thumbnail">
+  </ion-thumbnail>
+    {{game.name}}
+    <small grey padding-horizontal>id {{game.gameId}}</small>
+  <p>
+    <span secondary>
+      {{game.rating > -1 ? 'Personal rating: ' + game.rating : 'No personal rating'}}.
+    </span>
+    <br />
+    <span light>
+      {{game.averageRating > -1 ? 'Average rating: ' + game.averageRating.toFixed(1) : 'No average rating'}}.
+    </span>
+  </p>
+
+  <div *ngIf="showControls" margin-top>
+    <button clear (click)="prepend(game)">
+      <ion-icon name="trending-up"></ion-icon>
+      Set to #1
+    </button>
+    <button clear (click)="append(game)">
+      <ion-icon name="trending-down"></ion-icon>
+      Set to #{{last}}
+    </button>
+    <button item-left clear (click)="drop(game)" danger>
+      <ion-icon name="trash"></ion-icon>
+      Trash
+    </button>
+  </div>
+</ion-item>

@@ -1,0 +1,26 @@
+.tabs {
+
+}
+
+.loader{
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1999;
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  background-color: color($colors, white);
+  opacity: 1;
+  transform: translateZ(0);
+
+  text-align: center;
+  padding-top: 20%;
+}
+.loader img {
+  display: block;
+  margin: auto;
+  text-align: center;
+}
