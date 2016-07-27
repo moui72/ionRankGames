@@ -1,3 +1,13 @@
 .list {
 
 }
+.item h2.rank{
+  font-size:1.25em;
+}
+.item h2.rank span{
+  color: color($colors, primary);
+  font-size:2em;
+}
+.item ion-thumbnail.float-left{
+ float: left;
+}

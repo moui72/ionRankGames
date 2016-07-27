@@ -26,12 +26,13 @@
 // are different per mode.
 
 $colors: (
-  primary:    darken(#A07959, 10%),
-  secondary:  darken(#5da059, 10%),
+  primary:    #347,
+  secondary:  adjust-hue(#347, 135deg),
   danger:     #F61,
-  light:      lighten(#A07959, 15%),
-  dark:       darken(#A07959, 40%),
-  favorite:   invert(#A07959),
+  light:      lighten(#347, 25%),
+  dark:       darken(#347, 40%),
+  favorite:   adjust-hue(#347, 90deg),
   white: #fff,
   grey: #999,
+  warning: invert(#347)
 )

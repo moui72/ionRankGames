@@ -4,45 +4,65 @@
   See http://ionicframework.com/docs/v2/components/#navigation for more info on
   Ionic pages and navigation.
 -->
-<ion-header>
+<ion-header primary>
   <ion-navbar>
     <ion-title>RankGames &raquo; {{list.name}}</ion-title>
   </ion-navbar>
 </ion-header>
 
 <ion-content padding>
-  <h2>Editing {{list.name}}</h2>
-  <button (click)="resetRankings()" danger><ion-icon name="undo"></ion-icon>reset rankings</button>
-  <p>
-    Ranked games: {{list.rankedSet.length || 0}}
-    Unranked games: {{list.set.length - list.rankedSet.length || 0}}
-  </p>
-  <ion-grid>
-    <ion-row>
-      <ion-col width-50>
-        <game-compare [game]="incumbent" [rank]="incumbentRank()" (onChoose)="choose($event)" (onUnrank)="unrank($event)"></game-compare>
-      </ion-col>
-      <ion-col width-50>
-        <game-compare [game]="challenger" [rank]="-1" (onChoose)="choose($event)" (onDrop)="drop($event)"></game-compare>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+  <div class="wrap">
+    <h2>Editing {{list.name}}</h2>
+    <button (click)="resetRankings()" danger>
+      <ion-icon name="undo"></ion-icon> reset rankings
+    </button>
+    <button (click)="addingGame()">
+      <ion-icon name="add"></ion-icon> Add game to pool
+    </button>
+    <button (click)="rename()">
+      <ion-icon name="create"></ion-icon> Rename
+    </button>
+    <p>
+      Ranked games: {{list.rankedSet.length || 0}}
+      Unranked games: {{list.set.length - list.rankedSet.length || 0}}
+    </p>
+
+    <h2 text-center favorite>Pick a game</h2>
+    <ion-grid class="showdown">
+      <ion-row>
+        <ion-col width-50>
+          <game-compare [game]="incumbent" [rank]="incumbentRank()" (onChoose)="choose($event)" (onDrop)="drop($event)"></game-compare>
+        </ion-col>
+        <ion-col width-50>
+          <game-compare [game]="challenger" [rank]="-1" (onChoose)="choose($event)" (onDrop)="drop($event)"></game-compare>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
   <ion-list-header *ngIf="list.rankedSet.length > 0">
     Ranked games
   </ion-list-header>
-  <ion-item-group reorder (ionItemReorder)="dragged($event)">
+  <ion-list reorder (ionItemReorder)="dragged($event)">
     <ion-item *ngFor="let game of list.rankedSet; let i = index">
-      <h2>{{i + 1}}. {{game.name}}</h2>
-      <button small round danger item-left (click)="unrank(game)"><ion-icon name="close"></ion-icon></button>
+      <ranked-game
+        [game]="game"
+        [rank]="i + 1"
+        (onDrop)="unrank($event)">
+      </ranked-game>
     </ion-item>
-  </ion-item-group>
-  <ion-list-header *ngIf="unrankedGames().length > 0">Unranked games</ion-list-header>
+  </ion-list>
+
+  <ion-list-header *ngIf="unrankedGames().length > 0">
+    Unranked games
+  </ion-list-header>
   <ion-list>
     <unranked-game *ngFor="let game of unrankedGames()"
-    [game]="game"
-    [last]="list.rankedSet.length + 1"
-    (onDrop)="drop($event)"
-    (onPrepend)="prepend($event)"
-    (onAppend)="append($event)"></unranked-game>
+      [game]="game"
+      [last]="list.rankedSet.length + 1"
+      (onDrop)="drop($event)"
+      (onPrepend)="prepend($event)"
+      (onAppend)="append($event)">
+    </unranked-game>
   </ion-list>
 </ion-content>

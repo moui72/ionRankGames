@@ -226,4 +226,4 @@ declare module 'pouchdb' {
 // emit is the function that the PouchFilter.map function should call in order to add a particular item to
 // a filter view.
 //
-declare function emit(key: any, value: any): void;
+declare function emit(key: any, value?: any): void;

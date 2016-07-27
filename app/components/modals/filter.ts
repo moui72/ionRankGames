@@ -8,14 +8,27 @@ import { ViewController, NavParams } from 'ionic-angular';
     <form>
       <h2>Filter your game set using BGG data</h2>
       <ion-list>
+      
         <ion-item *ngFor="let field of schema.bool">
           <ion-label inline title="{{field.description}}">{{field.prettyname}}</ion-label>
           <ion-toggle [(ngModel)]="bggOpts[field.name]"></ion-toggle>
         </ion-item>
-        <ion-item *ngFor="let field of schema.number">
+
+        <ion-item *ngFor="let field of schema.number" [hidden]="field.show !== true && bggOpts[field.show] == false">
           <ion-label stacked title="{{field.description}}">{{field.prettyname}}</ion-label>
-          <ion-input [disabled]="field.show !== true && bggOpts[field.show] == false" type="number" [(ngModel)]="bggOpts[field.name]"></ion-input>
+          <ion-input text-center
+            type="number" [(ngModel)]="bggOpts[field.name]"></ion-input>
         </ion-item>
+
+        <ion-item *ngFor="let field of schema.range">
+          <ion-label stacked title="{{field.description}}">{{field.prettyname}}: {{bggOpts[field.name]}}</ion-label>
+          <ion-range [min]="field.min" [max]="field.max" pin="true"
+            [(ngModel)]="bggOpts[field.name]" secondary>
+            <ion-icon range-left small [name]="field.iconLow"></ion-icon>
+            <ion-icon range-right [name]="field.iconHigh"></ion-icon>
+          </ion-range>
+        </ion-item>
+
         <ion-item>
           <button (click)=close()>Filter</button>
           <button (click)=cancel()>Cancel</button>
@@ -44,10 +57,10 @@ export class FilterGames {
       {
         name: 'username',
         prettyname: 'BGG Username',
-        description: 'BGG username for collection to import.',
+        description: 'The boardgamegeek username that owns the collection you are importing.',
       }
     ],
-    number: [
+    range: [
       {
         name: 'minrating',
         prettyname: 'Minimum rating',
@@ -56,8 +69,26 @@ export class FilterGames {
         default:7,
         min: 0,
         max: 10,
-        show: 'rated'
-      },
+        show: true,
+        iconLow: 'thumbs-down',
+        iconHigh: 'thumbs-up'
+      }
+    ],
+    number: [
+      {
+        name: 'minplays',
+        prettyname: 'Minimum plays',
+        description:
+         "Collection owner's lowest number of plays for imported games",
+        default:0,
+        min: 0,
+        max: 50,
+        show: 'played',
+        iconLow: 'rewind',
+        iconHigh: 'fastforward'
+      }
+    ],
+/*
       {
         name: 'minrank',
         prettyname: 'Maximum BGG rank',
@@ -68,16 +99,7 @@ export class FilterGames {
         max: 100000,
         show: true
       },
-      {
-        name: 'minplays',
-        prettyname: 'Minimum plays',
-        description:
-         "Collection owner's lowest number of plays for imported games",
-        default:0,
-        min: 0,
-        max: 1000,
-        show: 'played'
-      },
+
       {
         name: 'minAverageRating',
         prettyname: 'Minimum average rating',
@@ -88,7 +110,7 @@ export class FilterGames {
         max: 10,
         show: true
       }
-    ],
+ */
     bool: [
       {
         name : 'excludeExp',

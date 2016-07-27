@@ -4,15 +4,34 @@
   </ion-navbar>
 </ion-header>
 <ion-content padding>
-  <ion-card>
-    <ion-card-header>Manage your lists</ion-card-header>
-    <ion-card-content>
-      Current pool: {{pool.length || 0}}
-    </ion-card-content>
-  </ion-card>
+  <div class="wrap">
+    <h1 favorite>Manage your lists</h1>
+    <p>
+      Current pool: {{data.games.length || 0}}
+    </p>
+    <ion-card class="newlist" margin>
+      <ion-card-content>
+        <h3 primary>
+          New list
+        </h3>
+        <ion-item>
+          <ion-label stacked>List name</ion-label>
+          <ion-input type="text" [(ngModel)]="newName"
+            placeholder="Your list's name">
+          </ion-input>
+        </ion-item>
+        <div padding-left>
+          <button small outline (click)="create()">Create</button>
+        </div>
+      </ion-card-content>
+    </ion-card>
+  </div>
+  <ion-list-header>
+    Your lists
+  </ion-list-header>
   <ion-list>
     <ion-item *ngFor="let list of lists">
-      <div (click)="openCtrl(list.key)">
+      <div (click)="toggleCtrl(list.key)">
         {{list.name}}
         <small grey padding-horizontal>id {{list.key}}</small>
         <p>
@@ -24,7 +43,7 @@
         <ion-icon light name="open"></ion-icon>
       </button>
       <button small clear item-right
-        (click)="openCtrl(list.key)" *ngIf="!showCtrl(list.key)">
+        (click)="toggleCtrl(list.key)" *ngIf="!showCtrl(list.key)">
         <ion-icon item-left light name="more"></ion-icon>
       </button>
       <ion-item-group class="listCtrl" *ngIf="showCtrl(list.key)" padding margin-top>
@@ -40,7 +59,7 @@
           <ion-icon item-left primary name="create"></ion-icon>
           <label stacked>Rename</label>
         </button>
-        <button ion-item (click)="closeCtrl(list.key)">
+        <button ion-item (click)="toggleCtrl(list.key)">
           <ion-icon item-left light name="close"></ion-icon>
           <label stacked>Cancel</label>
         </button>
@@ -52,17 +71,6 @@
       </p>
     </ion-item>
   </ion-list>
-  <div class="newlist">
-    <h2>
-      Make new list
-    </h2>
-    <div>
-      <ion-label stacked primary>List name</ion-label>
-      <ion-input type="text" [(ngModel)]="newName"></ion-input>
-    </div>
-    <div text-right>
-      <button item-right (click)="create()">Create</button>
-    </div>
-  </div>
+
 
 </ion-content>

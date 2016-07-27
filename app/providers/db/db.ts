@@ -1,5 +1,4 @@
 import { Injectable } from '@angular/core';
-import { Storage, SqlStorage } from 'ionic-angular';
 import { Game, WrappedGame } from '../../game.class';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
@@ -25,18 +24,51 @@ export class Db {
 
   load() {
     this.games_db = new PouchDB('rankGames_games');
-    this.refresh();
+    this.createDesignDoc();
+    if(this.games.length < 1){
+      this.getAll();
+    }
   }
 
-  refresh() {
+  createDesignDoc(){
+    var ddoc = {
+    _id: '_design/my_index',
+    views: {
+      by_name: {
+        map: function (doc) { emit(doc.game.name); }.toString()
+      },
+      by_filtered: {
+        map: function (doc) { emit(doc.game.filtered); }.toString()
+        }
+      }
+    }
+
+    this.games_db.put(ddoc).then(function() {
+        this.games_db.query('my_index/by_name', {
+        limit: 0 // don't return any results
+      }).then(function (res) {
+        // index was built!
+      }).catch(function (err) {
+        // some error
+      });
+    }).catch(err => {
+      // error adding design doc
+    });
+  }
+
+  getAll() {
     return new Observable(obs => {
       this.games_db.allDocs({
           include_docs: true
       }).then(response => {
         // should map each row's game into array for game
         obs.next('LOADING ' + response.total_rows + ' GAMES');
-        let arr = _.map(response.rows, row => {
-          return row['doc'].game;
+        let arr = [];
+         _.forEach(response.rows, row => {
+          if(!row['key'].includes('g_')){
+            return;
+          }
+          return arr.push(row['doc'].game);
         });
         this.games = arr;
         obs.complete();
@@ -59,11 +91,7 @@ export class Db {
     let gameDoc: WrappedGame = {_id: 'g_' + game.gameId, game: game};
     return new Observable(obs => {
       this.games_db.put(gameDoc).then(result => {
-        this.refresh().subscribe(
-          msg => obs.next(msg),
-          error => obs.error(error),
-          () => obs.complete()
-        )
+        obs.next('Inserted ' + game,name+ '.');
       }).catch(error => {
         obs.error(error);
       })
@@ -80,11 +108,11 @@ export class Db {
       // get game then remove game
       this.games_db.get('g_' + game.gameId, (error, doc) => {
         if(error){
-          observer.error(error);
+          observer.next(error);
         }
         this.games_db.remove(doc)
           .then(response => observer.complete()
-          .catch(error => observer.error(error)));
+          .catch(error => observer.next(error)));
       })
     })
   }
@@ -98,6 +126,36 @@ export class Db {
         obs.complete();
       })
     });
+  }
+
+  getFiltered(value: boolean = true){
+    return this.games_db.query('by_filtered', {key: value});
+  }
+
+  filterSet(inSet, outSet){
+    return this.getFiltered().then(result => {
+      console.log(result);
+      let unfilter = _.map(_.filter(result.rows, doc => {
+        return _.some(inSet, doc['game'].gameId);
+      }), doc => {
+        doc['game'].filtered = false;
+        return doc;
+      })
+      this.getFiltered(false).then(result => {
+        let filter = _.map(_.filter(result.rows, doc => {
+          return _.some(outSet, doc['game'].gameId);
+        }), doc => {
+          doc['game'].filtered = true;
+          return doc;
+        });
+        return this.games_db.bulkDocs(unfilter.concat(filter));
+      }).catch(err => {
+        // error
+      });;
+    }).catch(err => {
+      // error
+    });
+
   }
 
   updateGame(game: Game, column: string, value: boolean){

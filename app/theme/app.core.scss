@@ -9,19 +9,73 @@
 
 @import "../pages/home/home";
 @import "../pages/lists/lists";
+@import "../pages/list/list";
+@import "../pages/tabs/tabs";
+@import url(https://fonts.googleapis.com/css?family=Noto+Sans|Passion+One);
+
+ion-content ion-list, ion-content ion-list-header, ion-content .wrap{
+  max-width: 978px;
+  margin: auto;
+}
 
 // app-wide styles
-button.item-borderless{
+html, body, p, ion-content {
+  font-family: 'Noto Sans', sans-serif;
+}
+h1,h2,h3,h4,h5,h6 {
+  font-family: 'Passion One', sans-serif;
+}
+
+h1{
+  color: darken(color($colors, secondary), 10%);
+}
+
+h2 {
+  color: color($colors, secondary);
+}
+h3, h4, h5, h6{
+  color: lighten(color($colors, secondary), 10%);
+}
+
+ion-icon{
+  color: color($colors, light)
+}
+
+img {
+  background: url('./../img/loading.gif') no-repeat;
+}
+
+.item-borderless{
   border: none;
 }
 
 game-compare img{
-  max-height: 20em;
-  height: auto;
-  width: auto;
+  max-width: 100%;
+  max-height: 50%;
+}
+game-compare .imgWrapper{
+  max-height: 300px;
   display: block;
-  margin: auto;
+  overflow: hidden;
 }
 game-compare{
   text-align: center;
+}
+.showdown {
+  max-width: 900px;
+  margin: auto;
+}
+.choose {
+  cursor: pointer;
+}
+game-compare ion-card:hover{
+  background-color: lighten(green, 70%);
+  box-shadow: 0px 0px 25px color($colors, secondary);
+}
+game-compare .button{
+  margin: auto;
+  display: block;
+}
+game-compare .button.compareTrash:hover{
+  background-color: lighten(color($colors, danger), 35%);
 }

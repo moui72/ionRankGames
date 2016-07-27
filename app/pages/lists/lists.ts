@@ -4,6 +4,7 @@ import { Game } from '../../game.class';
 import { List, WrappedList } from '../../list.class';
 import { ListPage } from '../list/list'
 import { Listdb } from '../../providers/listdb/listdb';
+import { Data } from '../../providers/data/data';
 import * as _ from 'lodash';
 /*
   Generated class for the ListsPage page.
@@ -14,21 +15,20 @@ import * as _ from 'lodash';
 @Component({
   templateUrl: 'build/pages/lists/lists.html'
 })
-/* TODO: figure out how to pass pool, newName to list */
+
 export class ListsPage {
-  lists: Array<List> = [];
-  pool: Array<Game> = [];
-  newName: string = 'New list';
-  showingCtrl: Array<number> = [];
+  lists: Array<List>          = [];
+  showingCtrl: Array<number>  = [];
+  newName: string             = '';
 
   constructor(
       private nav: NavController,
       private params: NavParams,
-      private listdb: Listdb
+      private listdb: Listdb,
+      private data: Data
     )
   {
     this.lists = [];
-    this.pool = params.get('pool');
     this.getLists();
   }
 
@@ -40,9 +40,9 @@ export class ListsPage {
 
   create(){
     let list = new List(this.nextKey());
-    list.name = this.newName;
-    if(this.pool){
-      list.set = this.pool;
+    list.name = this.newName || 'new list';
+    if(this.data.games){
+      list.set = this.data.games;
     }
     this.lists.push(list);
     this.listdb.create(list);
@@ -127,29 +127,23 @@ export class ListsPage {
   }
 
   rankedCount(list){
-    if(list.rankedSet.length < 1){
+    if(list.rankedSet == undefined){
       return 0;
     }
     return list.rankedSet.length;
   }
   unrankedCount(list){
-    if(list.set.length < 1){
+    if(list.set.length == undefined){
       return 0;
     }
     return list.set.length;
   }
 
   showCtrl(id){
-    return !(_.indexOf(this.showingCtrl, id) < 0);
+    return id == this.showingCtrl;
   }
-  openCtrl(id){
-    this.showingCtrl.push(id);
+  toggleCtrl(id){
+    this.showingCtrl = this.showingCtrl == id ? -1 : id;
   }
-  closeCtrl(xId){
-    _.remove(this.showingCtrl, id => {
-      return xId == id;
-    });
-  }
-
 
 }

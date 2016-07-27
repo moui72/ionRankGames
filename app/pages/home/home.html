@@ -1,17 +1,18 @@
+
 <ion-header>
   <ion-navbar primary>
     <ion-title>RankGames &raquo; Manage games</ion-title>
-    <ion-buttons start>
+    <ion-buttons left>
       <button menuToggle><ion-icon name="menu"></ion-icon></button>
     </ion-buttons>
-    <ion-buttons end>
-      <button><ion-icon name="help" title="help"></ion-icon></button>
+    <ion-buttons right>
+      <button (click)="lastList"><ion-icon name="open"></ion-icon></button>
     </ion-buttons>
   </ion-navbar>
 </ion-header>
 
 <ion-menu [content]="content" id="manageMenu" type="reveal">
-  <ion-toolbar primary>
+  <ion-toolbar>
     <ion-title>Menu</ion-title>
   </ion-toolbar>
   <ion-list>
@@ -27,10 +28,6 @@
       <ion-icon name="funnel" secondary item-left ></ion-icon>
       Filter
     </button>
-    <button (click)="ranking()" ion-item class="item-borderless">
-      <ion-icon name="list" secondary item-left></ion-icon>
-      Manage/create lists
-    </button>
     <button menuClose ion-item detail-none>
       <ion-icon name="close" secondary item-left></ion-icon>
       Close
@@ -39,31 +36,64 @@
 </ion-menu>
 
 <ion-content padding class="home" #content>
-  <ion-card>
-    <ion-card-header>
-      <h2>
-        <span *ngIf="viewing == 'in'">
-          Viewing your current game set
-        </span>
-        <span *ngIf="viewing == 'out'">
-          Viewing your trashed and filtered games
-        </span>
-      </h2>
-    </ion-card-header>
-    <ion-card-content class="lightfont">
-      <p *ngIf="viewing == 'in'" >
-        Trash games to remove from the set of games that you will rank.
-      </p>
-      <p *ngIf="viewing == 'out'">
-        Restore games to put them back into the set of games that you will rank.
-      </p>
-      <p *ngIf="updatingDB" margin-top danger>
-        Database update(s) in progress: {{dbUpdateProg}}% done. Please don't close your browser.
-      </p>
-    </ion-card-content>
-  </ion-card>
+  <div class='wrap'>
+    <h2 favorite>
+      <span *ngIf="viewing == 'in'">
+        Viewing your current game set
+      </span>
+      <span *ngIf="viewing == 'out'">
+        Viewing your trashed and filtered games
+      </span>
+    </h2>
+
+    <p>
+      You are in the "manage games" section where you build the pool of games
+      from which you will create your ranked list. There is an
+      <ion-icon name="menu" primary></ion-icon> icon at the top left of your
+      screen that will <a href="#" menuToggle>toggle the menu</a> and show you
+      the available commands.
+    </p>
+    <p>
+      You can import your boardgamegeek collection using the "fetch" command.
+      You can also filter out games to remove them categorically, or you can
+      individually trash or restore games for more fine-grained control.
+    </p>
+    <p *ngIf="viewing == 'in'" >
+      While viewing your current game pool, trash games to remove from the set of
+      games that you can rank.
+    </p>
+    <p *ngIf="viewing == 'out'">
+      While viewing your trashed and filtered games, restore games to put them
+      back into the set of games that you can rank.
+    </p>
+
+    <ion-grid>
+      <ion-row>
+        <ion-col width-50>
+          <ion-item>
+            <ion-label hidden>Sort by </ion-label>
+            <ion-icon name="stats"></ion-icon>
+            <ion-select [(ngModel)]="sort">
+              <ion-option value="name">Name</ion-option>
+              <ion-option value="rating">Personal rating</ion-option>
+              <ion-option value="averageRating">Average rating</ion-option>
+              <ion-option value="gameId">Game ID</ion-option>
+            </ion-select>
+          </ion-item>
+        </ion-col>
+        <ion-col width-50>
+          <ion-item grey (click)="toggleSortOrder()" class='link'>
+            <ion-icon name="{{sortAsc ? 'arrow-up' : 'arrow-down'}}"></ion-icon>
+              {{sortAsc ? 'Ascending' : 'Descending'}}
+          </ion-item>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+  </div>
+
   <ion-list *ngIf="thereAreGames()">
-    <game-card *ngFor="let game of viewGames" [game]="game"
+
+    <game-card *ngFor="let game of games()" [game]="game"
       (onRestore)="restore($event)"
       (onTrash)="trash($event)"
       (onDetail)="detail($event)"
@@ -81,13 +111,13 @@
 
 <ion-footer>
   <ion-toolbar position="bottom" primary>
-    <ion-segment [(ngModel)]="viewing" (ionChange)="view($event)" white>
+    <ion-segment [(ngModel)]="viewing" white>
       <ion-segment-button value="in" title="view non-trashed games">
         <strong padding-horizontal>
           Games
         </strong>
         <ion-badge light>
-            {{games ? games.length - out() : 0}}
+            {{games ? data.games.length - out() : 0}}
         </ion-badge>
       </ion-segment-button>
       <ion-segment-button value="out" title="view trashed games">

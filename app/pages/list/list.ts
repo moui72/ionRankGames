@@ -4,17 +4,19 @@ import { Game } from '../../game.class';
 import { List } from '../../list.class';
 import { GameCompare } from '../../components/game-compare/game-compare';
 import { UnrankedGame } from '../../components/unranked-game/unranked-game';
+import { RankedGame } from '../../components/ranked-game/ranked-game';
 import { Listdb } from '../../providers/listdb/listdb';
+import { Data } from '../../providers/data/data';
 import * as _ from 'lodash';
 
 /*
-  TODO: implement sorting (drag and drop needs event listener)
-        cf. http://ionicframework.com/docs/v2/api/components/item/ItemReorder/
+  TODO: make list items use game components
+  TODO: allow image toggling
  */
 
 @Component({
   templateUrl: 'build/pages/list/list.html',
-  directives: [GameCompare, UnrankedGame]
+  directives: [GameCompare, UnrankedGame, RankedGame]
 })
 export class ListPage {
   list: List;
@@ -23,7 +25,7 @@ export class ListPage {
   remainder: Game[];
 
   constructor(private nav: NavController,
-    private params: NavParams, private listdb: Listdb)
+    private params: NavParams, private listdb: Listdb, private data: Data)
   {
     this.list = params.get('list');
     this.remainder = this.list.rankedSet;
@@ -80,6 +82,7 @@ export class ListPage {
       })
       this.nav.present(confirm);
   }
+
   unrank(game){
     // TOAST? ('unranking');
     _.remove(this.list.rankedSet, game);
@@ -171,4 +174,75 @@ export class ListPage {
     return _.indexOf(this.list.rankedSet, this.incumbent) + 1;
   }
 
+  addingGame(){
+    var games = _.sortBy(_.differenceBy(this.data.games,
+      this.list.set, game => {
+        return game['gameId'];
+      }), game => {
+        return game.name;
+      });
+    let prompt = Alert.create({
+      title: 'Add game(s) to pool',
+      subTitle: 'Add games to the pool that you might have missed.',
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: data => {
+          // TOAST? ('Cancel game add');
+          }
+        },
+        {
+          text: 'Add',
+          handler: data => {
+            for(const gameId of data){
+              let game = _.find(games, game => {
+                return gameId == game['gameId'];
+              })
+              this.list.set.push(game);
+            }
+            this.sort();
+            this.save();
+          }
+        }
+      ]
+    });
+    for (const game of games) {
+      prompt.addInput({
+        type: 'checkbox',
+        value: game['gameId'],
+        label: game['name']
+      })
+    }
+    this.nav.present(prompt);
+  }
+  rename(){
+    let prompt = Alert.create({
+      title: 'Rename ' + this.list.name,
+      subTitle: 'Assign a new name to this list.',
+      inputs: [
+        {
+          name: 'name',
+          type: 'text',
+          placeholder: 'new list name'
+        }
+      ],
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: data => {
+          // TOAST? ('Cancel rename list');
+          }
+        },
+        {
+          text: 'Rename',
+          handler: data => {
+            console.log(data);
+            this.list.name = data.name;
+            this.save();
+          }
+        }
+      ]
+    })
+    this.nav.present(prompt);
+  }
 }

@@ -4,21 +4,31 @@
   See https://angular.io/docs/ts/latest/api/core/ComponentMetadata-class.html
   for more info on Angular 2 Components.
 -->
-    <ion-item>
-      <ion-thumbnail item-left>
-        <img [src]="game.thumbnail">
-      </ion-thumbnail>
-      <h3>
-        {{game.name}}
-        <small grey padding-horizontal>id {{game.gameId}}</small>
-      </h3>
-    <p grey>
+<ion-item>
+  <ion-thumbnail item-left>
+    <img [src]="game.thumbnail">
+  </ion-thumbnail>
+    {{game.name}}
+    <small grey padding-horizontal>id {{game.gameId}}</small>
+  <p>
+    <span secondary>
       {{game.rating > -1 ? 'Personal rating: ' + game.rating : 'No personal rating'}}.
-
+    </span>
+    <br />
+    <span light>
       {{game.averageRating > -1 ? 'Average rating: ' + game.averageRating.toFixed(1) : 'No average rating'}}.
-    </p>
-    <button (click)=trash(game) *ngIf="!isOut()">trash</button>
-    <button (click)=detail(game)>detail</button>
-    <button (click)=restore(game) *ngIf="isOut()">restore</button>
-    <button (click)=amIout()>Out?</button>
-  </ion-item>
+    </span>
+  </p>
+  <button (click)=trash(game) *ngIf="!isOut()">
+    <ion-icon name="trash"></ion-icon>
+    trash
+  </button>
+  <button (click)=restore(game) *ngIf="isOut()">
+    <ion-icon name="undo"></ion-icon>
+    restore
+  </button>
+  <button (click)=more(game)>
+    <ion-icon name="more"></ion-icon>
+    more
+  </button>
+</ion-item>
