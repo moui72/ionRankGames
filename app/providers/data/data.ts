@@ -93,8 +93,6 @@ export class Data {
         // no games, return false
       }
 
-      obs.next('filtering...');
-
       let pool = _.reject(arr, game => {
         let reject: boolean = false;
         // reject if excluding expansion AND this game is an expansion
@@ -126,7 +124,6 @@ export class Data {
 
         return reject;
       })
-      obs.next(pool.length + ' games passed through the filter');
 
       /*
         arr contains all games that passed through filter
@@ -144,15 +141,15 @@ export class Data {
         }
         return game;
       });
-      obs.next("Filtering " + filtered.length + " games. ");
       obs.complete();
+
       // update db -- pool Game[] in, filtered Game[] out
       this.updatingDB = true;
       this.db.filterSet(pool, filtered).then(result => {
-        obs.next('filter complete in db');
+        obs.next('db');
         this.dbDone();
       }).catch(err => {
-        console.log(err);
+        obs.next(err);
       })
     });
   }
@@ -188,15 +185,12 @@ export class Data {
   fetch(username: string){
     return new Observable(obs => {
       this.bgg.fetch(username).then(data => {
-        let errors = [];
         this.procImport(_.values(data)).subscribe(
           update => {
             obs.next(update);
           },
           error => {
-            obs.next('import processing error:')
             obs.next(error);
-            errors.push(error);
           },
           () => {
             obs.next('import complete');
@@ -219,7 +213,6 @@ export class Data {
 
       this.updatingDB = true;
       this.dbUpdateProg = 0;
-
 
       let dbupdated = _.after(set.length, () => {
         this.updatingDB = false;
@@ -247,21 +240,18 @@ export class Data {
         }
         if (this.games.length + dupes == set.length) {
           // games are all in memory
-          obs.next('loaded ' + this.games.length + ', ignoring ' + dupes +
-            ' dupes.')
           obs.complete();
         }
 
         // add game to db
-        this.dbUpdateProg = _.floor(loaded / toLoad * 100)
         this.add(game).subscribe(
           msg => {},
           error => {
             if(error.status == 409){
-              toLoad--;
-              obs.next('Dupe, ' + loaded + ' added');
+              loaded++;
+              obs.next(_.floor(loaded / toLoad * 100));
               if(loaded == toLoad){
-                this.dbDone();
+                obs.next('db');
               }
             } else {
               obs.error(error);
@@ -269,9 +259,9 @@ export class Data {
           },
           () => {
             loaded++;
-            obs.next('Added to db, ' + loaded + ' added');
+            obs.next(_.floor(loaded / toLoad * 100));
             if(loaded == toLoad){
-              obs.complete();
+              obs.next('db');
             }
           }
         )

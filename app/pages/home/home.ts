@@ -8,7 +8,8 @@ import {
   NavParams,
   ActionSheet,
   Menu,
-  Loading
+  Loading,
+  Toast
 } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 import * as _ from 'lodash';
@@ -27,8 +28,6 @@ import { Game } from '../../game.class';
 
 export class HomePage {
 
-  /* TODO: comment each method */
-  /* TODO: move menu to root scope */
   /* TODO: add game details display options */
 
   bggUsr: string;
@@ -65,10 +64,38 @@ export class HomePage {
   {
   }
 
-  log(text){
+  /**
+   * Debugging output -- sends messages to console.log() if this.logging ==
+   * true.
+   * @param  {any}    text   The debugging message to log; should be coercible
+   *                         to string.
+   * @return {void}          No return value.
+   */
+  log(text: any){
     if (this.logging) {
       console.log(text);
     }
+  }
+
+  /**
+   * Displays a toast with a given message. Persists until click and has close
+   * button if stay == true.
+   * @param  {string}           msg  The message to display.
+   * @param  {boolean = false}  stay Whether to persist the message until click.
+   * @return {Toast}                 The presented toast object.
+   */
+  toast(msg: string, stay: boolean = false){
+    let opts = {
+      message: msg
+    }
+    if(!stay){
+      opts['duration'] = 3000;
+    } else {
+      opts['showCloseButton'] = true;
+    }
+    let toast = Toast.create(opts);
+    this.nav.present(toast);
+    return toast;
   }
 
   /**
@@ -80,20 +107,38 @@ export class HomePage {
     return this.isTrue(game.filtered) || this.isTrue(game.trash);
   }
 
+  /**
+   * Change the current sort order
+   * @return {void} no return value
+   */
   toggleSortOrder(){
     this.sortAsc = !this.sortAsc;
   }
 
-  sortGames(arr){
+  /**
+   * Sorts an array of games by the specified property in the specified
+   * direction.
+   * @param  {Game[]}                 arr    Array of games to sort.
+   * @param  {string  = this.sort}    byProp Property to sort by.
+   * @param  {boolean = this.sortAsc} asc    Direction of sort.
+   * @return {Game[]}                        Sorted array of games.
+   */
+  sortGames(arr: Game[], byProp: string = this.sort,
+   asc: boolean = this.sortAsc){
     let result = _.sortBy(arr, game => {
-      return game[this.sort];
+      return game[byProp];
     })
-    if(!this.sortAsc){
+    if(!asc){
       return _.reverse(result);
     }
     return result;
   }
 
+  /**
+   * Returns array of games based on the current view.
+   * @return {Game[]} [in games if viewing == in, or out games if
+   *                       viewing == out]
+   */
   games(){
     return this.sortGames(_.filter(this.data.games, game => {
       return this.isGameOut(game) != (this.viewing == 'in');
@@ -141,7 +186,7 @@ export class HomePage {
         {
           text: 'Cancel',
           handler: data => {
-            this.log('Cancel fetching');
+            this.log('Fetching canceled.');
           }
         },
         {
@@ -154,16 +199,32 @@ export class HomePage {
               this.nav.present(loading);
               // update username
               this.bggUsr = data.username;
+              let dbToast = Toast.create({
+                message: 'Updating saved data. Please do not close your browser.',
+                position: 'top',
+                cssClass: 'danger'
+              });
+              this.nav.present(dbToast);
               this.data.fetch(this.bggUsr).subscribe(
-                msg => this.log(msg),
+                msg => {
+                  this.log(msg);
+                  if(msg == 'db'){
+                    dbToast.dismiss();
+                  }
+                  if(typeof msg == 'number'){
+                    dbToast.setMessage('Updating saved data (' + msg + '%). Please do not close your browser.')
+                  }
+                },
                 error => this.log(error),
                 () => {
                   this.log('fetching complete');
                   loading.dismiss();
+                  this.toast('Imported ' + this.data.games.length + ' games.');
+                  dbToast.dismiss();
                 }
               );
             } else {
-              this.log('No username provided');
+              this.toast('No username provided');
             }
           }
         }
@@ -181,13 +242,25 @@ export class HomePage {
     modal.onDismiss(data => {
       if(data){
         this.bggOpts = data;
+        let dbToast = Toast.create({
+          message: 'Updating saved data. Please do not close your browser.',
+          position: 'top',
+          cssClass: 'danger'
+        });
+        this.nav.present(dbToast);
         this.data.filter(this.data.games, this.bggOpts).subscribe(
-          msg => this.log(msg),
+          msg => {
+            this.log(msg);
+            if(msg == 'db'){
+              dbToast.dismiss();
+            }
+          },
           error => this.log(error),
           () => {
             this.log('filtering complete');
+            this.toast('Filtered out ' + this.out() + ' games.');
           }
-        );;
+        );
       } else {
         this.log('Filtering canceled.');
       }
@@ -202,7 +275,8 @@ export class HomePage {
   purging(){
     let purge = Alert.create({
       title: 'Delete all data',
-      message: 'Delete all application data? This will remove everything and cannot be undone.',
+      message: 'Delete all games from your library? This will remove ' +
+      'everything except your lists, and it cannot be undone.',
       buttons: [
         {
           text: 'Cancel',
@@ -214,6 +288,7 @@ export class HomePage {
           text: 'Destroy',
           handler: data => {
             this.data.purge();
+            this.toast('Purged library data.')
           }
         }
       ]
@@ -228,30 +303,48 @@ export class HomePage {
    */
   trash(game: Game){
     game.trash = true;
+    this.toast('Trashed ' + game.name + '.');
+    let dbToast = Toast.create({
+      message: 'Updating saved data. Please do not close your browser.',
+      position: 'top',
+      cssClass: 'danger'
+    });
+    this.nav.present(dbToast);
     this.data.updateGame(game, 'trash', true).subscribe(
       msg => {
         this.log("DB UPDATE MESSAGE -> " + msg);
+        dbToast.setMessage(msg.toString());
       },
       error => {
         this.log(error);
       },
       () => {
         this.log('TRASH -> database update complete');
+        dbToast.dismiss();
+        this.toast('Saved data updated.');
       }
     );
   }
 
   /**
-   * [restore description]
-   * @param  {Game}   game [description]
-   * @return {[type]}      [description]
+   * Returns a trashed or filtered game to the pool.
+   * @param  {Game}   game The game to restore.
+   * @return {void}        No return value.
    */
   restore(game: Game) {
     game.trash = false;
     game.filtered = false;
+    this.toast('Restored ' + game.name + '.');
+    let dbToast = Toast.create({
+      message: 'Updating saved data. Please do not close your browser.',
+      position: 'top',
+      cssClass: 'danger'
+    });
+    this.nav.present(dbToast);
     this.data.updateGame(game, 'trash', false).subscribe(
       msg => {
         this.log("DB UPDATE MESSAGE -> " + msg);
+        dbToast.setMessage(msg.toString());
       },
       error => {
         this.log(error);
@@ -260,12 +353,15 @@ export class HomePage {
         this.data.updateGame(game, 'filtered', false).subscribe(
           msg => {
             this.log("DB UPDATE MESSAGE -> " + msg);
+            dbToast.setMessage(msg.toString());
           },
           error => {
             this.log(error);
           },
           () => {
             this.log('RESTORE -> database update complete');
+            dbToast.dismiss();
+            this.toast('Saved data updated.');
           }
         );
       }
