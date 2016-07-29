@@ -240,7 +240,7 @@ export class Data {
         }
         if (this.games.length + dupes == set.length) {
           // games are all in memory
-          obs.complete();
+          obs.next('mem');
         }
 
         // add game to db
@@ -249,9 +249,10 @@ export class Data {
           error => {
             if(error.status == 409){
               loaded++;
-              obs.next(_.floor(loaded / toLoad * 100));
+              obs.next(loaded / toLoad);
               if(loaded == toLoad){
                 obs.next('db');
+                obs.complete();
               }
             } else {
               obs.error(error);
@@ -259,7 +260,7 @@ export class Data {
           },
           () => {
             loaded++;
-            obs.next(_.floor(loaded / toLoad * 100));
+            obs.next(loaded / toLoad);
             if(loaded == toLoad){
               obs.next('db');
             }

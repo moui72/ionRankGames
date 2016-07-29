@@ -46,7 +46,7 @@ export class HomePage {
   showingTrash: boolean = false;
   viewing: string = 'in';
 
-  logging = true;
+  logging = false;
 
   updatingDB: boolean = false;
   dbUpdateProg: number = 0;
@@ -210,17 +210,24 @@ export class HomePage {
                   this.log(msg);
                   if(msg == 'db'){
                     dbToast.dismiss();
+                    return;
                   }
-                  if(typeof msg == 'number'){
-                    dbToast.setMessage('Updating saved data (' + msg + '%). Please do not close your browser.')
+
+                  if(msg == 'mem'){
+                    this.log('fetching complete');
+                    loading.dismiss();
+                    this.toast('Imported ' + this.data.games.length + ' games.');
+                    return;
                   }
+
+                  let pct =  (Number(msg) * 100).toPrecision(2);
+                  dbToast.setMessage('Updating saved data (' + pct + '%).' +
+                  ' Please do not close your browser.')
+
                 },
                 error => this.log(error),
                 () => {
-                  this.log('fetching complete');
-                  loading.dismiss();
-                  this.toast('Imported ' + this.data.games.length + ' games.');
-                  dbToast.dismiss();
+                  this.log('import complete');
                 }
               );
             } else {
@@ -313,7 +320,6 @@ export class HomePage {
     this.data.updateGame(game, 'trash', true).subscribe(
       msg => {
         this.log("DB UPDATE MESSAGE -> " + msg);
-        dbToast.setMessage(msg.toString());
       },
       error => {
         this.log(error);
@@ -353,7 +359,6 @@ export class HomePage {
         this.data.updateGame(game, 'filtered', false).subscribe(
           msg => {
             this.log("DB UPDATE MESSAGE -> " + msg);
-            dbToast.setMessage(msg.toString());
           },
           error => {
             this.log(error);
