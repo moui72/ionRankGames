@@ -25,6 +25,7 @@ export class ListPage {
   remainder: Game[];
   updatingH2H: boolean = false;
   updatingChallenger: boolean = false;
+  promptDrops = true;
 
   constructor(private nav: NavController,
     private params: NavParams, private listdb: Listdb, private data: Data)
@@ -65,9 +66,35 @@ export class ListPage {
     this.save();
   }
   drop(game){
-    let confirm = Alert.create({
+    if(game == this.challenger){
+      this.updatingChallenger = true;
+    }
+    if(game == this.incumbent){
+      this.updatingH2H = true;
+    }
+    this.unrank(game);
+    _.remove(this.list.set, game);
+    if(game == this.challenger){
+      this.challenger = this.getOne();
+    }
+    _.delay(() => {
+      this.updatingChallenger = false;
+      this.updatingH2H = false;
+    }, 300);
+    this.save();
+  }
+  dropping(game){
+    if(this.promptDrops){
+      let confirm = Alert.create({
         title: 'Drop ' + game.name + ' from pool?',
         message: 'Remove ' + game.name + ' from the pool of games to be ranked? This can\'t be undone. To get it back you would have to start a new list.',
+        inputs: [
+          {
+            type: 'checkbox',
+            label: 'Don\'t ask again.',
+            value: 'mute'
+          }
+        ],
         buttons: [
           {
             text: 'Cancel',
@@ -78,17 +105,18 @@ export class ListPage {
           {
             text: 'Trash',
             handler: data => {
-              if(this.rankOf(game))
-              _.remove(this.list.set, game);
-              if(game == this.challenger){
-                this.challenger = this.getOne();
+              if(data.indexOf('mute') > -1){
+                this.promptDrops = false;
               }
-              this.save();
+              this.drop(game);
             }
           }
         ]
       })
       this.nav.present(confirm);
+    }else{
+      this.drop(game);
+    }
   }
 
   unrank(game){
@@ -100,9 +128,11 @@ export class ListPage {
     if(game == this.incumbent){
       // handle case where incumbent becomes unranked (get new incumbent)
       this.incumbent = this.getIncumbent();
+      this.updatingH2H = true;
     }
     this.sort();
     this.save();
+    _.delay(() => {this.updatingH2H = true;}, 300)
     return true;
   }
 

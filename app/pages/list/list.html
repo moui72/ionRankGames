@@ -40,7 +40,7 @@
             [game]="incumbent"
             [rank]="incumbentRank()"
             (onChoose)="choose($event)"
-            (onDrop)="drop($event)"></game-compare>
+            (onDrop)="dropping($event)"></game-compare>
 
         </ion-col>
         <ion-col width-50>
@@ -53,7 +53,7 @@
             [game]="challenger"
             [rank]="-1"
             (onChoose)="choose($event)"
-            (onDrop)="drop($event)"></game-compare>
+            (onDrop)="dropping($event)"></game-compare>
 
         </ion-col>
       </ion-row>
@@ -63,12 +63,13 @@
   <ion-list-header *ngIf="list.rankedSet.length > 0">
     Ranked games
   </ion-list-header>
+  
   <ion-list reorder (ionItemReorder)="dragged($event)">
     <ion-item *ngFor="let game of list.rankedSet; let i = index">
       <ranked-game
         [game]="game"
         [rank]="i + 1"
-        (onDrop)="unrank($event)">
+        (onDrop)="dropping($event)">
       </ranked-game>
     </ion-item>
   </ion-list>
@@ -80,7 +81,7 @@
     <unranked-game *ngFor="let game of unrankedGames()"
       [game]="game"
       [last]="list.rankedSet.length + 1"
-      (onDrop)="drop($event)"
+      (onDrop)="dropping($event)"
       (onPrepend)="prepend($event)"
       (onAppend)="append($event)">
     </unranked-game>
