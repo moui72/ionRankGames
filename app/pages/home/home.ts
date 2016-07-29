@@ -15,7 +15,8 @@ import { Observable } from 'rxjs/Observable';
 import * as _ from 'lodash';
 import { Data } from '../../providers/data/data';
 import { FilterGames } from '../../components/modals/filter';
-import { ListsPage } from '../../pages/lists/lists'
+import { ListPage } from '../../pages/list/list';
+import { Listdb } from '../../providers/listdb/listdb'
 import { GameCard } from '../../components/game/game';
 import { BggOpts } from '../../bggopts.class';
 import { Game } from '../../game.class';
@@ -59,7 +60,8 @@ export class HomePage {
   constructor(
     private nav: NavController,
     private menu: MenuController,
-    private data: Data
+    private data: Data,
+    private listdb: Listdb
   )
   {
   }
@@ -393,6 +395,16 @@ export class HomePage {
       return true;
     }
     return false;
+  }
+
+  openLastList(){
+    this.listdb.getLast().then(list => {
+      try{
+        this.nav.push(ListPage, {list: list});
+      }catch(e){
+        this.toast('No existing lists.')
+      }
+    })
   }
 
 }

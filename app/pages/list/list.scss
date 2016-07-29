@@ -6,13 +6,16 @@
   margin: auto;
   display: block;
 }
-.list-page  game-compare .button.compareTrash:hover{
+.list-page game-compare .button.compareTrash:hover{
   background-color: lighten(color($colors, danger), 35%);
 }
 .list-page game-compare .imgWrapper{
   max-height: 300px;
   display: block;
   overflow: hidden;
+}
+.list-page game-compare ion-card {
+  cursor: pointer;
 }
 .item h2.rank{
   font-size:1.25em;

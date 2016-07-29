@@ -5,9 +5,11 @@ export class List{
   set: Array<Game> = [];
   rankedSet: Array<Game> = [];
   key: string;
+  lastEdit: number;
 
   constructor(key: string){
     this.key = key;
+    this.lastEdit = Date.now();
   }
 
 }

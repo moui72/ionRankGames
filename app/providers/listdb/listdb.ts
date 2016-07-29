@@ -42,6 +42,10 @@ export class Listdb {
   }
 
   update(list){
+    let now = Date.now();
+    if(list.lastEdit == undefined || list.lastEdit == null || list.lastEdit < now){
+      list.lastEdit = now;
+    }
     this.list_db.get('li_'+list.key, (error, doc) => {
       if(error){
         // handle error
@@ -71,6 +75,12 @@ export class Listdb {
         // handle success
       })
     });
+  }
+
+  getLast(){
+    return this.getLists().then(lists => {
+      return _.last(_.sortBy(_.values(lists), 'lastEdit'));
+    })
   }
 
   thereAreLists(){

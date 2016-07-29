@@ -38,6 +38,9 @@
           Ranked games: {{rankedCount(list)}}.
           Unranked games: {{unrankedCount(list)}}.
         </p>
+        <p *ngIf="list.lastEdit">
+          Last edited: {{list.lastEdit | date:'medium' }}
+        </p>
       </div>
       <button small clear item-right (click)="edit(list)" *ngIf="!showCtrl(list.key)">
         <ion-icon light name="open"></ion-icon>

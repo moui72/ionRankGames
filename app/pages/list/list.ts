@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { NavController, NavParams, reorderArray, Alert } from 'ionic-angular';
+import { NavController, NavParams, reorderArray, Alert, Toast } from 'ionic-angular';
 import { Game } from '../../game.class';
 import { List } from '../../list.class';
 import { GameCompare } from '../../components/game-compare/game-compare';
@@ -31,6 +31,10 @@ export class ListPage {
     private params: NavParams, private listdb: Listdb, private data: Data)
   {
     this.list = params.get('list');
+    let now = Date.now();
+    if(this.list.lastEdit == undefined || this.list.lastEdit == null || this.list.lastEdit < now){
+      this.list.lastEdit = now;
+    }
     this.remainder = this.list.rankedSet;
     this.nextComparison();
   }
@@ -44,8 +48,31 @@ export class ListPage {
     });
   }
   resetRankings(){
-    this.list.rankedSet = [];
-    this.nextComparison();
+    let prompt = Alert.create({
+      title: 'Reset rankings?',
+      message: 'Reset all your rankings? This will clear your entire list ' +
+      ' and cannot be undone.',
+      buttons: [
+        {
+          text: 'Cancel',
+          handler: data => {
+          // TOAST? ('Cancel game drop');
+          }
+        },
+        {
+          text: 'Reset',
+          handler: data => {
+            this.list.rankedSet = [];
+            this.nextComparison();
+            this.nav.present(Toast.create({message: 'Rankings reset.'}))
+          }
+        }
+      ]
+    });
+
+    this.nav.present(prompt)
+
+
   }
   rankOf(game){
     let index = _.findIndex(this.list.rankedSet, fg => {
