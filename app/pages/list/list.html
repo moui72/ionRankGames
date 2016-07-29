@@ -31,10 +31,30 @@
     <ion-grid class="showdown">
       <ion-row>
         <ion-col width-50>
-          <game-compare [game]="incumbent" [rank]="incumbentRank()" (onChoose)="choose($event)" (onDrop)="drop($event)"></game-compare>
+
+          <div class="ph" *ngIf="updatingH2H">
+            <img src="//gotu-game.com/rankgames/loading.gif" />
+          </div>
+
+          <game-compare *ngIf="!updatingH2H"
+            [game]="incumbent"
+            [rank]="incumbentRank()"
+            (onChoose)="choose($event)"
+            (onDrop)="drop($event)"></game-compare>
+
         </ion-col>
         <ion-col width-50>
-          <game-compare [game]="challenger" [rank]="-1" (onChoose)="choose($event)" (onDrop)="drop($event)"></game-compare>
+
+          <div class="ph" *ngIf="updatingChallenger">
+            <img src="//gotu-game.com/rankgames/loading.gif" />
+          </div>
+
+          <game-compare *ngIf="!updatingChallenger"
+            [game]="challenger"
+            [rank]="-1"
+            (onChoose)="choose($event)"
+            (onDrop)="drop($event)"></game-compare>
+
         </ion-col>
       </ion-row>
     </ion-grid>

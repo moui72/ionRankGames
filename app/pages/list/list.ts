@@ -23,6 +23,8 @@ export class ListPage {
   challenger: Game;
   incumbent: Game;
   remainder: Game[];
+  updatingH2H: boolean = false;
+  updatingChallenger: boolean = false;
 
   constructor(private nav: NavController,
     private params: NavParams, private listdb: Listdb, private data: Data)
@@ -44,7 +46,12 @@ export class ListPage {
     this.list.rankedSet = [];
     this.nextComparison();
   }
-
+  rankOf(game){
+    let index = _.findIndex(this.list.rankedSet, fg => {
+      fg.gameId == game.gameId;
+    });
+    return index > -1 ? index + 1 : index;
+  }
   dragged(indices){
     this.list.rankedSet = reorderArray(this.list.rankedSet, indices);
     this.save();
@@ -69,8 +76,9 @@ export class ListPage {
             }
           },
           {
-            text: 'Drop',
+            text: 'Trash',
             handler: data => {
+              if(this.rankOf(game))
               _.remove(this.list.set, game);
               if(game == this.challenger){
                 this.challenger = this.getOne();
@@ -85,13 +93,17 @@ export class ListPage {
 
   unrank(game){
     // TOAST? ('unranking');
-    _.remove(this.list.rankedSet, game);
+    let removed = _.remove(this.list.rankedSet, game);
+    if(removed.length < 1){
+      return false;
+    }
     if(game == this.incumbent){
       // handle case where incumbent becomes unranked (get new incumbent)
       this.incumbent = this.getIncumbent();
     }
     this.sort();
     this.save();
+    return true;
   }
 
   unrankedGames(){
@@ -125,17 +137,27 @@ export class ListPage {
 
   nextComparison(){
     // TOAST? ('setting up new comparison...');
-    if(this.list.rankedSet.length < 1){
-      this.append(this.getOne());
-      this.remainder = this.list.rankedSet;
-    }
-    this.incumbent = this.getIncumbent();
-    if (this.challenger == undefined ||
-      _.indexOf(this.list.rankedSet, this.challenger) > -1)
-    {
-      this.challenger = this.getOne();
-    }
-    this.save();
+    this.updatingH2H = true;
+    new Promise((resolve, reject) => {
+      if(this.list.rankedSet.length < 1){
+        this.append(this.getOne());
+        this.remainder = this.list.rankedSet;
+      }
+      this.incumbent = this.getIncumbent();
+      if (this.challenger == undefined ||
+        _.indexOf(this.list.rankedSet, this.challenger) > -1)
+      {
+        this.updatingChallenger = true;
+        this.challenger = this.getOne();
+      }
+      this.save();
+      resolve(this.updatingChallenger);
+    }).then(newChallenger => {
+      _.delay(() => {
+        this.updatingH2H = false;
+        this.updatingChallenger = false;
+      }, 300);
+    })
   }
 
   choose(winner){
@@ -145,6 +167,7 @@ export class ListPage {
       (this.challenger == winner ? this.challenger.name +
       ', the challenger!' : this.incumbent.name + ', the incumbent.'));
     */
+
     let pivot = _.indexOf(this.remainder, this.incumbent);
     this.remainder = this.getRemainder(
       pivot,

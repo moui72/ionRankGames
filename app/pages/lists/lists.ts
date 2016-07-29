@@ -38,11 +38,17 @@ export class ListsPage {
     });
   }
 
+  pool(){
+    return _.filter(this.data.games, game => {
+      return !(game.filtered || game.trash);
+    })
+  }
+
   create(){
     let list = new List(this.nextKey());
     list.name = this.newName || 'new list';
     if(this.data.games){
-      list.set = this.data.games;
+      list.set = this.pool();
     }
     this.lists.push(list);
     this.listdb.create(list);

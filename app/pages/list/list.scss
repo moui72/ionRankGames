@@ -1,5 +1,18 @@
-.list {
-
+.list-page game-compare ion-card:hover{
+  background-color: lighten(green, 70%);
+  box-shadow: 0px 0px 25px color($colors, secondary);
+}
+.list-page  game-compare .button{
+  margin: auto;
+  display: block;
+}
+.list-page  game-compare .button.compareTrash:hover{
+  background-color: lighten(color($colors, danger), 35%);
+}
+.list-page game-compare .imgWrapper{
+  max-height: 300px;
+  display: block;
+  overflow: hidden;
 }
 .item h2.rank{
   font-size:1.25em;
@@ -10,4 +23,9 @@
 }
 .item ion-thumbnail.float-left{
  float: left;
+}
+
+.ph{
+  height: 415px;
+  width: 425px;
 }
