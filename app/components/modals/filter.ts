@@ -8,7 +8,7 @@ import { ViewController, NavParams } from 'ionic-angular';
     <form>
       <h2>Filter your game set using BGG data</h2>
       <ion-list>
-      
+
         <ion-item *ngFor="let field of schema.bool">
           <ion-label inline title="{{field.description}}">{{field.prettyname}}</ion-label>
           <ion-toggle [(ngModel)]="bggOpts[field.name]"></ion-toggle>
@@ -40,17 +40,9 @@ import { ViewController, NavParams } from 'ionic-angular';
 export class FilterGames {
   constructor(private viewCtrl: ViewController, private params: NavParams) {
     this.bggOpts = params.get('bggOpts');
+    console.log(this.bggOpts);
   }
-  bggOpts: BggOpts = {
-    minrating: 7,
-    maxrank: 0,
-    minplays: 0,
-    minAverageRating: 7,
-    excludeExp: true,
-    owned: true,
-    rated: true,
-    played: false
-  };
+  bggOpts: BggOpts;
 
   schema = {
     text: [

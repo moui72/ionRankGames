@@ -71,8 +71,9 @@ export class Db {
         this.games_db.set('games', JSON.stringify(this.games));
         obs.next('saved');
         obs.complete();
+      }else{
+        throw new Error('db.save was called but ionicSQL is not available');
       }
-      obs.error('db.save was called but ionicSQL is not available');
     })
   }
 
@@ -211,6 +212,27 @@ export class Db {
         obs.error(error);
       })
     })
+  }
+
+  addSet(games: Game[]){
+    if(this.ionicSQL){
+      throw new Error('addSet was called but ionicSQL is available');
+    }
+    return new Observable(obs => {
+      let gameDocs = _.map(games, game => {
+        let gameDoc: WrappedGame = {_id: 'g_' + game.gameId, game: game};
+        return gameDoc;
+      });
+      obs.next('adding ' + gameDocs.length + ' games to db');
+      this.games_db.bulkDocs(gameDocs, (err, res) => {
+        if(err){
+          obs.error(err);
+        }
+        obs.next(res);
+        obs.complete();
+      })
+    })
+
   }
 
   /**

@@ -115,10 +115,10 @@ export class Data {
         filtered gets set to array of all games not in arr
       */
       this.games = _.map(arr, game => {
-        let inpool = _.some(pool, pGame => {
+        let inPool = _.some(pool, pGame => {
           return pGame.gameId == game.gameId;
         });
-        if(inpool){
+        if(inPool){
           game.filtered = false;
         }else{
           game.filtered = true;
@@ -126,20 +126,23 @@ export class Data {
         return game;
       });
       obs.next('mem');
-
-      // update db -- pool Game[] in, filtered Game[] out
-      this.updatingDB = true;
-      let filtered = _.filter(this.games, game => {
-        return game.filtered;
-      })
-      this.db.filterSet(pool, filtered).then(result => {
-        obs.next('db');
-        obs.complete();
-      }).catch(err => {
-        obs.next(err);
-      })
+      if(this.db.ionicSQL){
+        this.db.save().subscribe(msg => obs.next(msg), err => obs.err(err),
+        () => {
+          obs.complete();
+        });
+      }else{
+        this.db.filterSet(pool, _.filter(this.games, g => {
+          return g.filtered;
+        })).then(() => {
+          obs.complete();
+        }).catch(e => {
+          obs.error(e);
+        })
+      }
     });
   }
+
 
   /**
    * Wrapper for updateGame method of Db service
@@ -171,10 +174,10 @@ export class Data {
             obs.next(update);
           },
           error => {
+            obs.next('...error...')
             obs.next(error);
           },
           () => {
-            obs.next('import complete');
             obs.complete();
           }
         );
@@ -189,16 +192,7 @@ export class Data {
   procImport(set: Array<any>){
     return new Observable(obs => {
       let toLoad = set.length;
-      let loaded = 0;
       let dupes = 0;
-
-      this.updatingDB = true;
-      this.dbUpdateProg = 0;
-
-      let dbupdated = _.after(set.length, () => {
-        this.updatingDB = false;
-        this.dbUpdateProg = 0;
-      })
 
       // iterate through the set of retrieved games
       for(let rawGame of set){
@@ -223,30 +217,21 @@ export class Data {
           // games are all in memory
           obs.next('mem');
         }
-
-        // add game to db
-        this.add(game).subscribe(
-          msg => {},
-          error => {
-            if(error.status == 409){
-              loaded++;
-              obs.next(loaded / toLoad);
-              if(loaded == toLoad){
-                obs.next('db');
-                obs.complete();
-              }
-            } else {
-              obs.error(error);
-            }
-          },
-          () => {
-            loaded++;
-            obs.next(loaded / toLoad);
-            if(loaded == toLoad){
-              obs.next('db');
-            }
-          }
+      }
+      if(this.db.ionicSQL){
+        obs.next('saving, ionicSQL');
+        this.db.save().subscribe(
+          msg => obs.next(msg),
+          err => obs.error(err),
+          () => obs.complete()
         )
+      }else{
+        obs.next('saving, pouchDB');
+        this.db.addSet(this.games).subscribe(
+          msg => obs.next(msg),
+          err => obs.error(err),
+          () => obs.complete()
+        );
       }
     })
   }

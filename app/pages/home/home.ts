@@ -35,7 +35,7 @@ export class HomePage {
   /* TODO: add game details display options */
 
   bggUsr: string;
-
+  loading: boolean = false;
   local: Storage;
 
   bggOpts: BggOpts = {
@@ -82,7 +82,7 @@ export class HomePage {
     }
     try{
       this.local.get('bggOpts').then(opts => {
-        this.bggUsr = JSON.parse(opts);
+        this.bggOpts = JSON.parse(opts);
       })
     }catch(e){
       this.log('No stored options');
@@ -130,7 +130,6 @@ export class HomePage {
     }
     let toast = Toast.create(opts);
     this.nav.present(toast);
-    return toast;
   }
 
   /**
@@ -229,38 +228,22 @@ export class HomePage {
           text: 'Fetch',
           handler: data => {
             if(data.username){
+              this.loading = true;
               this.local.set('bggUsr', data.username)
-              let loading = Loading.create({
-                content: 'Fetching games, please wait...'
-              });
-              this.nav.present(loading);
               // update username
               this.bggUsr = data.username;
-              let dbToast = Toast.create({
-                message: 'Updating saved data. Please do not close your browser.',
-                position: 'top',
-                cssClass: 'danger'
-              });
-              this.nav.present(dbToast);
               this.data.fetch(this.bggUsr).subscribe(
                 msg => {
-                  this.log(msg);
                   if(msg == 'mem'){
-                    this.log('fetching complete');
-                    loading.dismiss();
-                    this.toast('Imported ' + this.data.games.length + ' games.');
-                    return;
+                    this.toast('Imported ' + this.games.length + ' games.');
                   }
-
-                  let pct =  (Number(msg) * 100).toPrecision(2);
-                  dbToast.setMessage('Updating saved data (' + pct + '%).' +
-                  ' Please do not close your browser.')
-
+                  this.log(msg);
                 },
                 error => this.log(error),
                 () => {
                   this.log('import complete');
-                  dbToast.dismiss();
+                  this.toast('Import saved.');
+                  this.loading = false;
                 }
               );
             } else {
@@ -278,35 +261,35 @@ export class HomePage {
    * @return {Void} no return value
    */
   filtering(){
-    let modal = Modal.create(FilterGames, {bggOpts: this.bggOpts});
-    modal.onDismiss(data => {
+    let fmodal = Modal.create(FilterGames, {bggOpts: this.bggOpts});
+
+    this.nav.present(fmodal);
+
+    fmodal.onDismiss(data => {
+      console.log('dismiss');
       if(data){
+        this.loading = true;
         this.bggOpts = data;
-        this.local.set('bggOpts', JSON.stringify(data));
-        let dbToast = Toast.create({
-          message: 'Updating saved data. Please do not close your browser.',
-          position: 'top',
-          cssClass: 'danger'
-        });
-        this.nav.present(dbToast);
+        this.local.set('bggOpts', JSON.stringify(this.bggOpts));
         this.data.filter(this.data.games, this.bggOpts).subscribe(
           msg => {
-            this.log(msg);
-            if(msg == 'db'){
-              dbToast.dismiss();
+            if(msg == 'mem'){
+              this.toast('Filtered out ' + this.out() + ' games.');
             }
+            this.log(msg);
           },
           error => this.log(error),
           () => {
+            this.loading = false;
             this.log('filtering complete');
-            this.toast('Filtered out ' + this.out() + ' games.');
+            this.toast('Changes saved.');
+
           }
         );
       } else {
-        this.log('Filtering canceled.');
+        this.log('filtering canceled.');
       }
     });
-    this.nav.present(modal);
   }
 
   /**

@@ -67,46 +67,48 @@
       back into the set of games that you can rank.
     </p>
 
-    <ion-grid>
-      <ion-row>
-        <ion-col width-50>
-          <ion-item>
-            <ion-label hidden>Sort by </ion-label>
-            <ion-icon name="stats"></ion-icon>
-            <ion-select [(ngModel)]="sort">
-              <ion-option value="name">Name</ion-option>
-              <ion-option value="rating">Personal rating</ion-option>
-              <ion-option value="averageRating">Average rating</ion-option>
-              <ion-option value="gameId">Game ID</ion-option>
-            </ion-select>
-          </ion-item>
-        </ion-col>
-        <ion-col width-50>
-          <ion-item grey (click)="toggleSortOrder()" class='link'>
-            <ion-icon name="{{sortAsc ? 'arrow-up' : 'arrow-down'}}"></ion-icon>
-              {{sortAsc ? 'Ascending' : 'Descending'}}
-          </ion-item>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+  <div *ngIf="loading" text-center>
+    <img  src="//gotu-game.com/rankgames/loading.gif" />
   </div>
 
-  <ion-list *ngIf="thereAreGames()">
+  <ion-grid *ngIf="thereAreGames()">
+    <ion-row>
+      <ion-col width-50>
+        <ion-item>
+          <ion-label hidden>Sort by </ion-label>
+          <ion-icon name="stats"></ion-icon>
+          <ion-select [(ngModel)]="sort">
+            <ion-option value="name">Name</ion-option>
+            <ion-option value="rating">Personal rating</ion-option>
+            <ion-option value="averageRating">Average rating</ion-option>
+            <ion-option value="gameId">Game ID</ion-option>
+          </ion-select>
+        </ion-item>
+      </ion-col>
+      <ion-col width-50>
+        <ion-item grey (click)="toggleSortOrder()" class='link'>
+          <ion-icon name="{{sortAsc ? 'arrow-up' : 'arrow-down'}}"></ion-icon>
+            {{sortAsc ? 'Ascending' : 'Descending'}}
+        </ion-item>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+</div>
 
+  <ion-list>
+    <ion-item *ngIf="!thereAreGames() && !loading">
+      <h2>No games yet</h2>
+      You haven't imported any games.
+      <button item-right small (click)="fetching()">Fetch games</button>
+    </ion-item>
     <game-card *ngFor="let game of games()" [game]="game"
       (onRestore)="restore($event)"
       (onTrash)="trash($event)"
       (onDetail)="detail($event)"
       (onCheck)="isGameOut($event)">
     </game-card>
-    <ion-card *ngIf="!thereAreGames() && initialized">
-      <ion-card-header>No games yet</ion-card-header>
-      <ion-card-content>
-        You haven't imported any games.
-        <button small (click)="fetching()">Fetch</button> some?
-      </ion-card-content>
-    </ion-card>
   </ion-list>
+
 </ion-content>
 
 <ion-footer>
