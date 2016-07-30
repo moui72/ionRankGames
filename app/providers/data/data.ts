@@ -100,27 +100,18 @@ export class Data {
 
         // reject if previously rejected
         // OR (excluding unowned AND this game is not owned)
-        reject = reject || (this.isTrue(opts.owned) && this.isTrue(game.owned));
+        reject =  reject || (this.isTrue(opts.owned) &&
+                  !this.isTrue(game.owned));
 
         // reject if previously rejected
         // OR (excluding low or unplayed AND this game has too few plays)
-        reject = reject || this.isTrue(opts.played)
-          && game.numPlays < (opts.minplays > 0 ? opts.minplays : 1);
+        reject = reject || (this.isTrue(opts.played) && game.numPlays < 1);
+        reject = reject || (game.numPlays > 0 && game.numPlays < opts.minplays);
 
         // reject if previously rejected
         // OR (excluding low or unrated AND this game has low or no rating)
-        reject = reject || this.isTrue(opts.rated)
-          && game.rating < (opts.minrating > 0 ? opts.minrating : 0);
-
-        // reject if previously rejected
-        // OR (excluding poorly ranked games AND this game has low or no rating)
-        reject = reject || (opts.maxrank > 0 && game.rank > opts.maxrank);
-
-        // reject if previously rejected
-        // OR (excluding poor averageRating games AND this game has low or
-        // no averageRating)
-        reject = reject || (opts.minAverageRating > 0 &&
-          game.averageRating < opts.minAverageRating);
+        reject =  reject || (this.isTrue(opts.rated)
+                  && game.rating < (opts.minrating > 0 ? opts.minrating : 0));
 
         return reject;
       })
