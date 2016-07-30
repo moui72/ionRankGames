@@ -82,7 +82,8 @@ export class Data {
    * fails any check dictated by opts
    * @param  {Array<Game>} arr  Array of games to filter; usually all games
    * @param  {BggOpts}     opts Options determining the filter
-   * @return {Boolean}          true if success, false if not
+   * @return {Observable}          emits 'mem' when filter complete in memory,
+   *                               'db' when filter complete in database
    */
   filter(arr: Array<Game>, opts: BggOpts){
     return new Observable(obs => {
@@ -100,8 +101,8 @@ export class Data {
 
         // reject if previously rejected
         // OR (excluding unowned AND this game is not owned)
-        reject =  reject || (this.isTrue(opts.owned) &&
-                  !this.isTrue(game.owned));
+        reject = reject || (this.isTrue(opts.owned) &&
+                 !this.isTrue(game.owned));
 
         // reject if previously rejected
         // OR (excluding low or unplayed AND this game has too few plays)
@@ -110,8 +111,8 @@ export class Data {
 
         // reject if previously rejected
         // OR (excluding low or unrated AND this game has low or no rating)
-        reject =  reject || (this.isTrue(opts.rated)
-                  && game.rating < (opts.minrating > 0 ? opts.minrating : 0));
+        reject = reject || (this.isTrue(opts.rated)
+                 && game.rating < (opts.minrating > 0 ? opts.minrating : 0));
 
         return reject;
       })
@@ -120,35 +121,31 @@ export class Data {
         arr contains all games that passed through filter
         filtered gets set to array of all games not in arr
       */
-      let filtered = []; // _.differenceBy(arr, pool, 'gameId');
       this.games = _.map(arr, game => {
-        if(_.some(pool, pGame => {
+        let inpool = _.some(pool, pGame => {
           return pGame.gameId == game.gameId;
-        })){
+        });
+        if(inpool){
           game.filtered = false;
         }else{
-          filtered.push(game);
           game.filtered = true;
         }
         return game;
       });
-      obs.complete();
+      obs.next('mem');
 
       // update db -- pool Game[] in, filtered Game[] out
       this.updatingDB = true;
+      let filtered = _.filter(this.games, game => {
+        return game.filtered;
+      })
       this.db.filterSet(pool, filtered).then(result => {
         obs.next('db');
-        this.dbDone();
+        obs.complete();
       }).catch(err => {
         obs.next(err);
       })
     });
-  }
-
-  dbDone(){
-    this.updatingDB = false;
-    this.dbUpdateProg = 0;
-    return true;
   }
 
   /**
