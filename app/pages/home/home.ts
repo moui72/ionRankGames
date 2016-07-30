@@ -38,16 +38,7 @@ export class HomePage {
   loading: boolean = false;
   local: Storage;
 
-  bggOpts: BggOpts = {
-    minrating: 7,
-    maxrank: 0,
-    minplays: 0,
-    minAverageRating: 7,
-    excludeExp: true,
-    owned: false,
-    rated: false,
-    played: false
-  }
+  bggOpts: BggOpts;
 
   lastList: List;
 
@@ -82,7 +73,21 @@ export class HomePage {
     }
     try{
       this.local.get('bggOpts').then(opts => {
-        this.bggOpts = JSON.parse(opts);
+        if(opts != null){
+          console.log(opts);
+          this.bggOpts = JSON.parse(opts);
+        }else{
+          this.bggOpts = {
+            minrating: 7,
+            maxrank: 0,
+            minplays: 0,
+            minAverageRating: 7,
+            excludeExp: true,
+            owned: false,
+            rated: false,
+            played: false
+          };
+        }
       })
     }catch(e){
       this.log('No stored options');
