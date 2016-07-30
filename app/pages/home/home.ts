@@ -9,7 +9,9 @@ import {
   ActionSheet,
   Menu,
   Loading,
-  Toast
+  Toast,
+  Storage,
+  LocalStorage
 } from 'ionic-angular';
 import { Observable } from 'rxjs/Observable';
 import * as _ from 'lodash';
@@ -20,6 +22,7 @@ import { Listdb } from '../../providers/listdb/listdb'
 import { GameCard } from '../../components/game/game';
 import { BggOpts } from '../../bggopts.class';
 import { Game } from '../../game.class';
+import { List } from '../../list.class';
 
 @Component({
   directives: [GameCard],
@@ -33,6 +36,8 @@ export class HomePage {
 
   bggUsr: string;
 
+  local: Storage;
+
   bggOpts: BggOpts = {
     minrating: 7,
     maxrank: 0,
@@ -44,10 +49,12 @@ export class HomePage {
     played: false
   }
 
+  lastList: List;
+
   showingTrash: boolean = false;
   viewing: string = 'in';
 
-  logging = false;
+  logging = true;
 
   updatingDB: boolean = false;
   dbUpdateProg: number = 0;
@@ -64,6 +71,32 @@ export class HomePage {
     private listdb: Listdb
   )
   {
+    this.local = new Storage(LocalStorage);
+    try{
+      this.local.get('bggUsr').then(usr => {
+        this.bggUsr = usr;
+      })
+    }catch(e){
+      this.log('No stored username');
+      this.log(e);
+    }
+    try{
+      this.local.get('bggOpts').then(opts => {
+        this.bggUsr = JSON.parse(opts);
+      })
+    }catch(e){
+      this.log('No stored options');
+      this.log(e);
+    }
+    try{
+      this.local.get('lastList').then(list => {
+        this.lastList = JSON.parse(list);
+      })
+    }catch(e){
+        this.lastList = undefined;
+        this.log('Last list not stored');
+        this.log(e);
+      }
   }
 
   /**
@@ -182,7 +215,8 @@ export class HomePage {
       message: 'Import your (or someone else\'s) game collection from boardgamegeek.com.',
       inputs: [{
         name: 'username',
-        placeholder: 'BGG Username'
+        placeholder: 'BGG Username',
+        value: this.bggUsr
       }],
       buttons: [
         {
@@ -195,6 +229,7 @@ export class HomePage {
           text: 'Fetch',
           handler: data => {
             if(data.username){
+              this.local.set('bggUsr', data.username)
               let loading = Loading.create({
                 content: 'Fetching games, please wait...'
               });
@@ -210,11 +245,6 @@ export class HomePage {
               this.data.fetch(this.bggUsr).subscribe(
                 msg => {
                   this.log(msg);
-                  if(msg == 'db'){
-                    dbToast.dismiss();
-                    return;
-                  }
-
                   if(msg == 'mem'){
                     this.log('fetching complete');
                     loading.dismiss();
@@ -230,6 +260,7 @@ export class HomePage {
                 error => this.log(error),
                 () => {
                   this.log('import complete');
+                  dbToast.dismiss();
                 }
               );
             } else {
@@ -251,6 +282,7 @@ export class HomePage {
     modal.onDismiss(data => {
       if(data){
         this.bggOpts = data;
+        this.local.set('bggOpts', JSON.stringify(data));
         let dbToast = Toast.create({
           message: 'Updating saved data. Please do not close your browser.',
           position: 'top',
@@ -398,12 +430,13 @@ export class HomePage {
   }
 
   openLastList(){
-    this.listdb.getLast().then(list => {
-      try{
-        this.nav.push(ListPage, {list: list});
-      }catch(e){
-        this.toast('No existing lists.')
-      }
+    this.local.get('lastList').then(list => {
+      let editList = JSON.parse(list);
+      this.nav.push(ListPage, {list: editList});
+    }).catch(e => {
+      this.toast('Most recent list not known.');
+      this.log(e);
+
     })
   }
 

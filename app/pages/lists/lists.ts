@@ -1,5 +1,5 @@
 import { Component, Input } from '@angular/core';
-import { NavController, NavParams, Loading, Alert } from 'ionic-angular';
+import { NavController, NavParams, Loading, Alert, Storage, LocalStorage } from 'ionic-angular';
 import { Game } from '../../game.class';
 import { List, WrappedList } from '../../list.class';
 import { ListPage } from '../list/list'
@@ -20,6 +20,7 @@ export class ListsPage {
   lists: Array<List>          = [];
   showingCtrl: Array<number>  = [];
   newName: string             = '';
+  local: Storage;
 
   constructor(
       private nav: NavController,
@@ -30,6 +31,7 @@ export class ListsPage {
   {
     this.lists = [];
     this.getLists();
+    this.local = new Storage(LocalStorage);
   }
 
   getLists(){
@@ -56,6 +58,7 @@ export class ListsPage {
 
   edit(list){
     this.nav.push(ListPage, {list: list});
+    this.local.set('lastList', JSON.stringify(list));
   }
 
   destroying(list){

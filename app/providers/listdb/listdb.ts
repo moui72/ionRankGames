@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { List, WrappedList } from '../../list.class';
 import * as PouchDB from 'pouchdb';
 import * as _ from 'lodash';
-
+import { Storage, LocalStorage } from 'ionic-angular';
 /*
   Generated class for the Listdb provider.
 
@@ -13,9 +13,11 @@ import * as _ from 'lodash';
 export class Listdb {
   lists: Array<List>;
   list_db: PouchDB;
+  local: Storage;
 
   constructor() {
     this.list_db = new PouchDB('rankGames_lists');
+    this.local = new Storage(LocalStorage);
   }
 
   getLists(){
@@ -45,6 +47,7 @@ export class Listdb {
     let now = Date.now();
     if(list.lastEdit == undefined || list.lastEdit == null || list.lastEdit < now){
       list.lastEdit = now;
+      this.local.set('lastList', JSON.stringify(list));
     }
     this.list_db.get('li_'+list.key, (error, doc) => {
       if(error){
@@ -75,12 +78,6 @@ export class Listdb {
         // handle success
       })
     });
-  }
-
-  getLast(){
-    return this.getLists().then(lists => {
-      return _.last(_.sortBy(_.values(lists), 'lastEdit'));
-    })
   }
 
   thereAreLists(){

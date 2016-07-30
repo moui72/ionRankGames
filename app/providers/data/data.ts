@@ -33,16 +33,9 @@ export class Data {
     })
   }
 
-  bggOpts: BggOpts = {
-    minrating: 7,
-    maxrank: 0,
-    minplays: 0,
-    minAverageRating: 7,
-    excludeExp: true,
-    owned: false,
-    rated: false,
-    played: false
-  }
+  local: Storage;
+
+  bggOpts: BggOpts;
 
   ready: boolean = false;
 
