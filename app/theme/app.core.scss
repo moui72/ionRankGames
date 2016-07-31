@@ -10,6 +10,7 @@
 @import "../pages/home/home";
 @import "../pages/lists/lists";
 @import "../pages/list/list";
+@import "../pages/game-detail/game-detail";
 @import "../pages/tabs/tabs";
 @import url(https://fonts.googleapis.com/css?family=Noto+Sans|Passion+One);
 
@@ -19,7 +20,9 @@ ion-content ion-list, ion-content ion-list-header, ion-content .wrap{
   max-width: 978px;
   margin: auto;
 }
-
+.clicky{
+  cursor: pointer;
+}
 html, body, p, ion-content {
   font-family: 'Noto Sans', sans-serif;
 }
@@ -35,8 +38,8 @@ h2 {
 h3, h4, h5, h6{
   color: lighten(color($colors, secondary), 10%);
 }
-ion-icon{
-  color: color($colors, light)
+button ion-icon{
+  color: #CDF;
 }
 img {
   background: url('http://gotu-game.com/rankgames/loading.gif') no-repeat;

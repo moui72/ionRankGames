@@ -28,11 +28,11 @@
 $colors: (
   primary:    #347,
   secondary:  adjust-hue(#347, 135deg),
-  danger:     #F61,
+  danger:     #C33,
   light:      lighten(#347, 25%),
   dark:       darken(#347, 40%),
   favorite:   adjust-hue(#347, 90deg),
   white: #fff,
   grey: #999,
-  warning: invert(#347)
+  warning: #F61
 )

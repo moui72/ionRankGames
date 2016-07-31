@@ -14,5 +14,83 @@
 
 
 <ion-content padding>
-
+  <div class="wrap">
+    <ion-grid>
+      <ion-row center>
+        <ion-col width-33>
+          <img [src]="game.image" class="detail"/>
+        </ion-col>
+        <ion-col width-67>
+          <h1 class='title'>
+            {{game.name}}
+            <small grey padding-horizontal>id {{game.gameId}}</small>
+          </h1>
+          <p grey class="subtitle">
+            You {{game.owned ? '' : 'do not'}} own this {{game.isExpansion ? 'expanison' : 'game'}}. More info available on <a href="//boardgamegeek.com/boardgame/{{game.gameId}}">boardgamegeek.com</a>.
+            <br />
+            {{game.isExpansion ? 'This is an expansion' : ''}}.
+          </p>
+          <p>
+            <button (click)='close()'>
+              <ion-icon name="arrow-back"></ion-icon>
+              back
+            </button>
+            <button (click)='trash(game)' *ngIf="!isOut()" warning>
+              <ion-icon name="trash"></ion-icon>
+              trash
+            </button>
+            <button (click)='restore(game)' *ngIf="isOut()" favorite>
+              <ion-icon name="undo"></ion-icon>
+              restore
+            </button>
+          </p>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
+    <ion-list>
+      <ion-list-header>Details for {{game.name}}</ion-list-header>
+      <ion-item>
+        Published
+        <p>
+          {{game.yearPublished}}
+        </p>
+      </ion-item>
+      <ion-item>
+        Personal rating
+        <p>
+          {{game.rating < 0 ? 'None' : game.rating | number:'1.2-2'}}
+        </p>
+      </ion-item>
+      <ion-item>
+        Average rating
+        <p>
+          {{game.averageRating | number:'1.2-2'}}
+        </p>
+      </ion-item>
+      <ion-item>
+        BGG rank
+        <p>
+          {{game.rank}}
+        </p>
+      </ion-item>
+      <ion-item>
+        Player count
+        <p>
+          {{game.minPlayers}} to {{game.maxPlayers}}
+        </p>
+      </ion-item>
+      <ion-item>
+        Play time
+        <p>
+          {{game.playingTime}} minutes
+        </p>
+      </ion-item>
+      <ion-item>
+        Plays logged
+        <p>
+          {{game.numPlays || 'None'}}
+        </p>
+      </ion-item>
+    </ion-list>
+  </div>
 </ion-content>

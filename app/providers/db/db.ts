@@ -339,27 +339,12 @@ export class Db {
 
   }
 
-  updateGame(game: Game, column: string, value: boolean){
-    if(this.ionicSQL){
-      return new Observable(obs => {
-        this.games[_.findIndex(this.games, ig => {
-          return ig.gameId = game.gameId;
-        })][column] = value;
-        this.save().subscribe(msg => {
-          obs.next(msg);
-        }, error => {
-          obs.error(error);
-        }, () => {
-          obs.complete()
-        });
-      });
-    }
+  putGame(game: Game){
     return new Observable(obs => {
       this.exists(game).then((doc) => {
-        doc.game[column] = value;
+        doc.game = game;
         this.games_db.put(doc).then(response => {
-          obs.next('UPDATED ' + doc.game.name + ' IN DB -> ' +
-           column + ' = ' + doc.game[column] + '(intended ' + value + ')');
+          obs.next('UPDATED ' + doc.game.name);
           obs.complete();
         }).catch(error => obs.error(error));
       }).catch(error => obs.error(error));

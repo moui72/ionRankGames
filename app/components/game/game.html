@@ -5,25 +5,31 @@
   for more info on Angular 2 Components.
 -->
 <ion-item>
-  <ion-thumbnail item-left>
+  <ion-thumbnail item-left (click)="more(game)" class='clicky'>
     <img [src]="game.thumbnail">
   </ion-thumbnail>
+  <div (click)="more(game)" class='clicky'>
     {{game.name}}
     <small grey padding-horizontal>id {{game.gameId}}</small>
-  <p>
-    <span secondary>
-      {{game.rating > -1 ? 'Personal rating: ' + game.rating : 'No personal rating'}}.
-    </span>
-    <br />
-    <span light>
-      {{game.averageRating > -1 ? 'Average rating: ' + game.averageRating.toFixed(1) : 'No average rating'}}.
-    </span>
-  </p>
-  <button (click)=trash(game) *ngIf="!isOut()">
+    <p>
+      <span secondary>
+        {{game.rating > -1 ? 'Personal rating: ' + game.rating : 'No personal rating'}}.
+      </span>
+      <br />
+      <span light>
+        {{game.averageRating > -1 ? 'Average rating: ' + game.averageRating.toFixed(1) : 'No average rating'}}.
+      </span>
+    </p>
+  </div>
+  <button (click)=more(game)>
+    <ion-icon name="more"></ion-icon>
+    details
+  </button>
+  <button (click)=trash(game) *ngIf="!isOut()" warning>
     <ion-icon name="trash"></ion-icon>
     trash
   </button>
-  <button (click)=restore(game) *ngIf="isOut()">
+  <button (click)=restore(game) *ngIf="isOut()" favorite>
     <ion-icon name="undo"></ion-icon>
     restore
   </button>

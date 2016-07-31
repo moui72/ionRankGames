@@ -12,12 +12,16 @@ import { Game } from '../../game.class';
 })
 export class GameCard {
   @Input() game: Game;
+  @Output() onMore = new EventEmitter<Game>();
   @Output() onRestore = new EventEmitter<Game>();
   @Output() onTrash = new EventEmitter<Game>();
   @Output() onDetail = new EventEmitter<Game>();
   @Output() onCheck = new EventEmitter<Game>();
 
   constructor() {
+  }
+  more(){
+    this.onMore.emit(this.game);
   }
   restore(){
     this.onRestore.emit(this.game);

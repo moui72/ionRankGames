@@ -30,8 +30,8 @@ import { ViewController, NavParams } from 'ionic-angular';
         </ion-item>
 
         <ion-item>
-          <button (click)=close()>Filter</button>
-          <button (click)=cancel()>Cancel</button>
+          <button (click)="close()">Filter</button>
+          <button (click)="cancel()">Cancel</button>
         </ion-item>
       </ion-list>
     </form>

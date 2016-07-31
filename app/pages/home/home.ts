@@ -18,6 +18,7 @@ import * as _ from 'lodash';
 import { Data } from '../../providers/data/data';
 import { FilterGames } from '../../components/modals/filter';
 import { ListPage } from '../../pages/list/list';
+import { GameDetailPage } from '../../pages/game-detail/game-detail';
 import { Listdb } from '../../providers/listdb/listdb'
 import { GameCard } from '../../components/game/game';
 import { BggOpts } from '../../bggopts.class';
@@ -38,7 +39,7 @@ export class HomePage {
   loading: boolean = false;
   local: Storage;
 
-  bggOpts: BggOpts;
+  bggOpts: BggOpts;r
 
   lastList: List;
 
@@ -115,6 +116,10 @@ export class HomePage {
     if (this.logging) {
       console.log(text);
     }
+  }
+
+  more(showGame: Game){
+    this.nav.push(GameDetailPage, {game: showGame})
   }
 
   /**
@@ -214,7 +219,7 @@ export class HomePage {
    */
   fetching(){
     this.log('fetching');
-    let fetch = Alert.create({
+    const fetch = Alert.create({
       title: 'Import games from BGG',
       message: 'Import your (or someone else\'s) game collection from boardgamegeek.com.',
       inputs: [{
@@ -233,6 +238,7 @@ export class HomePage {
           text: 'Fetch',
           handler: data => {
             if(data.username){
+              let result = '';
               this.loading = true;
               this.local.set('bggUsr', data.username)
               // update username
@@ -240,14 +246,14 @@ export class HomePage {
               this.data.fetch(this.bggUsr).subscribe(
                 msg => {
                   if(msg == 'mem'){
-                    this.toast('Imported ' + this.games.length + ' games.');
+                    result += 'Imported ' + this.games.length + ' games.';
                   }
                   this.log(msg);
                 },
                 error => this.log(error),
                 () => {
                   this.log('import complete');
-                  this.toast('Import saved.');
+                  this.toast(result + ' Import saved.');
                   this.loading = false;
                 }
               );
@@ -266,28 +272,29 @@ export class HomePage {
    * @return {Void} no return value
    */
   filtering(){
-    let fmodal = Modal.create(FilterGames, {bggOpts: this.bggOpts});
+    const fmodal = Modal.create(FilterGames, {bggOpts: this.bggOpts});
 
     this.nav.present(fmodal);
 
     fmodal.onDismiss(data => {
       console.log('dismiss');
       if(data){
+        let result = '';
         this.loading = true;
         this.bggOpts = data;
         this.local.set('bggOpts', JSON.stringify(this.bggOpts));
         this.data.filter(this.data.games, this.bggOpts).subscribe(
           msg => {
             if(msg == 'mem'){
-              this.toast('Filtered out ' + this.out() + ' games.');
+              result += 'Filtered out ' + this.out() + ' games.';
             }
             this.log(msg);
           },
           error => this.log(error),
           () => {
+            this.toast(result + ' Saved changes.')
             this.loading = false;
             this.log('filtering complete');
-            this.toast('Changes saved.');
 
           }
         );
@@ -332,24 +339,18 @@ export class HomePage {
    */
   trash(game: Game){
     game.trash = true;
-    this.toast('Trashed ' + game.name + '.');
-    let dbToast = Toast.create({
-      message: 'Updating saved data. Please do not close your browser.',
-      position: 'top',
-      cssClass: 'danger'
-    });
-    this.nav.present(dbToast);
-    this.data.updateGame(game, 'trash', true).subscribe(
+    let result = 'Trashed ' + game.name + '.';
+    this.data.saveGame(game).subscribe(
       msg => {
         this.log("DB UPDATE MESSAGE -> " + msg);
       },
       error => {
+        this.toast(result + ' Error saving.');
         this.log(error);
       },
       () => {
         this.log('TRASH -> database update complete');
-        dbToast.dismiss();
-        this.toast('Saved data updated.');
+        this.toast(result + ' Saved data updated.');
       }
     );
   }
@@ -362,47 +363,21 @@ export class HomePage {
   restore(game: Game) {
     game.trash = false;
     game.filtered = false;
-    this.toast('Restored ' + game.name + '.');
-    let dbToast = Toast.create({
-      message: 'Updating saved data. Please do not close your browser.',
-      position: 'top',
-      cssClass: 'danger'
-    });
-    this.nav.present(dbToast);
-    this.data.updateGame(game, 'trash', false).subscribe(
+    let result = 'Restored ' + game.name + '.';
+
+    this.data.saveGame(game).subscribe(
       msg => {
         this.log("DB UPDATE MESSAGE -> " + msg);
-        dbToast.setMessage(msg.toString());
       },
       error => {
+        this.toast(result + ' Error saving.');
         this.log(error);
       },
       () => {
-        this.data.updateGame(game, 'filtered', false).subscribe(
-          msg => {
-            this.log("DB UPDATE MESSAGE -> " + msg);
-          },
-          error => {
-            this.log(error);
-          },
-          () => {
-            this.log('RESTORE -> database update complete');
-            dbToast.dismiss();
-            this.toast('Saved data updated.');
-          }
-        );
+        this.log('RESTORE -> database update complete');
+        this.toast(result + ' Saved data updated.');
       }
     );
-  }
-
-
-  /**
-   * Displays detailed info for game
-   * @param  {Game}   game the game to display details of
-   * @return {}            no return value
-   */
-  more(game: Game){
-    this.log(game);
   }
 
   /**
@@ -417,12 +392,16 @@ export class HomePage {
     return false;
   }
 
+  /**
+   * Opens cached list from local storage, if available.
+   * @return {[type]} [description]
+   */
   openLastList(){
     this.local.get('lastList').then(list => {
       let editList = JSON.parse(list);
       this.nav.push(ListPage, {list: editList});
     }).catch(e => {
-      this.toast('Most recent list not known.');
+      this.toast('Cached list not found.');
       this.log(e);
 
     })

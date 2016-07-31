@@ -143,23 +143,19 @@ export class Data {
     });
   }
 
-
   /**
-   * Wrapper for updateGame method of Db service
-   * @param  {Game}    game   the game to update (uses gameId property for
-   *  lookup)
-   * @param  {string}  column   the column to change (filter or trash)
-   * @param  {boolean} value    the value to insert for column
-   * @return {Observable}       passes observable returned by Db service
+   * Updates database after a game has been trashed or restored.
+   * @param  {Game} game      The game to save
+   * @return {Obsvervable}    Either db.save() observable if ionSQL is
+   *                          available, otherwise db.putGame() observable.
    */
-  updateGame(game: Game, column: string, value : boolean){
-    if(column != 'filtered' && column != 'trash'){
-      return new Observable(obs => {
-        obs.error(new Error('invalid column name'));
-      });
+    saveGame(game: Game){
+      if(this.db.ionicSQL){
+        return this.db.save();
+      }
+      return this.db.putGame(game);
+
     }
-    return this.db.updateGame(game, column, value);
-  }
 
   /**
    * Forwards request to BggData service which then fetches data
