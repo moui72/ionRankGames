@@ -1,7 +1,10 @@
 
 <ion-header>
   <ion-navbar primary>
-    <ion-title>RankGames &raquo; Manage games</ion-title>
+    <ion-title>
+      RankGames &raquo; Manage games
+      <ion-badge margin-horizontal favorite>v{{version}}</ion-badge>
+    </ion-title>
     <ion-buttons left>
       <button menuToggle><ion-icon name="menu"></ion-icon></button>
     </ion-buttons>
@@ -37,41 +40,47 @@
 
 <ion-content padding class="home" #content>
   <div class='wrap'>
-    <h2 favorite>
-      <span *ngIf="viewing == 'in'">
-        Viewing your current game set
-      </span>
-      <span *ngIf="viewing == 'out'">
-        Viewing your trashed and filtered games
-      </span>
-    </h2>
-
-    <p>
-      You are in the "manage games" section where you build the pool of games
-      from which you will create your ranked list. There is an
-      <ion-icon name="menu" primary></ion-icon> icon at the top left of your
-      screen that will <a href="#" menuToggle>toggle the menu</a> and show you
-      the available commands.
-    </p>
-    <p>
-      You can import your boardgamegeek collection using the "fetch" command.
-      You can also filter out games to remove them categorically, or you can
-      individually trash or restore games for more fine-grained control.
-    </p>
-    <p *ngIf="viewing == 'in'" >
-      While viewing your current game pool, trash games to remove from the set of
-      games that you can rank.
-    </p>
-    <p *ngIf="viewing == 'out'">
-      While viewing your trashed and filtered games, restore games to put them
-      back into the set of games that you can rank.
-    </p>
+    <h2 *ngIf="loading">Loading your games</h2>
+    <div *ngIf="!loading">
+      <h2 favorite>
+        <span *ngIf="viewing == 'in'">
+          Viewing your current game set
+        </span>
+        <span *ngIf="viewing == 'out'">
+          Viewing your trashed and filtered games
+        </span>
+      </h2>
+      <p>
+        You are in the "manage games" section where you build the pool of games
+        from which you will create your ranked list. There is an
+        <ion-icon name="menu" primary></ion-icon> icon at the top left of your
+        screen that will <a href="#" menuToggle>toggle the menu</a> and show you
+        the available commands.
+      </p>
+      <p>
+        You can import your boardgamegeek collection using the "fetch" command.
+        You can also filter out games to remove them categorically, or you can
+        individually trash or restore games for more fine-grained control.
+      </p>
+      <p *ngIf="viewing == 'in'" >
+        While viewing your current game pool, trash games to remove from the set of
+        games that you can rank.
+      </p>
+      <p *ngIf="viewing == 'out'">
+        While viewing your trashed and filtered games, restore games to put them
+        back into the set of games that you can rank.
+      </p>
+      <button (click)="exportLib()">export</button>
+    </div>
 
   <div *ngIf="loading" text-center>
     <img  src="//gotu-game.com/rankgames/loading.gif" />
+    <p>
+      Loading...
+    </p>
   </div>
 
-  <ion-grid *ngIf="thereAreGames()">
+  <ion-grid *ngIf="thereAreGames() && !loading">
     <ion-row>
       <ion-col width-50>
         <ion-item>
@@ -95,8 +104,8 @@
   </ion-grid>
 </div>
 
-  <ion-list>
-    <ion-item *ngIf="!thereAreGames() && !loading">
+  <ion-list *ngIf="!loading">
+    <ion-item *ngIf="!thereAreGames()">
       <h2>No games yet</h2>
       You haven't imported any games.
       <button item-right small (click)="fetching()">Fetch games</button>

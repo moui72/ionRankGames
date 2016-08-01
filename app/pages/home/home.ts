@@ -35,6 +35,7 @@ export class HomePage {
 
   /* TODO: add game details display options */
 
+  version: string = '0.1.01';
   bggUsr: string;
   loading: boolean = false;
   local: Storage;
@@ -103,6 +104,16 @@ export class HomePage {
         this.log('Last list not stored');
         this.log(e);
       }
+  }
+
+  exportLib(format: string = 'json'){
+    const data = JSON.stringify(this.data.games);
+    const blob = new Blob([data], {type:'application/octet-stream'});
+    const url = window.URL.createObjectURL(blob);
+    let name = 'rg_' +
+      (this.bggUsr ? this.bggUsr + 'G' : 'g') + 'amesLibrary.json';
+    window.open(url);
+    _.delay(() => {window.URL.revokeObjectURL(url)}, 250);
   }
 
   /**
