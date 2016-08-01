@@ -68,7 +68,12 @@
       </p>
       <p *ngIf="viewing == 'out'">
         While viewing your trashed and filtered games, restore games to put them
-        back into the set of games that you can rank.
+        back into the set of games that you can rank. The
+        <ion-icon name="funnel"></ion-icon> funnel icon indicates that a game
+        was filtered out and thus can be restored by future uses of the filter
+        command, while the <ion-icon name="trash" tooltip="test"></ion-icon> trash icon
+        indicates that a game was individually removed and thus will not be
+        restored by a filter.
       </p>
     </div>
 

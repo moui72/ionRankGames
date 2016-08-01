@@ -8,6 +8,7 @@ import { RankedGame } from '../../components/ranked-game/ranked-game';
 import { Listdb } from '../../providers/listdb/listdb';
 import { Data } from '../../providers/data/data';
 import * as _ from 'lodash';
+import * as fileSaver from 'file-saver'
 
 /*
   TODO: make list items use game components
@@ -37,6 +38,13 @@ export class ListPage {
     }
     this.remainder = this.list.rankedSet;
     this.nextComparison();
+  }
+
+  exportJSON(list){
+    let json = JSON.stringify(list);
+    let blob = new Blob([json], {type: "text/plain;charset=utf-8"});
+    fileSaver.saveAs(blob, 'rg_' +
+      this.list.name.replace(/\W+/g, '-').replace(/(\W+$|^\W+)/g, '') + '_ls.json');
   }
 
   save(){
@@ -154,12 +162,12 @@ export class ListPage {
     }
     if(game == this.incumbent){
       // handle case where incumbent becomes unranked (get new incumbent)
-      this.incumbent = this.getIncumbent();
       this.updatingH2H = true;
+      this.incumbent = this.getIncumbent();
     }
     this.sort();
     this.save();
-    _.delay(() => {this.updatingH2H = true;}, 300)
+    _.delay(() => {this.updatingH2H = false}, 300)
     return true;
   }
 

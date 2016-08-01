@@ -88,26 +88,36 @@ export class Data {
       }
 
       let pool = _.reject(arr, game => {
-        let reject: boolean = false;
-        // reject if excluding expansion AND this game is an expansion
-        reject = this.isTrue(opts.excludeExp) && this.isTrue(game.isExpansion);
+        if(this.isTrue(opts.excludeExp) && this.isTrue(game.isExpansion)){
+          // reject if excluding expansion AND this game is an expansion
+          return true;
+        }
+        // excluding unowned AND this game is not owned
+        if(this.isTrue(opts.owned) && !this.isTrue(game.owned)){
+          return true;
+        };
 
-        // reject if previously rejected
-        // OR (excluding unowned AND this game is not owned)
-        reject = reject || (this.isTrue(opts.owned) &&
-                 !this.isTrue(game.owned));
+        if(this.isTrue(opts.played) && game.numPlays < 1){
+          // reject if game not played and excluding unplayed
+          return true;
+        }
+        if(game.numPlays > 0 && game.numPlays < opts.minplays){
+          // reject if played and not enough plays
+          return true;
+        }
 
-        // reject if previously rejected
-        // OR (excluding low or unplayed AND this game has too few plays)
-        reject = reject || (this.isTrue(opts.played) && game.numPlays < 1);
-        reject = reject || (game.numPlays > 0 && game.numPlays < opts.minplays);
+        if(this.isTrue(opts.rated) && game.rating < 0){
+          // reject if unrated and excluding unrated
+          return true;
+        }
 
-        // reject if previously rejected
-        // OR (excluding low or unrated AND this game has low or no rating)
-        reject = reject || (this.isTrue(opts.rated)
-                 && game.rating < (opts.minrating > 0 ? opts.minrating : 0));
+        if(game.rating > 0 && game.rating < opts.minrating){
+          // reject if rated and rating too low
+          return true;
+        }
 
-        return reject;
+        // game is in!
+        return false;
       })
 
       /*

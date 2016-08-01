@@ -1,20 +1,3 @@
-// http://ionicframework.com/docs/v2/theming/
-
-
-// App Shared Imports
-// --------------------------------------------------
-// These are the imports which make up the design of this app.
-// By default each design mode includes these shared imports.
-// App Shared Sass variables belong in app.variables.scss.
-
-@import "../pages/home/home";
-@import "../pages/lists/lists";
-@import "../pages/list/list";
-@import "../pages/game-detail/game-detail";
-@import "../pages/tabs/tabs";
-@import url(https://fonts.googleapis.com/css?family=Noto+Sans|Passion+One);
-
-
 // app-wide styles
 ion-content ion-list, ion-content ion-list-header, ion-content .wrap{
   max-width: 978px;
@@ -38,12 +21,27 @@ h2 {
 h3, h4, h5, h6{
   color: lighten(color($colors, secondary), 10%);
 }
-button ion-icon{
-  color: #CDF;
-}
 img {
   background: url('http://gotu-game.com/rankgames/loading.gif') no-repeat;
 }
 .item-borderless{
   border: none;
 }
+.trash{
+  background-color: lighten(color($colors,light), 30%);
+}
+
+// App Shared Imports
+// --------------------------------------------------
+// These are the imports which make up the design of this app.
+// By default each design mode includes these shared imports.
+// App Shared Sass variables belong in app.variables.scss.
+// http://ionicframework.com/docs/v2/theming/
+
+
+@import "../pages/home/home";
+@import "../pages/lists/lists";
+@import "../pages/list/list";
+@import "../pages/game-detail/game-detail";
+@import "../pages/tabs/tabs";
+@import url(https://fonts.googleapis.com/css?family=Noto+Sans|Passion+One);

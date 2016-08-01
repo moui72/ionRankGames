@@ -5,7 +5,7 @@ import { ViewController, NavParams } from 'ionic-angular';
 @Component({
   template: `
   <ion-content padding>
-    <form>
+    <form (ngSubmit)="close()">
       <h2>Filter your game set using BGG data</h2>
       <ion-list>
 
@@ -30,7 +30,7 @@ import { ViewController, NavParams } from 'ionic-angular';
         </ion-item>
 
         <ion-item>
-          <button (click)="close()">Filter</button>
+          <button type='submit' (click)="close()">Filter</button>
           <button (click)="cancel()">Cancel</button>
         </ion-item>
       </ion-list>
@@ -112,13 +112,13 @@ export class FilterGames {
       },
       {
         name: 'owned',
-          prettyname: "Owned only",
-          description: "Limit to collection owner's owned games?",
-          default: true
+        prettyname: "Owned only",
+        description: "Limit to collection owner's owned games?",
+        default: true
       },
       {
         name: 'rated',
-        prettyname: 'Rated only',
+        prettyname: 'Only games that I\'ve rated',
         description: "Limit to games rated by collection owner?",
         default: true
       },

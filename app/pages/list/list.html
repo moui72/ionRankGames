@@ -22,13 +22,17 @@
     <button (click)="rename()">
       <ion-icon name="create"></ion-icon> Rename
     </button>
+    <button (click)="exportJSON(list)">
+      <ion-icon name="download"></ion-icon> Save to file
+    </button>
     <p>
-      Ranked games: {{list.rankedSet.length || 0}}
-      Unranked games: {{list.set.length - list.rankedSet.length || 0}}
+      Ranked games: {{list.rankedSet.length || 'None'}}
+      Unranked games: {{list.set.length - list.rankedSet.length || 'None'}}
     </p>
 
-    <h2 text-center favorite>Pick a game</h2>
-    <ion-grid class="showdown">
+    <h2 text-center favorite *ngIf="unrankedGames().length < 1">Your ranked list</h2>
+    <h2 text-center favorite *ngIf="unrankedGames().length > 0">Pick a game</h2>
+    <ion-grid class="showdown" *ngIf="unrankedGames().length > 0">
       <ion-row>
         <ion-col width-50>
 
@@ -36,7 +40,7 @@
             <img src="//gotu-game.com/rankgames/loading.gif" />
           </div>
 
-          <game-compare *ngIf="!updatingH2H"
+          <game-compare *ngIf="!updatingH2H && incumbent"
             [game]="incumbent"
             [rank]="incumbentRank()"
             (onChoose)="choose($event)"
@@ -49,7 +53,7 @@
             <img src="//gotu-game.com/rankgames/loading.gif" />
           </div>
 
-          <game-compare *ngIf="!updatingChallenger"
+          <game-compare *ngIf="!updatingChallenger && challenger"
             [game]="challenger"
             [rank]="-1"
             (onChoose)="choose($event)"
@@ -63,13 +67,13 @@
   <ion-list-header *ngIf="list.rankedSet.length > 0">
     Ranked games
   </ion-list-header>
-  
+
   <ion-list reorder (ionItemReorder)="dragged($event)">
     <ion-item *ngFor="let game of list.rankedSet; let i = index">
       <ranked-game
         [game]="game"
         [rank]="i + 1"
-        (onDrop)="dropping($event)">
+        (onDrop)="unrank($event)">
       </ranked-game>
     </ion-item>
   </ion-list>

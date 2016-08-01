@@ -4,7 +4,8 @@
   See https://angular.io/docs/ts/latest/api/core/ComponentMetadata-class.html
   for more info on Angular 2 Components.
 -->
-<ion-item>
+<ion-item [ngClass]="{trash: game.trash}">
+
   <ion-thumbnail item-left (click)="more(game)" class='clicky'>
     <img [src]="game.thumbnail">
   </ion-thumbnail>
@@ -21,6 +22,7 @@
       </span>
     </p>
   </div>
+  <ion-icon light item-right name="{{game.trash ? 'trash' : 'funnel'}}" *ngIf="isOut()"></ion-icon>
   <button (click)=more(game)>
     <ion-icon name="more"></ion-icon>
     details

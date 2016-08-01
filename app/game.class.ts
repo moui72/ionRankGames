@@ -13,6 +13,15 @@ export class Game{
   numPlays: number = 0;
   rating: number = 0;
   owned: boolean = false;
+  preOrdered: boolean = false;
+  forTrade: boolean = false;
+  previousOwned: boolean = false;
+  want: boolean = false;
+  wantToPlay: boolean = false;
+  wantToBuy: boolean = false;
+  wishList: boolean = false;
+
+  // internal
   trash: boolean = false;
   filtered: boolean = false;
 }

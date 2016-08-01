@@ -35,7 +35,7 @@ export class HomePage {
 
   /* TODO: add game details display options */
 
-  version: string = '0.1.01';
+  version: string = '0.1.016';
   bggUsr: string;
   loading: boolean = false;
   local: Storage;
@@ -47,7 +47,7 @@ export class HomePage {
   showingTrash: boolean = false;
   viewing: string = 'in';
 
-  logging = true;
+  logging = false;
 
   updatingDB: boolean = false;
   dbUpdateProg: number = 0;
@@ -76,7 +76,6 @@ export class HomePage {
     try{
       this.local.get('bggOpts').then(opts => {
         if(opts != null){
-          console.log(opts);
           this.bggOpts = JSON.parse(opts);
         }else{
           this.bggOpts = {
@@ -115,6 +114,8 @@ export class HomePage {
     window.open(url);
     _.delay(() => {window.URL.revokeObjectURL(url)}, 250);
   }
+
+  importLib(){}
 
   /**
    * Debugging output -- sends messages to console.log() if this.logging ==
@@ -283,7 +284,7 @@ export class HomePage {
    * @return {Void} no return value
    */
   filtering(){
-    const fmodal = Modal.create(FilterGames, {bggOpts: this.bggOpts});
+    let fmodal = Modal.create(FilterGames, {bggOpts: this.bggOpts});
 
     this.nav.present(fmodal);
 

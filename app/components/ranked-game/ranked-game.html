@@ -1,17 +1,9 @@
 <ion-grid (click)="toggleControls()">
-<!--
-  <button item-right clear>
-    <ion-icon name="more"></ion-icon>
-    <span *ngIf="!showControls">
-      more
-    </span>
-    <span *ngIf="showControls">
-      less
-    </span>
-  </button>
--->
   <ion-row>
     <ion-col width-20 text-center>
+      <button class="float-left" item-right (click)="drop(game)" clear warning>
+        <ion-icon  name="close"></ion-icon>
+      </button>
       <h2 class='rank'>
         #<span>{{rank}}</span>
       </h2>
@@ -22,20 +14,12 @@
       </ion-thumbnail>
       {{game.name}}
       <small grey padding-horizontal>id {{game.gameId}}</small>
-      <p>
-        <span secondary>
-          {{game.rating > -1 ? 'Personal rating: ' + game.rating : 'No personal rating'}}.
-        </span>
-        <br />
-        <span light>
-          {{game.averageRating > -1 ? 'Average rating: ' + game.averageRating.toFixed(1) : 'No average rating'}}.
-        </span>
-      </p>
+      <div secondary>
+        {{game.rating > -1 ? 'Personal rating: ' + game.rating : 'No personal rating'}}.
+      </div>
+      <div light>
+        {{game.averageRating > -1 ? 'Average rating: ' + game.averageRating.toFixed(1) : 'No average rating'}}.
+      </div>
     </ion-col>
-<!--
-  <div *ngIf="showControls" margin-top>
-
-  </div>
--->
   </ion-row>
 </ion-grid>

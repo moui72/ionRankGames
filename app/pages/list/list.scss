@@ -24,7 +24,13 @@
   color: color($colors, primary);
   font-size:2em;
 }
-.item ion-thumbnail.float-left{
+.item h2.rank button,
+.item h2.rank button span,
+.item h2.rank button ion-icon{
+  font-size:14px;
+  color: color($colors, primary);
+}
+.item .float-left{
  float: left;
 }
 
