@@ -172,7 +172,10 @@ export class ListPage {
   }
 
   unrankedGames(){
-    return _.differenceBy(this.list.set, this.list.rankedSet, 'gameId');
+    if(this.list.set.length > this.list.rankedSet.length){
+      return _.differenceBy(this.list.set, this.list.rankedSet, 'gameId');
+    }
+    return [];
   }
 
   getOne(){

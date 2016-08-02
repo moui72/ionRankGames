@@ -35,12 +35,12 @@ export class HomePage {
 
   /* TODO: add game details display options */
 
-  version: string = '0.1.016';
+  version: string = '0.1.017';
   bggUsr: string;
   loading: boolean = false;
   local: Storage;
 
-  bggOpts: BggOpts;r
+  bggOpts: BggOpts;
 
   lastList: List;
 
