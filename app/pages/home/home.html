@@ -128,7 +128,7 @@
 <ion-footer>
   <ion-toolbar position="bottom" primary>
     <ion-segment [(ngModel)]="viewing" white>
-      <ion-segment-button value="in" title="view non-trashed games">
+      <ion-segment-button value="in" >
         <strong padding-horizontal>
           Games
         </strong>
@@ -136,7 +136,7 @@
             {{games ? data.games.length - out() : 0}}
         </ion-badge>
       </ion-segment-button>
-      <ion-segment-button value="out" title="view trashed games">
+      <ion-segment-button value="out">
         <strong padding-horizontal>
           Trashed games
         </strong>

@@ -35,7 +35,7 @@ export class HomePage {
 
   /* TODO: add game details display options */
 
-  version: string = '0.1.017';
+  version: string = '0.1.018';
   bggUsr: string;
   loading: boolean = false;
   local: Storage;

@@ -5,6 +5,7 @@ import { List } from '../../list.class';
 import { GameCompare } from '../../components/game-compare/game-compare';
 import { UnrankedGame } from '../../components/unranked-game/unranked-game';
 import { RankedGame } from '../../components/ranked-game/ranked-game';
+import { RankedGamesTextPage } from '../ranked-games-text/ranked-games-text';
 import { Listdb } from '../../providers/listdb/listdb';
 import { Data } from '../../providers/data/data';
 import * as _ from 'lodash';
@@ -31,13 +32,25 @@ export class ListPage {
   constructor(private nav: NavController,
     private params: NavParams, private listdb: Listdb, private data: Data)
   {
+    this.debug(this);
     this.list = params.get('list');
     let now = Date.now();
-    if(this.list.lastEdit == undefined || this.list.lastEdit == null || this.list.lastEdit < now){
+    if(typeof this.list.lastEdit == 'undefined'
+    || !this.list.lastEdit || this.list.lastEdit < now){
       this.list.lastEdit = now;
     }
-    this.remainder = this.list.rankedSet;
-    this.nextComparison();
+    this.startComparisons();
+  }
+
+  startComparisons(){
+    if(this.list.set.length > this.list.rankedSet.length){
+      this.remainder = this.list.rankedSet;
+      this.nextComparison();
+    }
+  }
+
+  getText(showList){
+    this.nav.push(RankedGamesTextPage, {list: showList});
   }
 
   exportJSON(list){
@@ -166,6 +179,9 @@ export class ListPage {
       this.incumbent = this.getIncumbent();
     }
     this.sort();
+    if(typeof this.challenger == 'undefined' || !this.challenger){
+      this.challenger = this.getOne();
+    }
     this.save();
     _.delay(() => {this.updatingH2H = false}, 300)
     return true;
@@ -179,7 +195,12 @@ export class ListPage {
   }
 
   getOne(){
-    return _.shuffle(this.unrankedGames()).pop();
+    try{
+      return _.shuffle(this.unrankedGames()).pop();
+    }catch(e){
+      console.log('no unranked games');
+      return undefined;
+    }
   }
 
   getIncumbent(){
@@ -212,7 +233,7 @@ export class ListPage {
         this.remainder = this.list.rankedSet;
       }
       this.incumbent = this.getIncumbent();
-      if (this.challenger == undefined ||
+      if (typeof this.challenger == 'undefined' || !this.challenger ||
         _.indexOf(this.list.rankedSet, this.challenger) > -1)
       {
         this.updatingChallenger = true;
@@ -291,6 +312,9 @@ export class ListPage {
               })
               this.list.set.push(game);
             }
+            if(typeof this.challenger == 'undefined' || !this.challenger){
+              this.challenger = this.getOne();
+            }
             this.sort();
             this.save();
           }
@@ -327,7 +351,6 @@ export class ListPage {
         {
           text: 'Rename',
           handler: data => {
-            console.log(data);
             this.list.name = data.name;
             this.save();
           }
@@ -335,5 +358,10 @@ export class ListPage {
       ]
     })
     this.nav.present(prompt);
+  }
+  debug(item?){
+    console.log(item);
+    this.incumbent = undefined;
+    this.challenger = undefined;
   }
 }

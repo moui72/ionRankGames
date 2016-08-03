@@ -25,6 +25,9 @@
     <button (click)="exportJSON(list)">
       <ion-icon name="download"></ion-icon> Save to file
     </button>
+    <button (click)="getText(list)">
+      <ion-icon name="clipboard"></ion-icon> Copy &amp; paste version
+    </button>
     <p>
       Ranked games: {{list.rankedSet.length || 'None'}}
       Unranked games: {{list.set.length - list.rankedSet.length || 'None'}}

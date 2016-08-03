@@ -1,0 +1,64 @@
+<!--
+  Generated template for the RankedGamesTextPage page.
+
+  See http://ionicframework.com/docs/v2/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+  <ion-navbar>
+    <ion-title>Copy and paste view ({{mode}})</ion-title>
+    <ion-buttons right>
+      <button (click)="reverseGames(games)"><ion-icon name="shuffle"></ion-icon> reverse order</button>
+    </ion-buttons>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content padding >
+
+  <div class="wrap ranked-games-text">
+    <h1>{{list.name}}</h1>
+    <p>
+      Created {{list.lastEdit | date}} with <a href="//rankgames.ty-pe.com">rankGames</a>.
+    </p>
+      <div *ngIf="mode == 'html'">
+        <div *ngFor="let game of games; let i = index" padding-bottom margin-vertical>
+          <h2>{{reverse ? list.rankedSet.length - i : i + 1}}. <a href="//boardgamegeek.com/boardgame/{{game.gameId}}">{{game.name}}</a> <small grey margin-horizontal>ID {{game.gameId}}</small></h2>
+          <small>First published {{game.yearPublished}}</small>
+          <p>
+            My rating:
+            <span class='rating' [ngClass]="{'high': game.rating > 7.99, 'medium': game.rating > 6.99 && game.rating < 8, 'low': game.rating < 7 }">{{game.rating}}</span>
+          </p>
+          <img [src]="game.thumbnail" />
+        </div>
+      </div>
+      <div *ngIf="mode == 'text'">
+        <pre *ngFor="let game of games; let i = index" padding-bottom margin-vertical>
+          {{reverse ? list.rankedSet.length - i : i + 1}}. {{game.name}}
+          ID {{game.gameId}}
+          First published {{game.yearPublished}}
+          My rating: {{game.rating}}
+          http://boardgamegeek.com/boardgame/{{game.gameId}}
+        </pre>
+      </div>
+      <div *ngIf="mode == 'bggcode'">
+        <pre *ngFor="let game of games; let i = index" padding-bottom margin-vertical>
+          [size=12][b][thing={{game.gameId}}]{{game.name}}[/thing] - [BGCOLOR={{ratingColor(game)}}]&nbsp;{{game.rating}}&nbsp;[/BGCOLOR][/b][/size]
+          [size=7][b]First Published {{game.yearPublished}}[/b][/size]
+          [imageID={{getImageID(game)}} square inline]
+        </pre>
+      </div>
+  </div>
+
+</ion-content>
+
+<ion-footer>
+  <ion-toolbar position="bottom">
+    <ion-segment [(ngModel)]="mode">
+      <ion-segment-button value="html">HTML</ion-segment-button>
+      <ion-segment-button value="text">Text</ion-segment-button>
+      <ion-segment-button value="bggcode">BGG forum code</ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-footer>
