@@ -19,17 +19,25 @@
     <ion-title>Menu</ion-title>
   </ion-toolbar>
   <ion-list>
-    <button ion-item  (click)="purging()" class="item-borderless">
+    <button ion-item  (click)="purging()">
       <ion-icon danger name="warning" item-left></ion-icon>
       Purge
     </button>
-    <button ion-item (click)="fetching()" class="item-borderless">
+    <button ion-item (click)="fetching()">
       <ion-icon name="sync" secondary item-left ></ion-icon>
-      Fetch
+      Fetch from BGG
     </button>
-    <button ion-item  (click)="filtering()" class="item-borderless">
+    <button ion-item  (click)="filtering()">
       <ion-icon name="funnel" secondary item-left ></ion-icon>
       Filter
+    </button>
+    <button ion-item  (click)="exportJSON()">
+      <ion-icon name="download" secondary item-left ></ion-icon>
+      Download games to file
+    </button>
+    <button ion-item  (click)="importing()">
+      <ion-icon name="download" secondary item-left class="flip"></ion-icon>
+      Upload games from file
     </button>
     <button menuClose ion-item detail-none>
       <ion-icon name="close" secondary item-left></ion-icon>

@@ -1,5 +1,5 @@
 // app-wide styles
-ion-content ion-list, ion-content ion-list-header, ion-content .wrap{
+ion-content ion-list, ion-content ion-list-header, ion-content .wrap, .wrap{
   max-width: 978px;
   margin: auto;
 }
@@ -27,8 +27,13 @@ img {
 .item-borderless{
   border: none;
 }
-.trash{
-  background-color: lighten(color($colors,light), 30%);
+.flip{
+  transform-origin: 25% 50% 0;
+  transform: rotate(180deg);
+}
+ion-menu .flip{
+  transform-origin: 50% 40% 0;
+  transform: rotate(180deg);
 }
 
 // App Shared Imports

@@ -20,7 +20,7 @@ export class RankedGamesTextPage {
   mode: string = 'html';
   constructor(private nav: NavController, private params: NavParams) {
     this.list = params.get('list');
-    this.mode = 'html';
+    this.mode = 'text';
     this.reverse = false;
     this.games = this.list.rankedSet;
   }
@@ -28,10 +28,12 @@ export class RankedGamesTextPage {
 
   ratingColor(game){
     let score = game.rating / 10;
-    let r = this.getHexStr((1 - score) * 255 - 75);
-    let g = this.getHexStr(score * 255 - 75);
-    let b = this.getHexStr(50);
-    let hex =  '#' + r + g + b;
+    let r = (1 - score) * 255 - 75;
+    r = r > 0 ? r : 0;
+    let g = score * 255 - 75;
+    g = g > 0 ? g : 0;
+    let b = 50;
+    let hex =  '#' +  this.getHexStr(r) + this.getHexStr(g) + this.getHexStr(b);
     return hex;
   }
 
@@ -61,5 +63,9 @@ export class RankedGamesTextPage {
     let str = _.last(arr).toString();
     console.log(str);
     return str.substr(3, str.length - 7);
+  }
+
+  close(){
+    this.nav.pop();
   }
 }

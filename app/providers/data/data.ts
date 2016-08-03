@@ -167,6 +167,30 @@ export class Data {
 
     }
 
+    saveGames(games: Game[]){
+      if(this.db.ionicSQL){
+        this.games = games;
+        return this.db.save();
+      }
+      return new Observable(obs => {
+        let toLoad = games.length;
+        let loaded = 0;
+        games.forEach(game => {
+          this.db.putGame(game);
+          loaded++;
+          obs.next(100 * loaded/toLoad);
+          if(toLoad == loaded){
+            obs.complete();
+          }
+        });
+      });
+    }
+
+    merge(games){
+      // merge games into current library
+    }
+
+
   /**
    * Forwards request to BggData service which then fetches data
    * @param  {string} username The BGG username who's collection to fetch
@@ -295,17 +319,6 @@ export class Data {
         this.db.load();
       }
     );
-  }
-
-  /**
-   * Displays detailed info for game
-   * @param  {Game}   game the game to display details of
-   * @return {}            no return value
-   */
-  detail(game: Game){
-    /*
-
-     */
   }
 
   /**

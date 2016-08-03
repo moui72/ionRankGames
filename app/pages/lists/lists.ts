@@ -6,6 +6,7 @@ import { ListPage } from '../list/list'
 import { Listdb } from '../../providers/listdb/listdb';
 import { Data } from '../../providers/data/data';
 import * as _ from 'lodash';
+import * as fileSaver from 'file-saver'
 /*
   Generated class for the ListsPage page.
 
@@ -153,6 +154,14 @@ export class ListsPage {
   }
   toggleCtrl(id){
     this.showingCtrl = this.showingCtrl == id ? -1 : id;
+  }
+  exportJSON(lists){
+    let json = JSON.stringify(lists);
+    let blob = new Blob([json], {type: "text/plain;charset=utf-8"});
+    fileSaver.saveAs(blob, 'rg_lists.json');
+  }
+  importingList(){
+    // allow import of a list
   }
 
 }

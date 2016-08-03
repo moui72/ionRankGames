@@ -10,3 +10,6 @@ ion-menu{
 ion-title ion-badge{
   font-size: .55em;
 }
+.trash{
+  background-color: lighten(color($colors,light), 30%);
+}

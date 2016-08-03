@@ -5,42 +5,43 @@ import { ViewController, NavParams } from 'ionic-angular';
 @Component({
   template: `
   <ion-content padding>
-    <form (ngSubmit)="close()">
-      <h2>Filter your game set using BGG data</h2>
-      <ion-list>
+    <div class="wrap">
+      <form (ngSubmit)="filter()">
+        <h2>Filter your game set using BGG data</h2>
+        <ion-list>
 
-        <ion-item *ngFor="let field of schema.bool">
-          <ion-label inline title="{{field.description}}">{{field.prettyname}}</ion-label>
-          <ion-toggle [(ngModel)]="bggOpts[field.name]"></ion-toggle>
-        </ion-item>
+          <ion-item *ngFor="let field of schema.bool">
+            <ion-label inline title="{{field.description}}">{{field.prettyname}}</ion-label>
+            <ion-toggle [(ngModel)]="bggOpts[field.name]"></ion-toggle>
+          </ion-item>
 
-        <ion-item *ngFor="let field of schema.number" [hidden]="field.show !== true && bggOpts[field.show] == false">
-          <ion-label stacked title="{{field.description}}">{{field.prettyname}}</ion-label>
-          <ion-input text-center
-            type="number" [(ngModel)]="bggOpts[field.name]"></ion-input>
-        </ion-item>
+          <ion-item *ngFor="let field of schema.number" [hidden]="field.show !== true && bggOpts[field.show] == false">
+            <ion-label stacked title="{{field.description}}">{{field.prettyname}}</ion-label>
+            <ion-input text-center
+              type="number" [(ngModel)]="bggOpts[field.name]"></ion-input>
+          </ion-item>
 
-        <ion-item *ngFor="let field of schema.range">
-          <ion-label stacked title="{{field.description}}">{{field.prettyname}}: {{bggOpts[field.name]}}</ion-label>
-          <ion-range [min]="field.min" [max]="field.max" pin="true"
-            [(ngModel)]="bggOpts[field.name]" secondary>
-            <ion-icon range-left small [name]="field.iconLow"></ion-icon>
-            <ion-icon range-right [name]="field.iconHigh"></ion-icon>
-          </ion-range>
-        </ion-item>
-
-        <ion-item>
-          <button type='submit' (click)="close()">Filter</button>
-          <button (click)="cancel()">Cancel</button>
-        </ion-item>
-      </ion-list>
-    </form>
+          <ion-item *ngFor="let field of schema.range">
+            <ion-label stacked title="{{field.description}}">{{field.prettyname}}: {{bggOpts[field.name]}}</ion-label>
+            <ion-range [min]="field.min" [max]="field.max" pin="true"
+              [(ngModel)]="bggOpts[field.name]" secondary>
+              <ion-icon range-left small [name]="field.iconLow"></ion-icon>
+              <ion-icon range-right [name]="field.iconHigh"></ion-icon>
+            </ion-range>
+          </ion-item>
+        </ion-list>
+        <button type="submit" (click)="filter()" hidden="true">Filter</button>
+      </form>
+      <div margin-top>
+        <button (click)="filter()">Filter</button>
+        <button (click)="cancel()">Cancel</button>
+      </div>
+    </div>
   </ion-content>`
 })
 export class FilterGames {
   constructor(private viewCtrl: ViewController, private params: NavParams) {
     this.bggOpts = params.get('bggOpts');
-    console.log(this.bggOpts);
   }
   bggOpts: BggOpts;
 
@@ -49,7 +50,8 @@ export class FilterGames {
       {
         name: 'username',
         prettyname: 'BGG Username',
-        description: 'The boardgamegeek username that owns the collection you are importing.',
+        description: 'The boardgamegeek user that owns the collection you' +
+        ' are importing.',
       }
     ],
     range: [
@@ -134,12 +136,12 @@ export class FilterGames {
 
 
 
-  close() {
+  filter() {
     // parameter is returned to caller as onDismiss event
     this.viewCtrl.dismiss(this.bggOpts);
   }
 
   cancel(){
-    this.viewCtrl.dismiss();
+    this.viewCtrl.dismiss(false);
   }
 }

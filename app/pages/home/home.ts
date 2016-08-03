@@ -17,6 +17,7 @@ import { Observable } from 'rxjs/Observable';
 import * as _ from 'lodash';
 import { Data } from '../../providers/data/data';
 import { FilterGames } from '../../components/modals/filter';
+import { UploadGames } from '../../components/modals/upload';
 import { ListPage } from '../../pages/list/list';
 import { GameDetailPage } from '../../pages/game-detail/game-detail';
 import { Listdb } from '../../providers/listdb/listdb'
@@ -24,6 +25,7 @@ import { GameCard } from '../../components/game/game';
 import { BggOpts } from '../../bggopts.class';
 import { Game } from '../../game.class';
 import { List } from '../../list.class';
+import * as fileSaver from 'file-saver'
 
 @Component({
   directives: [GameCard],
@@ -35,7 +37,7 @@ export class HomePage {
 
   /* TODO: add game details display options */
 
-  version: string = '0.1.018';
+  version: string = '0.1.019';
   bggUsr: string;
   loading: boolean = false;
   local: Storage;
@@ -47,7 +49,7 @@ export class HomePage {
   showingTrash: boolean = false;
   viewing: string = 'in';
 
-  logging = false;
+  logging = true;
 
   updatingDB: boolean = false;
   dbUpdateProg: number = 0;
@@ -105,14 +107,11 @@ export class HomePage {
       }
   }
 
-  exportLib(format: string = 'json'){
-    const data = JSON.stringify(this.data.games);
-    const blob = new Blob([data], {type:'application/octet-stream'});
-    const url = window.URL.createObjectURL(blob);
-    let name = 'rg_' +
-      (this.bggUsr ? this.bggUsr + 'G' : 'g') + 'amesLibrary.json';
-    window.open(url);
-    _.delay(() => {window.URL.revokeObjectURL(url)}, 250);
+  exportJSON(){
+    this.log('ex');
+    let json = JSON.stringify(this.data.games);
+    let blob = new Blob([json], {type: "text/plain;charset=utf-8"});
+    fileSaver.saveAs(blob, 'rg_' + this.bggUsr ? this.bggUsr : 'my' + '-games.json');
   }
 
   importLib(){}
@@ -289,7 +288,6 @@ export class HomePage {
     this.nav.present(fmodal);
 
     fmodal.onDismiss(data => {
-      console.log('dismiss');
       if(data){
         let result = '';
         this.loading = true;
@@ -342,6 +340,25 @@ export class HomePage {
       ]
     })
     this.nav.present(purge);
+  }
+
+  importing(){
+    let umodal = Modal.create(UploadGames);
+    this.nav.present(umodal);
+    umodal.onDismiss((data: Game[], merge?: boolean) => {
+      merge = merge || false;
+      if(!merge){
+
+        this.data.saveGames(data).subscribe(
+          msg => this.log(msg),
+          err => this.log(err),
+          () => {
+            this.toast('Imported ' + data.length + ' games from file, overwriting existing library.');
+          });
+      } else {
+        this.data.merge(data);
+      }
+    });
   }
 
   /**
