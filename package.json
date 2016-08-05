@@ -21,6 +21,7 @@
   "devDependencies": {
     "del": "2.2.0",
     "gulp": "3.9.1",
+    "gulp-cache-bust": "^1.0.2",
     "gulp-watch": "4.3.5",
     "ionic-gulp-browserify-typescript": "2.0.0",
     "ionic-gulp-fonts-copy": "^1.0.0",
@@ -29,6 +30,8 @@
     "ionic-gulp-scripts-copy": "^2.0.0",
     "run-sequence": "1.1.5"
   },
+  "repository": "https://github.com/moui72/rankGames",
+  "license":"https://github.com/moui72/rankGames/blob/master/LICENSE.md",
   "name": "rankgames",
   "description": "rankGames: An Ionic project",
   "cordovaPlugins": [

@@ -1,17 +1,5 @@
-
-<ion-header>
-  <ion-navbar primary>
-    <ion-title>
-      RankGames &raquo; Manage games
-      <ion-badge margin-horizontal favorite>v{{version}}</ion-badge>
-    </ion-title>
-    <ion-buttons left>
-      <button menuToggle><ion-icon name="menu"></ion-icon></button>
-    </ion-buttons>
-    <ion-buttons *ngIf="lastList != undefined" right>
-      <button (click)="openLastList()"><ion-icon name="open"></ion-icon></button>
-    </ion-buttons>
-  </ion-navbar>
+<ion-header >
+  <ion-navbar></ion-navbar>
 </ion-header>
 
 <ion-menu [content]="content" id="manageMenu" type="reveal">

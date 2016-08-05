@@ -7,9 +7,24 @@ ion-menu{
 .link{
   cursor: pointer;
 }
-ion-title ion-badge{
-  font-size: .55em;
+ion-navbar.toolbar ion-badge{
+  position: relative;
+  top: -25px;
+  font-size: .75em;
+  float: right;
 }
 .trash{
   background-color: lighten(color($colors,light), 30%);
+}
+.logo{
+  float: left;
+  max-height: 40px;
+  background-image: none;
+}
+.toolbar-title{
+  position: relative;
+  top: 8px;
+  font-weight: 900;
+  font-family: 'Unica One';
+  font-size: 26px;
 }

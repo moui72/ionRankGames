@@ -120,7 +120,7 @@ export class FilterGames {
       },
       {
         name: 'rated',
-        prettyname: 'Only games that I\'ve rated',
+        prettyname: 'Exclude games that I haven\'t rated',
         description: "Limit to games rated by collection owner?",
         default: true
       },
@@ -128,6 +128,12 @@ export class FilterGames {
         name: 'played',
         prettyname: 'Must have play(s) logged',
         description: "Limit to games with plays logged by collection owner?",
+        default: false
+      },
+      {
+        name: 'wishList',
+        prettyname: 'Exclude wishlist',
+        description: "Don\'t include games from wishlist.",
         default: false
       },
     ]

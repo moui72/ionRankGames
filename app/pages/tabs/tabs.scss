@@ -24,3 +24,6 @@
   margin: auto;
   text-align: center;
 }
+ion-title span{
+  color: lighten(color($colors, 'light'), 20%);
+}

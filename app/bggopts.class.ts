@@ -22,4 +22,13 @@ export class BggOpts{
 
   // false if numPlays < 1
   played: boolean;
+
+  preOrdered: boolean;
+  forTrade: boolean;
+  previousOwned: boolean;
+  want: boolean;
+  wantToPlay: boolean;
+  wantToBuy: boolean;
+  wishList: boolean;
+
 }

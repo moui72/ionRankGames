@@ -37,7 +37,6 @@ export class HomePage {
 
   /* TODO: add game details display options */
 
-  version: string = '0.1.019';
   bggUsr: string;
   loading: boolean = false;
   local: Storage;
@@ -49,7 +48,7 @@ export class HomePage {
   showingTrash: boolean = false;
   viewing: string = 'in';
 
-  logging = true;
+  logging = false;
 
   updatingDB: boolean = false;
   dbUpdateProg: number = 0;
@@ -88,7 +87,14 @@ export class HomePage {
             excludeExp: true,
             owned: false,
             rated: false,
-            played: false
+            played: false,
+            preOrdered: false,
+            forTrade: false,
+            previousOwned: false,
+            want: false,
+            wantToPlay: false,
+            wantToBuy: false,
+            wishList: false
           };
         }
       })
@@ -257,7 +263,7 @@ export class HomePage {
               this.data.fetch(this.bggUsr).subscribe(
                 msg => {
                   if(msg == 'mem'){
-                    result += 'Imported ' + this.games.length + ' games.';
+                    result += 'Imported ' + this.data.games.length + ' games.';
                   }
                   this.log(msg);
                 },

@@ -67,7 +67,7 @@
           {{game.averageRating | number:'1.2-2'}}
         </p>
       </ion-item>
-      <ion-item>
+      <ion-item *ngIf="game.rank > 0">
         BGG rank
         <p>
           {{game.rank}}

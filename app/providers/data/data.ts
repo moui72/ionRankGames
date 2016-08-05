@@ -88,15 +88,18 @@ export class Data {
       }
 
       let pool = _.reject(arr, game => {
+        if(this.isTrue(opts.wishList) && this.isTrue(game.wishList) && !this.isTrue(game.owned)){
+          // reject if game is wishList and rejecting wishList
+          return true;
+        }
         if(this.isTrue(opts.excludeExp) && this.isTrue(game.isExpansion)){
           // reject if excluding expansion AND this game is an expansion
           return true;
         }
-        // excluding unowned AND this game is not owned
         if(this.isTrue(opts.owned) && !this.isTrue(game.owned)){
+          // excluding unowned AND this game is not owned
           return true;
         };
-
         if(this.isTrue(opts.played) && game.numPlays < 1){
           // reject if game not played and excluding unplayed
           return true;
@@ -223,6 +226,32 @@ export class Data {
     return new Observable(obs => {
       let toLoad = set.length;
       let dupes = 0;
+      let failed = [];
+      set = _.reject(set, game => {
+        let reject = true;
+        let tests = [
+          'owned',
+          'preOrdered',
+          'forTrade',
+          'previousOwned',
+          'want',
+          'wantToPlay',
+          'wantToBuy',
+          'wishList'
+        ]
+        for(let test of tests){
+          reject = reject && !game[test];
+        }
+        reject = reject && game.numPlays < 1 && game.rating < 0;
+        if(reject){
+          failed.push(game.name);
+        }
+        return reject;
+      });
+      if(failed.length > 0){
+        obs.next('Ghost games!');
+        obs.next(failed.join(', '));
+      }
 
       // iterate through the set of retrieved games
       for(let rawGame of set){
