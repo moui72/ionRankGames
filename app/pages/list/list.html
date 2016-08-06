@@ -4,30 +4,33 @@
   See http://ionicframework.com/docs/v2/components/#navigation for more info on
   Ionic pages and navigation.
 -->
-<ion-header primary>
+<ion-header>
   <ion-navbar>
-    <ion-title>RankGames &raquo; {{list.name}}</ion-title>
+    <ion-buttons start>
+      <button (click)="resetRankings()" danger>
+        <ion-icon name="undo"></ion-icon> reset
+      </button>
+      <button (click)="addingGame()" [hidden]="!notAllGames()">
+        <ion-icon name="add"></ion-icon> Add game
+      </button>
+      <button (click)="exportJSON(list)">
+        <ion-icon name="download"></ion-icon> Save to file
+      </button>
+      <button (click)="getText(list)">
+        <ion-icon name="clipboard"></ion-icon> Copy &amp; paste
+      </button>
+    </ion-buttons>
   </ion-navbar>
 </ion-header>
-
 <ion-content padding>
   <div class="wrap">
-    <h2>Editing {{list.name}}</h2>
-    <button (click)="resetRankings()" danger>
-      <ion-icon name="undo"></ion-icon> reset rankings
-    </button>
-    <button (click)="addingGame()">
-      <ion-icon name="add"></ion-icon> Add game to pool
-    </button>
-    <button (click)="rename()">
-      <ion-icon name="create"></ion-icon> Rename
-    </button>
-    <button (click)="exportJSON(list)">
-      <ion-icon name="download"></ion-icon> Save to file
-    </button>
-    <button (click)="getText(list)">
-      <ion-icon name="clipboard"></ion-icon> Copy &amp; paste version
-    </button>
+    <h2>
+      Editing {{list.name}}
+      <button (click)="rename()" clear small margin-bottom>
+        <ion-icon name="create"></ion-icon> Rename
+      </button>
+    </h2>
+
     <p>
       Ranked games: {{list.rankedSet.length || 'None'}}
       Unranked games: {{list.set.length - list.rankedSet.length || 'None'}}

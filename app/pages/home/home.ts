@@ -24,7 +24,6 @@ import { Listdb } from '../../providers/listdb/listdb'
 import { GameCard } from '../../components/game/game';
 import { BggOpts } from '../../bggopts.class';
 import { Game } from '../../game.class';
-import { List } from '../../list.class';
 import * as fileSaver from 'file-saver'
 
 @Component({
@@ -42,8 +41,6 @@ export class HomePage {
   local: Storage;
 
   bggOpts: BggOpts;
-
-  lastList: List;
 
   showingTrash: boolean = false;
   viewing: string = 'in';
@@ -102,15 +99,7 @@ export class HomePage {
       this.log('No stored options');
       this.log(e);
     }
-    try{
-      this.local.get('lastList').then(list => {
-        this.lastList = JSON.parse(list);
-      })
-    }catch(e){
-        this.lastList = undefined;
-        this.log('Last list not stored');
-        this.log(e);
-      }
+
   }
 
   exportJSON(){
@@ -427,19 +416,6 @@ export class HomePage {
     return false;
   }
 
-  /**
-   * Opens cached list from local storage, if available.
-   * @return {[type]} [description]
-   */
-  openLastList(){
-    this.local.get('lastList').then(list => {
-      let editList = JSON.parse(list);
-      this.nav.push(ListPage, {list: editList});
-    }).catch(e => {
-      this.toast('Cached list not found.');
-      this.log(e);
 
-    })
-  }
 
 }

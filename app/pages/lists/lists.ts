@@ -55,10 +55,17 @@ export class ListsPage {
     }
     this.lists.push(list);
     this.listdb.create(list);
+    if(!this.local.get('lastList')){
+      this.setLast(list);
+    }
   }
 
   edit(list){
-    this.nav.push(ListPage, {list: list});
+    this.nav.parent.parent.push(ListPage, {list: list});
+    this.setLast(list);
+  }
+
+  setLast(list){
     this.local.set('lastList', JSON.stringify(list));
   }
 

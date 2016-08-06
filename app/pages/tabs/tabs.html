@@ -4,30 +4,30 @@
   See http://ionicframework.com/docs/v2/components/#navigation for more info on
   Ionic pages and navigation.
 -->
-<ion-header >
+<ion-tabs #tabs (ionChange)="getTabTitle($event)" id="tabs">
+  <ion-tab [root]="tab1Root" tabTitle="Games" tabIcon="home"></ion-tab>
+  <ion-tab [root]="tab2Root" tabTitle="Lists" tabIcon="list"></ion-tab>
+  <ion-tab [root]="tab3Root" tabTitle="Help" tabIcon="information-circle"></ion-tab>
+</ion-tabs>
+<ion-header>
   <ion-navbar primary>
     <img src="//rankgames.ty-pe.com/icon.png" class='logo'/>
     <ion-title>
       RankGames <span *ngIf="initialized">&raquo; {{tabTitle}}</span>
     </ion-title>
     <ion-badge margin-horizontal favorite>v{{version}}</ion-badge>
-    <ion-buttons left>
-      <button menuToggle><ion-icon name="menu"></ion-icon></button>
+    <ion-buttons left >
+      <button *ngIf="tabTitle == 'Games'" menuToggle>
+        <ion-icon name="menu"></ion-icon>
+      </button>
+      <button class="bar-button bar-button-default bar-button-menutoggle bar-button-icon-only" *ngIf="tabTitle != 'Games'" (click)="goHome()">
+        <ion-icon name="home"></ion-icon>
+      </button>
     </ion-buttons>
-    <ion-buttons *ngIf="lastList != undefined" right>
-      <button (click)="openLastList()"><ion-icon name="open"></ion-icon></button>
+    <ion-buttons *ngIf="lastList != undefined && nav.length() < 2" right>
+      <button (click)="openLastList()">
+        <ion-icon name="open"></ion-icon>
+      </button>
     </ion-buttons>
   </ion-navbar>
 </ion-header>
-<div class="loader" *ngIf="!data.ready">
-  <img src="/loading.gif" text-center />
-  <h1 text-center>
-    Loading...
-  </h1>
-</div>
-
-<ion-tabs #tabs (ionChange)="getTabTitle($event)">
-  <ion-tab [root]="tab1Root" tabTitle="Games" tabIcon="home"></ion-tab>
-  <ion-tab [root]="tab2Root" tabTitle="Lists" tabIcon="list"></ion-tab>
-  <ion-tab [root]="tab3Root" tabTitle="Help" tabIcon="information-circle"></ion-tab>
-</ion-tabs>

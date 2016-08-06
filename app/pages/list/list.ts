@@ -28,11 +28,11 @@ export class ListPage {
   updatingH2H: boolean = false;
   updatingChallenger: boolean = false;
   promptDrops = true;
+  logging = true;
 
   constructor(private nav: NavController,
     private params: NavParams, private listdb: Listdb, private data: Data)
   {
-    this.debug(this);
     this.list = params.get('list');
     let now = Date.now();
     if(typeof this.list.lastEdit == 'undefined'
@@ -90,10 +90,7 @@ export class ListPage {
         }
       ]
     });
-
     this.nav.present(prompt)
-
-
   }
   rankOf(game){
     let index = _.findIndex(this.list.rankedSet, fg => {
@@ -103,7 +100,6 @@ export class ListPage {
   }
   dragged(indices){
     if(indices.from > -1 && indices.to > -1){
-      console.log(indices);
       this.list.rankedSet = reorderArray(this.list.rankedSet, indices);
       this.incumbent = this.getIncumbent();
       this.save();
@@ -202,7 +198,6 @@ export class ListPage {
     try{
       return _.shuffle(this.unrankedGames()).pop();
     }catch(e){
-      console.log('no unranked games');
       return undefined;
     }
   }
@@ -217,9 +212,6 @@ export class ListPage {
       ('Only ' + this.remainder.length + ' games remain to compare.');
       ('getting new comparison set, going ' + (goUp ? 'up' : 'down') + '.');
      */
-
-    console.log(index);
-
     if(goUp){
       // TOAST? ('dropping ' + size + ' from the right');
       return this.remainder.slice(0,index);
@@ -292,6 +284,13 @@ export class ListPage {
 
   incumbentRank(){
     return _.indexOf(this.list.rankedSet, this.incumbent) + 1;
+  }
+
+  notAllGames(){
+    return _.differenceBy(this.data.games,
+      this.list.set, game => {
+        return game['gameId'];
+      }).length > 0;
   }
 
   addingGame(){
@@ -367,9 +366,9 @@ export class ListPage {
     })
     this.nav.present(prompt);
   }
-  debug(item?){
-    console.log(item);
-    this.incumbent = undefined;
-    this.challenger = undefined;
+  log(item){
+    if(this.logging){
+      console.log(item);
+    }
   }
 }

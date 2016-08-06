@@ -36,6 +36,21 @@ ion-menu .flip{
   transform: rotate(180deg);
 }
 
+.toolbar-title{
+  position: relative;
+  top: 8px;
+  font-weight: 900;
+  font-family: 'Unica One';
+  font-size: 26px;
+}
+.list-page .toolbar-title{
+  position: relative;
+  top: 0px;
+  font-weight: 900;
+  font-family: 'Unica One';
+  font-size: 26px;
+}
+
 // App Shared Imports
 // --------------------------------------------------
 // These are the imports which make up the design of this app.
