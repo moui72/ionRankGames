@@ -135,7 +135,7 @@ export class FilterGames {
         prettyname: 'Exclude wishlist',
         description: "Don\'t include games from wishlist.",
         default: false
-      },
+      }
     ]
   }
 

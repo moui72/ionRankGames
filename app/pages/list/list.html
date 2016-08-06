@@ -72,7 +72,8 @@
   </ion-list-header>
 
   <ion-list reorder (ionItemReorder)="dragged($event)">
-    <ion-item *ngFor="let game of list.rankedSet; let i = index">
+    <ion-item *ngFor="let game of list.rankedSet; let i = index"
+      [ngClass]="{rem: inRem(game)}">
       <ranked-game
         [game]="game"
         [rank]="i + 1"

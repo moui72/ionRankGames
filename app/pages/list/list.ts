@@ -102,8 +102,12 @@ export class ListPage {
     return index > -1 ? index + 1 : index;
   }
   dragged(indices){
-    this.list.rankedSet = reorderArray(this.list.rankedSet, indices);
-    this.save();
+    if(indices.from > -1 && indices.to > -1){
+      console.log(indices);
+      this.list.rankedSet = reorderArray(this.list.rankedSet, indices);
+      this.incumbent = this.getIncumbent();
+      this.save();
+    }
   }
   append(game){
     this.list.rankedSet.push(game);
@@ -214,14 +218,14 @@ export class ListPage {
       ('getting new comparison set, going ' + (goUp ? 'up' : 'down') + '.');
      */
 
+    console.log(index);
+
     if(goUp){
-      let size = this.remainder.length % 2 == 0 ? index : index + 1;
       // TOAST? ('dropping ' + size + ' from the right');
-      return _.dropRight(this.remainder, size);
+      return this.remainder.slice(0,index);
     }
-    let size = index + 1;
     // TOAST? ('dropping ' + size + ' from the left');
-    return _.drop(this.remainder, size);
+    return this.remainder.slice(index + 1, this.remainder.length);
   }
 
   nextComparison(){
@@ -247,6 +251,10 @@ export class ListPage {
         this.updatingChallenger = false;
       }, 300);
     })
+  }
+
+  inRem(game: Game){
+    return this.remainder.indexOf(game) > -1;
   }
 
   choose(winner){
