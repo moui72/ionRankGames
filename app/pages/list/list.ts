@@ -246,6 +246,9 @@ export class ListPage {
   }
 
   inRem(game: Game){
+    if(!this.remainder){
+      return false;
+    }
     return this.remainder.indexOf(game) > -1;
   }
 
