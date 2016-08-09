@@ -39,12 +39,14 @@ export class ListPage {
     || !this.list.lastEdit || this.list.lastEdit < now){
       this.list.lastEdit = now;
     }
-    this.startComparisons();
+    this.resetComparisons();
   }
 
-  startComparisons(){
+  resetComparisons(){
     if(this.list.set.length > this.list.rankedSet.length){
       this.remainder = this.list.rankedSet;
+      this.incumbent = this.getIncumbent();
+      this.challenger = this.challenger || this.getOne();
       this.nextComparison();
     }
   }
@@ -123,7 +125,8 @@ export class ListPage {
     this.unrank(game);
     _.remove(this.list.set, game);
     if(game == this.challenger){
-      this.challenger = this.getOne();
+      this.challenger = undefined;
+      this.resetComparisons();
     }
     _.delay(() => {
       this.updatingChallenger = false;
