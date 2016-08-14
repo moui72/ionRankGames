@@ -65,11 +65,13 @@ export class ListPage {
   save(){
     this.listdb.update(this.list);
   }
+
   sort(){
     this.list.set = _.sortBy(this.list.set, game => {
       return game.name;
     });
   }
+
   resetRankings(){
     let prompt = Alert.create({
       title: 'Reset rankings?',
@@ -94,12 +96,14 @@ export class ListPage {
     });
     this.nav.present(prompt)
   }
+
   rankOf(game){
     let index = _.findIndex(this.list.rankedSet, fg => {
       fg.gameId == game.gameId;
     });
     return index > -1 ? index + 1 : index;
   }
+
   dragged(indices){
     if(indices.from > -1 && indices.to > -1){
       this.list.rankedSet = reorderArray(this.list.rankedSet, indices);
@@ -107,33 +111,33 @@ export class ListPage {
       this.save();
     }
   }
+
   append(game){
     this.list.rankedSet.push(game);
     this.save();
   }
+
   prepend(game){
     this.list.rankedSet.unshift(game);
     this.save();
   }
+
   drop(game){
-    if(game == this.challenger){
-      this.updatingChallenger = true;
-    }
-    if(game == this.incumbent){
-      this.updatingH2H = true;
-    }
-    this.unrank(game);
+    this.updatingChallenger = true;
+    this.updatingH2H = true;
     _.remove(this.list.set, game);
     if(game == this.challenger){
       this.challenger = undefined;
       this.resetComparisons();
     }
+    this.unrank(game);
     _.delay(() => {
       this.updatingChallenger = false;
       this.updatingH2H = false;
+      this.save();
     }, 300);
-    this.save();
   }
+
   dropping(game){
     if(this.promptDrops){
       let confirm = Alert.create({
@@ -278,6 +282,7 @@ export class ListPage {
       );
     }
     // advance to next comparison
+    this.save();
     this.nextComparison();
   }
 
@@ -343,6 +348,7 @@ export class ListPage {
     }
     this.nav.present(prompt);
   }
+
   rename(){
     let prompt = Alert.create({
       title: 'Rename ' + this.list.name,
@@ -372,6 +378,7 @@ export class ListPage {
     })
     this.nav.present(prompt);
   }
+  
   log(item){
     if(this.logging){
       console.log(item);

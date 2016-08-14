@@ -11,8 +11,8 @@ import 'rxjs/add/operator/map';
 @Injectable()
 export class BggData {
   data: Array<any>;
-  private rootAddr  = 'http://bgg-json.azurewebsites.net/';
-  private command   = 'collection/';
+  private rootAddr  = 'http://rankgames.ty-pe.com/bggapi/';
+  private command   = '?username=';
 
   constructor(private http: Http) {
     this.data = [];
