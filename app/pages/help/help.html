@@ -4,69 +4,94 @@
   See http://ionicframework.com/docs/v2/components/#navigation for more info on
   Ionic pages and navigation.
 -->
-<ion-header>
 
-  <ion-navbar primary>
-    <ion-title>Help</ion-title>
-  </ion-navbar>
-
-</ion-header>
-
-
-<ion-content padding>
-  <div class="wrap">
-    <h1><ion-icon name="home"></ion-icon> Games</h1>
-    <p>
-      The games page is where you set up the pool of games that you will build
-      your ranked lists from. It offers two views, accessible via the "games" and
-      "trashed games" tabs at the bottom of the screen. The "games" are those
-      that will be available when you make a list. The "trashed games" are those
-      that you have trashed individually, or removed via a filter.
-    </p>
-    <p>
-      You can indivually remove games from or restore games to the pool of games that will be available for ranking from these views.
-    </p>
-    <div padding>
-      <h2><ion-icon name="menu"></ion-icon> Menu commands</h2>
-      <p>
-        The games page also has a menu of commands available. The menu can be opened using the <ion-icon name="menu"></ion-icon> menu icon at the top left.
-      </p>
-      <div padding>
-        <h3>
-          <ion-icon danger name="warning"></ion-icon>
-          Purge
-        </h3>
-        <p>
-          The purge command will delete all games that you have imported, whether
-          they have been filtered, trashed or remain in the general pool. This
-          command is irreversible. You will be prompted to confirm before it actually
-          executes.
-        </p>
-        <h3>
-          <ion-icon name="sync"></ion-icon>
-          Fetch
-        </h3>
-        <p>
-          The fetch command will import all games in a given boardgamegeek user's
-          collection. Once they've been imported you will be able to manipulate which
-          ones are actually available during the ranking process.
-        </p>
-        <h3>
-          <ion-icon name="funnel"></ion-icon>
-          Filter
-        </h3>
-        <p>
-          The filter command will categorically remove games from the available pool.
-          You can then individually correct any exceptions using the "trash"
-          or "restore" button for a given game.
-        </p>
-      </div>
-    </div>
-
+<ion-content padding margin-bottom>
+  <div class="wrap" padding margin-bottom>
+    <h1><a id="About_0"></a>About</h1>
+    <p>This app is intended to help you build ranked lists of games from those in your collection
+    on <a href="http://boardgamegeek.com">Board Game Geek</a>. It’s open source: check it out on <a href="https://github.com/moui72/rankGames/">github</a>.</p>
+    <h2><a id="System_requirements_and_limitations_3"></a>System requirements and limitations</h2>
+    <p>This app currently only supports Chrome 52+ on desktop or laptop computers.
+    It may not function and may perform poorly on mobile devices and in other browsers.</p>
+    <h2><a id="Feedback_7"></a>Feedback</h2>
+    <p>I welcome any and all feedback. Please use one of the following methods to contact me: <a href="https://www.boardgamegeek.com/geekmail/compose?touser=moui">geekmail moui</a>, reply to <a href="https://www.boardgamegeek.com/article/23452478">my forum thread</a>, or create an issue on the <a href="https://github.com/moui72/rankGames/issues">rankgames github repo</a>.</p>
+    <p>This app stores your data locally, so you may want to periodically back up your work using the import/export functionality. If you ever “clear all data” in your browser, you will lose everything.</p>
+    <h1><a id="Games_13"></a>Games</h1>
+    <p>The games page is where you set up the pool of games that you will build
+    your ranked lists from. It offers two views, accessible via the “games”
+    and “trashed games” tabs at the bottom of the screen. The “games” are
+    those that will be available when you make a list. The “trashed games”
+    are those that you have trashed individually, or removed via a filter.</p>
+    <p>You can indivually remove games from or restore games to the pool of
+    games that will be available for ranking from these views.</p>
+    <h2><a id="Menu_commands_23"></a>Menu commands</h2>
+    <p>The games page also has a menu of commands available. The menu can be
+    opened using the menu icon at the top left.</p>
+    <h3><a id="Purge_27"></a>Purge</h3>
+    <p>The purge command will delete all games that you have imported, whether
+    they have been filtered, trashed or remain in the general pool. This
+    command is irreversible. You will be prompted to confirm before it
+    actually executes.</p>
+    <h3><a id="Fetch_33"></a>Fetch</h3>
+    <p>The fetch command will import all games in a given boardgamegeek user’s
+    collection. Once they’ve been imported you will be able to manipulate
+    which ones are actually available during the ranking process.</p>
+    <h3><a id="Filter_38"></a>Filter</h3>
+    <p>The filter command will categorically remove games from the available
+    pool. You can then individually correct any exceptions using the “trash”
+    or “restore” button for a given game.</p>
+    <h3><a id="Download_43"></a>Download</h3>
+    <p>Download your game libary to a <code>.json</code> file. You should use this to back up your data when
+    appropriate because if you ever “clear all data” in your browser, the app will forget what
+    you’ve done.</p>
+    <h3><a id="Upload_48"></a>Upload</h3>
+    <p>Restore data from a previously downloaded <code>.json</code> file.</p>
     <hr />
-
-    <h1><ion-icon name="list"></ion-icon> Lists</h1>
-    The lists page is where you can create and manage your ranked lists of games.
-
+    <h1><a id="Lists_53"></a>Lists</h1>
+    <p>The lists page is where you can create and manage your ranked lists of games.
+    When you create a list, the games that have not been trashed or filtered out
+    will be added to the pool of games that you will rank. You can refine this to some
+    extent after you have made the list, but it’s best to do the bulk of your filtering
+    in the game library prior to creating your list.</p>
+    <p>You can create, edit/open, rename and delete lists. For details on editing a list, see below.</p>
+    <hr />
+    <h1><a id="Editing_a_list_62"></a>Editing a list</h1>
+    <p>Once you have opened a list, you can start to rank your games by making comparisons.
+    You can also browse both the ranked and unranked sets of games and make corrections via
+    drag-and-drop. Below you will find some explanation for some of the commands you’ll find
+    while editing a list.</p>
+    <h2><a id="Global_commands_68"></a>Global commands</h2>
+    <p>The commands on the main menu are not tied to a specific game.</p>
+    <h3><a id="Reset_71"></a>Reset</h3>
+    <p>The reset button will unrank all games (<em>unrank</em> is defined below).</p>
+    <h3><a id="Save_to_file_74"></a>Save to file</h3>
+    <p>The save to file button will download your list as a <code>.json</code> file. You should use this to
+    back-up your list/</p>
+    <h3><a id="Load_from_file_78"></a>Load from file</h3>
+    <p><em>Not yet implemented.</em> The load from file button allows you to import a list from a previously
+    downloaded <code>.json</code> file.</p>
+    <h3><a id="Copy_amp_Paste_82"></a>Copy &amp; Paste</h3>
+    <p>The copy &amp; paste button will display your list in a copy &amp; paste friendly format. You
+    can choose from HTML, plain text, or BGG forum code. You can also choose to display them in
+    ascending or descending order.</p>
+    <h2><a id="More_87"></a>More</h2>
+    <p>Clicking on an unranked game or clicking the “more” button will make the following commands
+    visible.</p>
+    <h3><a id="Unrank_game_91"></a>Unrank game</h3>
+    <p>Ranked games will have an × button to their right. This button will unrank that game.
+    Unranking a game will remove it from the ranked list and return it to the
+    unranked (soon-to-be-ranked) set.</p>
+    <h3><a id="Trash_game_96"></a>Trash game</h3>
+    <p>Dropping a game will remove it from the set of games accessible from this list.
+    It will not trash it in your library, so it will appear in future lists if you
+    don’t trash it manually or filter it out subsequently.</p>
+    <h3><a id="Set_to_1_101"></a>Set to #1</h3>
+    <p>This will straightforwardly prepend a game to your ranked list. You will never be prompted
+    to compare a game prepended in this way to other ranked games, only unranked ones, so be careful.</p>
+    <h3><a id="Set_to_X_105"></a>Set to #X</h3>
+    <p>The value of X will vary; this button will append a game to the end of your ranked list.
+    You will never be prompted to compare a game appended in this way to other ranked games,
+    only unranked ones, so be careful.</p>
+    <hr />
   </div>
 </ion-content>

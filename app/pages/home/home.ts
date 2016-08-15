@@ -124,8 +124,12 @@ export class HomePage {
     }
   }
 
+  /**
+   * Pushes the detail page onto the top nav stack
+   * @param  {Game}   showGame game to show
+   */
   more(showGame: Game){
-    this.nav.push(GameDetailPage, {game: showGame})
+    this.nav.parent.parent.push(GameDetailPage, {game: showGame});
   }
 
   /**

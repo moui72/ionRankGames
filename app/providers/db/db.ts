@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Storage, SqlStorage } from 'ionic-angular';
+import { Storage, SqlStorage, Toast } from 'ionic-angular';
 import { Game, WrappedGame } from '../../game.class';
 import * as _ from 'lodash';
 import { Observable } from 'rxjs/Observable';
@@ -27,7 +27,14 @@ export class Db {
 
   load() {
     this.makeDbWithLegacyCheck().subscribe(
-      msg => {},
+      msg => {
+        if(String(msg).includes('not available')){
+          let toast = Toast.create({message: 'Warning: your browser does ' +
+          'not support the data storage method useed by this app. It may ' +
+          'malfunction or perform poorly. For the best experience please use' +
+          ' Chrome 52+ on a Windows/MacOS/Unix system.'})
+        }
+      },
       error => {},
       () => {}
     );

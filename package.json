@@ -32,7 +32,7 @@
     "run-sequence": "1.1.5"
   },
   "repository": "https://github.com/moui72/rankGames",
-  "license": "https://github.com/moui72/rankGames/blob/master/LICENSE.md",
+  "license": "MIT",
   "name": "rankgames",
   "description": "rankGames: An Ionic project",
   "cordovaPlugins": [

@@ -9,6 +9,7 @@ import { NavController } from 'ionic-angular';
 */
 @Component({
   templateUrl: 'build/pages/help/help.html',
+  directives: []
 })
 export class HelpPage {
 
