@@ -105,7 +105,7 @@ don't trash it manually or filter it out subsequently.
 This will straightforwardly prepend a game to your ranked list. You will never be prompted 
 to compare a game prepended in this way to other ranked games, only unranked ones, so be careful.
 
-### Set to #X
+#### Set to #X
 The value of X will vary; this button will append a game to the end of your ranked list. 
 You will never be prompted to compare a game appended in this way to other ranked games, 
 only unranked ones, so be careful.
