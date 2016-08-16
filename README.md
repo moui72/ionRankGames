@@ -1,6 +1,6 @@
 # rankGames
 
-An app to make top game lists. Built using Typescript, Angular 2 and Ionic 2.
+An app to make top game lists. Built using Typescript, Angular 2 and Ionic 2. Access the live app at [rankgames.ty-pe.com](http://rankgames.ty-pe.com)
 
 ## About
 This app is intended to help you build ranked lists of games from those in your collection
