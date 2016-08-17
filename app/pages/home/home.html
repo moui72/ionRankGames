@@ -75,7 +75,24 @@
       Loading...
     </p>
   </div>
-
+  <ion-segment [(ngModel)]="viewing" *ngIf="thereAreGames() && !loading">
+    <ion-segment-button value="in" >
+      <strong padding-horizontal>
+        Games
+      </strong>
+      <ion-badge light>
+          {{games ? data.games.length - out() : 0}}
+      </ion-badge>
+    </ion-segment-button>
+    <ion-segment-button value="out">
+      <strong padding-horizontal>
+        Trashed games
+      </strong>
+      <ion-badge danger>
+        {{games ? out() : 0}}
+      </ion-badge>
+    </ion-segment-button>
+  </ion-segment>
   <ion-grid *ngIf="thereAreGames() && !loading">
     <ion-row>
       <ion-col width-50>
@@ -116,26 +133,3 @@
   </ion-list>
 
 </ion-content>
-
-<ion-footer>
-  <ion-toolbar position="bottom" primary>
-    <ion-segment [(ngModel)]="viewing" white>
-      <ion-segment-button value="in" >
-        <strong padding-horizontal>
-          Games
-        </strong>
-        <ion-badge light>
-            {{games ? data.games.length - out() : 0}}
-        </ion-badge>
-      </ion-segment-button>
-      <ion-segment-button value="out">
-        <strong padding-horizontal>
-          Trashed games
-        </strong>
-        <ion-badge danger>
-          {{games ? out() : 0}}
-        </ion-badge>
-      </ion-segment-button>
-    </ion-segment>
-  </ion-toolbar>
-</ion-footer>

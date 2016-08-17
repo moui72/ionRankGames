@@ -17,7 +17,7 @@ import { List } from '../../list.class';
   templateUrl: 'build/pages/tabs/tabs.html',
 })
 export class TabsPage {
-  version: string = 'beta-0.2.02';
+  version: string = 'beta-0.2.04';
 
   @ViewChild('tabs') tabsRef: Tabs;
 
