@@ -1,14 +1,15 @@
 <ion-content padding>
   <div class="wrap">
     <h1 favorite>Manage your lists</h1>
-    <p>
-      Current pool: {{pool().length || 0}}
-    </p>
-    <ion-card class="newlist" margin>
+    <button (click)="importing()" favorite>import list from file</button>
+    <ion-card class="newlist" margin-vertical>
       <ion-card-content>
         <h3 primary>
           New list
         </h3>
+        <p padding-horizontal grey>
+          Current pool: {{pool().length || 0}}
+        </p>
         <ion-item>
           <ion-label stacked>List name</ion-label>
           <ion-input type="text" [(ngModel)]="newName"
@@ -20,7 +21,6 @@
         </div>
       </ion-card-content>
     </ion-card>
-    <button (click)="importing()">upload list</button>
   </div>
   <ion-list-header>
     Your lists
