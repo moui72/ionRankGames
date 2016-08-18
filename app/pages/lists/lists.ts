@@ -1,5 +1,13 @@
 import { Component, Input } from '@angular/core';
-import { NavController, NavParams, Loading, Alert, Storage, LocalStorage } from 'ionic-angular';
+import {
+  NavController,
+  NavParams,
+  Loading,
+  Alert,
+  Storage,
+  LocalStorage,
+  Modal,
+  Toast } from 'ionic-angular';
 import { Game } from '../../game.class';
 import { List, WrappedList } from '../../list.class';
 import { ListPage } from '../list/list'
@@ -7,6 +15,7 @@ import { Listdb } from '../../providers/listdb/listdb';
 import { Data } from '../../providers/data/data';
 import * as _ from 'lodash';
 import * as fileSaver from 'file-saver'
+import { UploadList } from '../../components/modals/upload-list'
 /*
   Generated class for the ListsPage page.
 
@@ -22,6 +31,7 @@ export class ListsPage {
   showingCtrl: Array<number>  = [];
   newName: string             = '';
   local: Storage;
+  logging: boolean = false;
 
   constructor(
       private nav: NavController,
@@ -53,6 +63,10 @@ export class ListsPage {
     if(this.data.games){
       list.set = this.pool();
     }
+    this.pushList(list);
+  }
+
+  pushList(list){
     this.lists.push(list);
     this.listdb.create(list);
     if(!this.local.get('lastList')){
@@ -149,6 +163,7 @@ export class ListsPage {
     }
     return list.rankedSet.length;
   }
+
   unrankedCount(list){
     if(list.set.length == undefined){
       return 0;
@@ -159,16 +174,28 @@ export class ListsPage {
   showCtrl(id){
     return id == this.showingCtrl;
   }
+
   toggleCtrl(id){
     this.showingCtrl = this.showingCtrl == id ? -1 : id;
   }
+
   exportJSON(lists){
     let json = JSON.stringify(lists);
     let blob = new Blob([json], {type: "text/plain;charset=utf-8"});
     fileSaver.saveAs(blob, 'rg_lists.json');
   }
-  importingList(){
-    // allow import of a list
+
+  importing(){
+    let umodal = Modal.create(UploadList, {key: this.nextKey()});
+    this.nav.present(umodal);
+    umodal.onDismiss((list: List) => {
+      this.pushList(list);
+    });
   }
 
+  log(msg){
+    if(this.logging){
+      console.log(msg);
+    }
+  }
 }

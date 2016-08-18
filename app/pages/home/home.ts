@@ -347,7 +347,6 @@ export class HomePage {
     umodal.onDismiss((data: Game[], merge?: boolean) => {
       merge = merge || false;
       if(!merge){
-
         this.data.saveGames(data).subscribe(
           msg => this.log(msg),
           err => this.log(err),
