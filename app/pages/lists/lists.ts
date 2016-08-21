@@ -32,6 +32,7 @@ export class ListsPage {
   newName: string             = '';
   local: Storage;
   logging: boolean = false;
+  creating: boolean = false;
 
   constructor(
       private nav: NavController,
@@ -189,8 +190,14 @@ export class ListsPage {
     let umodal = Modal.create(UploadList, {key: this.nextKey()});
     this.nav.present(umodal);
     umodal.onDismiss((list: List) => {
-      this.pushList(list);
+      if(list){
+        this.pushList(list);
+      }
     });
+  }
+
+  toggleCreate(){
+    this.creating = !this.creating;
   }
 
   log(msg){

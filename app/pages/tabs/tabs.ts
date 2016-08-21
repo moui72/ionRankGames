@@ -13,11 +13,17 @@ import { List } from '../../list.class';
   See http://ionicframework.com/docs/v2/components/#navigation for more info on
   Ionic pages and navigation.
 */
+
+interface MyWindow extends Window {
+    myFunction(): void;
+}
+
+declare var window: MyWindow;
 @Component({
   templateUrl: 'build/pages/tabs/tabs.html',
 })
 export class TabsPage {
-  version: string = 'beta-0.2.04';
+  version: string = 'beta-0.2.05';
 
   @ViewChild('tabs') tabsRef: Tabs;
 
@@ -63,6 +69,9 @@ export class TabsPage {
 
   getTabTitle(t){
     this.log(t)
+    if(t.tabTitle == 'Help'){
+      this.goWiki();
+    }
     if(this.initialized){
       this.tabTitle = t.tabTitle;
     }
@@ -85,6 +94,9 @@ export class TabsPage {
   goHome(){
     this.nav.popToRoot();
     this.tabsRef.select(0);
+  }
+  goWiki(){
+    window.open('https://github.com/moui72/rankGames/wiki');
   }
 
 }

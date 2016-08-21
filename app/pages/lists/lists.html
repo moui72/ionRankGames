@@ -1,12 +1,16 @@
 <ion-content padding>
   <div class="wrap">
     <h1 favorite>Manage your lists</h1>
-    <button (click)="importing()" favorite>import list from file</button>
-    <ion-card class="newlist" margin-vertical>
+    <ion-card class="newlist" margin-vertical [hidden]="!creating">
       <ion-card-content>
-        <h3 primary>
-          New list
-        </h3>
+        <ion-toolbar white>
+          <ion-buttons right>
+            <button (click)="toggleCreate()"><ion-icon name="close"></ion-icon></button>
+          </ion-buttons>
+          <h2 margin-horizontal>
+            New list
+          </h2>
+      </ion-toolbar>
         <p padding-horizontal grey>
           Current pool: {{pool().length || 0}}
         </p>
@@ -18,9 +22,16 @@
         </ion-item>
         <div padding-left>
           <button small outline (click)="create()">Create</button>
+          <button small outline (click)="toggleCreate()">Cancel</button>
         </div>
       </ion-card-content>
     </ion-card>
+  </div>
+  <div class="wrap">
+    <ion-buttons right>
+      <button (click)="importing()">import list from file</button>
+      <button (click)="toggleCreate()" [disabled]="creating">create new list</button>
+    </ion-buttons>
   </div>
   <ion-list-header>
     Your lists
@@ -70,6 +81,10 @@
       </p>
     </ion-item>
   </ion-list>
-
-
+  <div class="wrap">
+    <ion-buttons right>
+      <button (click)="importing()">import list from file</button>
+      <button (click)="toggleCreate()" [disabled]="creating">create new list</button>
+    </ion-buttons>
+  </div>
 </ion-content>
