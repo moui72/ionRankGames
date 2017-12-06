@@ -96,7 +96,7 @@ export class TabsPage {
     this.tabsRef.select(0);
   }
   goWiki(){
-    window.open('https://github.com/moui72/rankGames/wiki');
+    window.open('https://github.com/moui72/ionRankGames/wiki');
   }
 
 }

@@ -93,7 +93,7 @@
       </ion-badge>
     </ion-segment-button>
   </ion-segment>
-  <ion-grid *ngIf="thereAreGames() && !loading">
+  <ion-grid *ngIf="thereAreGames() && !loading && games().length > 0">
     <ion-row>
       <ion-col width-50>
         <ion-item>
@@ -122,6 +122,10 @@
       <h2>No games yet</h2>
       You haven't imported any games.
       <button item-right small (click)="fetching()">Fetch games</button>
+    </ion-item>
+    <ion-item *ngIf="thereAreGames() && games().length < 1">
+      <h2>No games</h2>
+      No games in this view.
     </ion-item>
     <game-card *ngFor="let game of games()" [game]="game"
       (onMore)="more($event)"

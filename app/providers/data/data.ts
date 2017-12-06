@@ -197,24 +197,30 @@ export class Data {
   /**
    * Forwards request to BggData service which then fetches data
    * @param  {string} username The BGG username who's collection to fetch
-   * @return {void}            None
+   * @return {Observable}      Observable of fetching process
    */
   fetch(username: string){
     return new Observable(obs => {
-      this.bgg.fetch(username).then(data => {
-        this.procImport(_.values(data)).subscribe(
-          update => {
-            obs.next(update);
-          },
-          error => {
-            obs.next('...error...')
-            obs.next(error);
-          },
-          () => {
-            obs.complete();
-          }
-        );
-      });
+      this.bgg.fetch(username).then(
+        data => {
+          this.procImport(_.values(data)).subscribe(
+            update => {
+              obs.next(update);
+            },
+            error => {
+              obs.next('...error...')
+              obs.next(error);
+            },
+            () => {
+              obs.complete();
+            }
+          );
+        },
+        err => {
+            console.log(err);
+            obs.error(err);
+        }
+      );
     })
   }
   /**

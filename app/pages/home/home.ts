@@ -45,7 +45,7 @@ export class HomePage {
   showingTrash: boolean = false;
   viewing: string = 'in';
 
-  logging = false;
+  logging = true;
 
   updatingDB: boolean = false;
   dbUpdateProg: number = 0;
@@ -54,6 +54,8 @@ export class HomePage {
 
   sort: string = 'name';
   sortAsc: boolean = true;
+
+  lastMsg: string = '';
 
   constructor(
     private nav: NavController,
@@ -150,6 +152,7 @@ export class HomePage {
     }
     let toast = Toast.create(opts);
     this.nav.present(toast);
+    this.lastMsg = msg;
   }
 
   /**
@@ -250,7 +253,7 @@ export class HomePage {
             if(data.username){
               let result = '';
               this.loading = true;
-              this.local.set('bggUsr', data.username)
+              this.local.set('bggUsr', data.username);
               // update username
               this.bggUsr = data.username;
               this.data.fetch(this.bggUsr).subscribe(
@@ -260,7 +263,12 @@ export class HomePage {
                   }
                   this.log(msg);
                 },
-                error => this.log(error),
+                error => {
+                  this.log('error: ' + error);
+                  this.toast(error);
+                  this.loading = false;
+
+                },
                 () => {
                   this.log('import complete');
                   this.toast(result + ' Import saved.');
