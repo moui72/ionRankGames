@@ -23,7 +23,7 @@ declare var window: MyWindow;
   templateUrl: 'build/pages/tabs/tabs.html',
 })
 export class TabsPage {
-  version: string = 'beta-0.2.05';
+  version: string = '0.3.00-beta';
 
   @ViewChild('tabs') tabsRef: Tabs;
 
