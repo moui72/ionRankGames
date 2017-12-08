@@ -243,6 +243,7 @@ export class Data {
           status: 202,
           message: 'The server is taking too long to process the request.'
         });
+        return;
       }
       this.bgg.fetch(username).then(
         data => {
@@ -251,7 +252,7 @@ export class Data {
           if (error.status === 202) {
             setTimeout(() => {
               console.log(username);
-              resolve(this.fetches(username, attempt--));
+              resolve(this.fetches(username, attempt-1));
             }, this.fetchThrottle);
           } else {
             reject(error);
