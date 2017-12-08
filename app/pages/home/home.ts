@@ -256,6 +256,7 @@ export class HomePage {
               this.local.set('bggUsr', data.username);
               // update username
               this.bggUsr = data.username;
+              this.data.fetchCount = 0;
               this.data.fetch(this.bggUsr).subscribe(
                 msg => {
                   if(msg == 'mem'){
@@ -264,8 +265,15 @@ export class HomePage {
                   this.log(msg);
                 },
                 error => {
-                  this.log('error: ' + error);
-                  this.toast(error);
+                  this.log(error);
+                  let msg = 'Error fetching games. ';
+                  if (error.error.message) {
+                    msg += error.error.message;
+                  } else if (error.message) {
+                    msg += error.message;
+                  }
+                  this.log(msg);
+                  this.toast(msg);
                   this.loading = false;
 
                 },

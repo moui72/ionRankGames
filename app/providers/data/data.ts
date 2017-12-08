@@ -39,6 +39,10 @@ export class Data {
 
   ready: boolean = false;
 
+  fetchCount:   number = 0; // how many attempts have been made
+  maxFetches:   number = 5; // max number of retries
+  fetchThrottle: number = 250; // wait 250 ms between retries
+
   // the main data object
   games = [];
 
@@ -193,35 +197,70 @@ export class Data {
       // merge games into current library
     }
 
+    oneFetch (username) {
+      return new Promise((resolve, reject) => {
+        this.bgg.fetch(username).then(
+          data => {
+            resolve (data);
+          },
+          err => {
+            // bgg-data.fetch promise was rejected
+            reject (err);
+          }
+        )
+      })
+    }
 
   /**
    * Forwards request to BggData service which then fetches data
    * @param  {string} username The BGG username who's collection to fetch
    * @return {Observable}      Observable of fetching process
    */
-  fetch(username: string){
+  fetch = function fetch(username: string){
     return new Observable(obs => {
-      this.bgg.fetch(username).then(
+      this.fetches(username, this.maxFetches).then(
         data => {
           this.procImport(_.values(data)).subscribe(
-            update => {
-              obs.next(update);
-            },
-            error => {
-              obs.next('...error...')
-              obs.next(error);
-            },
-            () => {
-              obs.complete();
-            }
+            m => obs.next(m),
+            e => obs.error(e),
+            () => obs.complete()
           );
         },
-        err => {
-            console.log(err);
-            obs.error(err);
+        error => {
+            obs.error(error);
+            obs.complete();
+          }
+        )
+      }
+    )
+  }
+
+  fetches (username, attempt) {
+    console.log(`${attempt} fetches remaining.`)
+    return new Promise((resolve, reject) => {
+      if (attempt < 1) {
+        reject({
+          status: 202,
+          message: 'The server is taking too long to process the request.'
+        });
+      }
+      this.bgg.fetch(username).then(
+        data => {
+          resolve(data);
+        }, error => {
+          if (error.status === 202) {
+            setTimeout(() => {
+              console.log(username);
+              resolve(this.fetches(username, attempt--));
+            }, this.fetchThrottle);
+          } else {
+            reject(error);
+          }
         }
-      );
+      )
     })
+
+
   }
   /**
    * Goes through a set of raw imported games and inserts them into local DB

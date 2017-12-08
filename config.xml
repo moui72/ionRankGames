@@ -74,4 +74,5 @@
     <plugin name="cordova-plugin-device" spec="~1.1.2" />
     <plugin name="cordova-plugin-splashscreen" spec="~3.2.2" />
     <plugin name="ionic-plugin-keyboard" spec="~2.2.1" />
+    <engine name="browser" spec="^5.0.1" />
 </widget>

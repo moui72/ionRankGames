@@ -30,32 +30,19 @@ export class BggData {
       .map(res => res.json())
       .subscribe(data => {
         console.log(data);
-        if (data.error) {
-          reject(data.error)
+        if (data.error || data.status === 202) {
+          if (!data.status) {
+            data.status = 500;
+          }
+          reject(data);
         }
         if(!data || data.length < 1){
-          resolve([]);
+          reject(null);
         }
         this.data = data;
         resolve(this.data);
       },
       err => {
-        console.log('err');
-        console.log(err);
-        if (err.error instanceof Error) {
-          // A client-side or network error occurred. Handle it accordingly.
-          reject('An error occurred:' + err.error.message);
-        } else {
-          // The backend returned an unsuccessful response code.
-          // The response body may contain clues as to what went wrong.
-          if (err.status === 0) {
-            reject (
-              'The server rejected your request. '
-              + 'Please report this to the developer.'
-            )
-          }
-          reject(`Backend returned code ${err.status}, body was: ${err.error} (err: ${err})`);
-        }
         reject(err);
       })
     })
