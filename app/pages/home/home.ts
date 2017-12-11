@@ -55,7 +55,8 @@ export class HomePage {
   sort: string = 'name';
   sortAsc: boolean = true;
 
-  lastMsg: string = '';
+  msgLog: any[] = [];
+  errObjs: any[] = [];
 
   constructor(
     private nav: NavController,
@@ -70,7 +71,7 @@ export class HomePage {
         this.bggUsr = usr;
       })
     }catch(e){
-      this.log('No stored username');
+      this.log('No stored username', 'notice');
       this.log(e);
     }
     try{
@@ -105,13 +106,11 @@ export class HomePage {
   }
 
   exportJSON(){
-    this.log('ex');
+    this.log('exporting', 'notice');
     let json = JSON.stringify(this.data.games);
     let blob = new Blob([json], {type: "text/plain;charset=utf-8"});
     fileSaver.saveAs(blob, 'rg_' + this.bggUsr ? this.bggUsr : 'my' + '-games.json');
   }
-
-  importLib(){}
 
   /**
    * Debugging output -- sends messages to console.log() if this.logging ==
@@ -120,9 +119,17 @@ export class HomePage {
    *                         to string.
    * @return {void}          No return value.
    */
-  log(text: any){
+  log(text: any, type: string = 'error'){
+    console.log();
+    if (typeof text === 'object') {
+      this.errObjs.push({timestamp: Date.now(), body: text})
+    }
     if (this.logging) {
+      if(type == 'error') {
+        console.error(text);
+      }
       console.log(text);
+      this.logItem(text, type);
     }
   }
 
@@ -132,6 +139,14 @@ export class HomePage {
    */
   more(showGame: Game){
     this.nav.parent.parent.push(GameDetailPage, {game: showGame});
+  }
+
+  logItem (msg, type) {
+    this.msgLog.push({
+      message: msg,
+      type: type,
+      timestamp: Date.now()
+    });
   }
 
   /**
@@ -146,13 +161,18 @@ export class HomePage {
       message: msg
     }
     if(!stay){
-      opts['duration'] = 3000;
+      opts['duration'] = 5000;
     } else {
       opts['showCloseButton'] = true;
     }
     let toast = Toast.create(opts);
     this.nav.present(toast);
-    this.lastMsg = msg;
+    this.log(msg, 'toast');
+    return toast;
+  }
+
+  showLog() {
+    console.log(this.msgLog);
   }
 
   /**
@@ -231,7 +251,7 @@ export class HomePage {
    * @return {void} no return value
    */
   fetching(){
-    this.log('fetching');
+    this.log('fetching', 'notice');
     const fetch = Alert.create({
       title: 'Import games from BGG',
       message: 'Import your (or someone else\'s) game collection from boardgamegeek.com.',
@@ -244,7 +264,7 @@ export class HomePage {
         {
           text: 'Cancel',
           handler: data => {
-            this.log('Fetching canceled.');
+            this.log('Fetching canceled.', 'notice');
           }
         },
         {
@@ -262,35 +282,41 @@ export class HomePage {
                   if(msg == 'mem'){
                     result += 'Imported ' + this.data.games.length + ' games.';
                   }
-                  this.log(msg);
                 },
                 error => {
                   this.log(error);
                   let msg = 'Error fetching games. ';
-                  if (error.error.message) {
-                    msg += error.error.message;
-                  } else if (error.message) {
-                    msg += error.message;
-                  }
-                  this.log(msg);
+                  msg += this.getErrorMessage(error);
+
                   this.toast(msg);
                   this.loading = false;
 
                 },
                 () => {
-                  this.log('import complete');
+                  this.log('import complete', 'notice');
                   this.toast(result + ' Import saved.');
                   this.loading = false;
                 }
               );
             } else {
-              this.toast('No username provided');
+              this.toast('No username provided.');
             }
           }
         }
       ]
     })
     this.nav.present(fetch);
+  }
+
+  getErrorMessage (error) {
+    let msg = '';
+    while (typeof(error) === 'object') {
+      if (error.message) {
+        msg += error.message
+      }
+      error = error.error;
+    }
+    return msg;
   }
 
   /**
@@ -313,18 +339,17 @@ export class HomePage {
             if(msg == 'mem'){
               result += 'Filtered out ' + this.out() + ' games.';
             }
-            this.log(msg);
           },
           error => this.log(error),
           () => {
             this.toast(result + ' Saved changes.')
             this.loading = false;
-            this.log('filtering complete');
+            this.log('filtering complete', 'notice');
 
           }
         );
       } else {
-        this.log('filtering canceled.');
+        this.log('filtering canceled.', 'notice');
       }
     });
   }
@@ -342,7 +367,7 @@ export class HomePage {
         {
           text: 'Cancel',
           handler: data => {
-            this.log('Cancel clicked');
+            this.log('Cancel clicked', 'notice');
           }
         },
         {
@@ -364,13 +389,13 @@ export class HomePage {
       merge = merge || false;
       if(!merge){
         this.data.saveGames(data).subscribe(
-          msg => this.log(msg),
+          msg => this.log(msg, 'notice'),
           err => this.log(err),
           () => {
             this.toast('Imported ' + data.length + ' games from file, overwriting existing library.');
           });
       } else {
-        this.data.merge(data);
+        // @TODO allow merging of games
       }
     });
   }
@@ -385,14 +410,14 @@ export class HomePage {
     let result = 'Trashed ' + game.name + '.';
     this.data.saveGame(game).subscribe(
       msg => {
-        this.log("DB UPDATE MESSAGE -> " + msg);
+        this.log("DB UPDATE MESSAGE -> " + msg, 'notice');
       },
       error => {
         this.toast(result + ' Error saving.');
         this.log(error);
       },
       () => {
-        this.log('TRASH -> database update complete');
+        this.log('TRASH -> database update complete', 'notice');
         this.toast(result + ' Saved data updated.');
       }
     );
@@ -410,7 +435,7 @@ export class HomePage {
 
     this.data.saveGame(game).subscribe(
       msg => {
-        this.log("DB UPDATE MESSAGE -> " + msg);
+        this.log("DB UPDATE MESSAGE -> " + msg), 'notice';
       },
       error => {
         this.toast(result + ' Error saving.');

@@ -193,24 +193,6 @@ export class Data {
       });
     }
 
-    merge(games){
-      // merge games into current library
-    }
-
-    oneFetch (username) {
-      return new Promise((resolve, reject) => {
-        this.bgg.fetch(username).then(
-          data => {
-            resolve (data);
-          },
-          err => {
-            // bgg-data.fetch promise was rejected
-            reject (err);
-          }
-        )
-      })
-    }
-
   /**
    * Forwards request to BggData service which then fetches data
    * @param  {string} username The BGG username who's collection to fetch
