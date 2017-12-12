@@ -59,5 +59,7 @@
     "platforms": [
       "browser"
     ]
-  }
+  },
+  "scripts": {"upload": "scp -r www/ aso:www/rankgames/www/"}
+
 }

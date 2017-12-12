@@ -18,12 +18,14 @@ import * as _ from 'lodash';
 import { Data } from '../../providers/data/data';
 import { FilterGames } from '../../components/modals/filter';
 import { UploadGames } from '../../components/modals/upload';
+import { MessageLog } from '../../components/modals/message-log/message-log';
 import { ListPage } from '../../pages/list/list';
 import { GameDetailPage } from '../../pages/game-detail/game-detail';
 import { Listdb } from '../../providers/listdb/listdb'
 import { GameCard } from '../../components/game/game';
 import { BggOpts } from '../../bggopts.class';
 import { Game } from '../../game.class';
+import { Message } from '../../message.class';
 import * as fileSaver from 'file-saver'
 
 @Component({
@@ -123,14 +125,16 @@ export class HomePage {
     console.log();
     if (typeof text === 'object') {
       this.errObjs.push({timestamp: Date.now(), body: text})
+      text = this.getErrorMessage(text);
     }
     if (this.logging) {
       if(type == 'error') {
         console.error(text);
       }
       console.log(text);
-      this.logItem(text, type);
     }
+    this.logItem(text, type);
+
   }
 
   /**
@@ -142,11 +146,10 @@ export class HomePage {
   }
 
   logItem (msg, type) {
-    this.msgLog.push({
-      message: msg,
-      type: type,
-      timestamp: Date.now()
-    });
+    this.msgLog.push(new Message(
+      msg,
+      type
+    ));
   }
 
   /**
@@ -169,10 +172,6 @@ export class HomePage {
     this.nav.present(toast);
     this.log(msg, 'toast');
     return toast;
-  }
-
-  showLog() {
-    console.log(this.msgLog);
   }
 
   /**
@@ -382,6 +381,12 @@ export class HomePage {
     this.nav.present(purge);
   }
 
+  showLog() {
+    console.log(this.msgLog);
+    let messageLog = Modal.create(MessageLog, {messages: this.msgLog});
+    this.nav.present(messageLog);
+  }
+
   importing(){
     let umodal = Modal.create(UploadGames);
     this.nav.present(umodal);
@@ -396,6 +401,7 @@ export class HomePage {
           });
       } else {
         // @TODO allow merging of games
+        this.log('attempted merge, feature not available', 'warning');
       }
     });
   }

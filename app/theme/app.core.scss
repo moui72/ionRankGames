@@ -3,6 +3,24 @@ ion-content ion-list, ion-content ion-list-header, ion-content .wrap, .wrap{
   max-width: 978px;
   margin: auto;
 }
+.message-ts {
+  font-size: 80%;
+  color: color($colors, light);
+}
+.message-type {
+  font-weight: bold;
+  color: color($colors, primary);
+}
+.message-type.warning {
+  color: color($colors, warning);
+}
+.message-type.error {
+  color: color($colors, danger);
+}
+.toast {
+  color: color($colors, favorite);
+}
+
 .clicky{
   cursor: pointer;
 }
@@ -51,13 +69,23 @@ ion-menu .flip{
   font-size: 26px;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0,0,0,0);
+  border: 0;
+}
+
 // App Shared Imports
 // --------------------------------------------------
 // These are the imports which make up the design of this app.
 // By default each design mode includes these shared imports.
 // App Shared Sass variables belong in app.variables.scss.
 // http://ionicframework.com/docs/v2/theming/
-
 
 @import "../pages/home/home";
 @import "../pages/lists/lists";
