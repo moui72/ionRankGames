@@ -60,6 +60,6 @@
       "browser"
     ]
   },
-  "scripts": {"upload": "scp -r www/ aso:www/rankgames/www/"}
+  "scripts": {"upload": "scp -r www aso:www/rankgames/"}
 
 }
