@@ -33,6 +33,8 @@ export class Data {
     })
   }
 
+  v: string;
+
   local: Storage;
 
   bggOpts: BggOpts;
@@ -218,22 +220,27 @@ export class Data {
   }
 
   fetches (username, attempt) {
-    console.log(`${attempt} fetches remaining.`)
+    console.log(`${attempt} fetches remaining.`);
+    let last = {status: 0, message: 'No response.'};
     return new Promise((resolve, reject) => {
       if (attempt < 1) {
-        reject({
-          status: 202,
-          message: 'The server is taking too long to process the request.'
-        });
+        let err = last;
+        if (last.status == 202) {
+          err = {
+            status: 202,
+            message: 'The server is taking too long to process the request.'
+          };
+        }
+        reject(err);
         return;
       }
       this.bgg.fetch(username).then(
         data => {
           resolve(data);
         }, error => {
+          last = error;
           if (error.status === 202) {
             setTimeout(() => {
-              console.log(username);
               resolve(this.fetches(username, attempt-1));
             }, this.fetchThrottle);
           } else {

@@ -28,6 +28,7 @@
     "del": "2.2.0",
     "gulp": "3.9.1",
     "gulp-cache-bust": "^1.0.2",
+    "gulp-inject-version": "^1.0.1",
     "gulp-watch": "4.3.5",
     "ionic-gulp-browserify-typescript": "2.0.0",
     "ionic-gulp-fonts-copy": "^1.0.0",
@@ -60,6 +61,7 @@
       "browser"
     ]
   },
-  "scripts": {"upload": "scp -r www aso:www/rankgames/"}
-
+  "scripts": {
+    "upload": "scp -r www aso:www/rankgames/"
+  }
 }

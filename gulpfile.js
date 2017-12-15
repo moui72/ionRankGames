@@ -3,6 +3,7 @@ var gulp = require('gulp'),
     del = require('del'),
     runSequence = require('run-sequence'),
     cachebust = require('gulp-cache-bust'),
+    injectVersion = require('gulp-inject-version'),
     argv = process.argv;
 
 
@@ -38,7 +39,7 @@ var isRelease = argv.indexOf('--release') > -1;
 
 gulp.task('watch', ['clean'], function(done){
   runSequence(
-    ['sass', 'html', 'fonts', 'scripts', 'bustCache'],
+    ['injectVersion', 'sass', 'html', 'fonts', 'scripts', 'bustCache'],
     function(){
       gulpWatch('app/**/*.scss', function(){ gulp.start('sass'); });
       gulpWatch('app/**/*.html', function(){ gulp.start('html'); });
@@ -64,6 +65,7 @@ gulp.task('build', ['clean'], function(done){
   );
 });
 
+gulp.task('injectVersion', injectVersion({replace: '@IORG-VERSION@'}));
 gulp.task('sass', buildSass);
 gulp.task('html', copyHTML);
 gulp.task('fonts', copyFonts);
