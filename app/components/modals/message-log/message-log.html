@@ -1,0 +1,46 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title>Messages received</ion-title>
+    <ion-buttons start>
+      <button ion-button (click)="close()">
+        <span ion-text color="primary sr-only">Close</span>
+        <ion-icon name="md-close" aria-hidden></ion-icon>
+      </button>
+
+    </ion-buttons>
+  </ion-toolbar>
+  <ion-toolbar>
+    <ion-segment [(ngModel)]="display">
+      <ion-segment-button value="all">
+        All
+      </ion-segment-button>
+      <ion-segment-button value="message">
+        Messages
+      </ion-segment-button>
+      <ion-segment-button value="notice">
+        Notices
+      </ion-segment-button>
+    </ion-segment>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <ion-list>
+    <p>
+      Showing: {{display}}
+    </p>
+    <ion-item *ngIf="messages.length < 1">
+      <p>
+        Nothing logged.
+      </p>
+    </ion-item>
+    <template ngFor let-message [ngForOf]="messages">
+      <ion-item  *ngIf="display == 'all' || display == message.displayType">
+        <span class="message-type {{message.type}}">{{message.displayType | uppercase}}</span>
+        <ion-note class="message-ts">{{message.timestamp | date:"medium"}}</ion-note>
+        <p>
+          {{message.text}}
+        </p>
+      </ion-item>
+    </template>
+  </ion-list>
+</ion-content>
