@@ -9553,5 +9553,6 @@
       "resolved": "https://registry.npmjs.org/zone.js/-/zone.js-0.6.26.tgz",
       "integrity": "sha1-BnwTuLgCI6ibYuncgmgPCXYsRjY="
     }
-  }
+  },
+  "version": "0.4.0-beta2"
 }
